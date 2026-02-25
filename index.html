@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" id="theme-color-meta" content="#F7F3E8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>筆記</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='37.5' fill='%239A871E'/></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="mobile-sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <button class="fab-scroll-btn fab-scroll-up" onclick="scrollToMonth('prev')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
+    <button class="fab-scroll-btn fab-scroll-down" onclick="scrollToMonth('next')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </button>
+
+    <button class="fab-main-btn" onclick="handleMainAction()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+
+    <div id="custom-context-menu" class="context-menu">
+        <div id="context-add-btn" class="context-item" onclick="triggerContextAdd()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span id="context-add-text">新增</span>
+        </div>
+        <div id="context-edit-btn" class="context-item" onclick="triggerContextEdit()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            編輯
+        </div>
+        <div id="context-delete-btn" class="context-item danger" onclick="triggerContextDelete()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            刪除
+        </div>
+    </div>
+
+    <aside id="sidebar">
+        <div class="logo-container">
+            <button class="icon-btn" onclick="toggleSidebarDesktop()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="logo-text" id="app-logo-text">筆記</div>
+            <button class="icon-btn edit-title-btn" onclick="openTitleModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="sidebar-section-title">年份</div>
+        <div id="year-list"></div>
+        
+        <div class="sidebar-bottom">
+            <div id="nav-bookmarks" class="year-item" style="margin-bottom: 10px;">
+                <span class="item-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </span>
+                <span class="item-text">網站收藏</span>
+                <div class="year-tooltip">網站收藏</div>
+            </div>
+            <div class="theme-switch-wrapper">
+                <span class="theme-text">深色模式</span>
+                <label class="ios-toggle">
+                    <input type="checkbox" id="theme-checkbox" onchange="toggleTheme()">
+                    <span class="slider"></span>
+                </label>
+                <div class="theme-btn-wrapper" onclick="document.getElementById('theme-checkbox').click()">
+                    <div class="collapsed-theme-btn"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <header style="background: transparent; border: none; backdrop-filter: none; -webkit-backdrop-filter: none;">
+            <div class="main-header-left">
+                <button id="show-sidebar-btn" class="icon-btn visible" onclick="toggleSidebar()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h1 id="current-main-title">請選擇年份</h1>
+            </div>
+            <div class="header-actions">
+                <div class="sort-wrapper" id="sort-wrapper">
+                    <button id="sort-toggle-btn" class="header-action-btn action-sort" onclick="toggleSortMenu(event)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="sort-menu" class="sort-menu">
+                        <div class="sort-item selected" onclick="setSortOrder('newest')">最新</div>
+                        <div class="sort-item" onclick="setSortOrder('oldest')">從舊到新</div>
+                    </div>
+                </div>
+                <button class="header-action-btn action-export" onclick="exportData()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                </button>
+                <label class="header-action-btn action-import" style="cursor: pointer;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <input type="file" accept=".json" style="display: none;" onchange="importData(event)">
+                </label>
+            </div>
+        </header>
+        <div id="content-container"></div>
+    </main>
+
+    <div id="modal-overlay" onclick="closeAllEditors()"></div>
+    
+    <div id="editor-modal" class="glass-effect">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin:0;">編輯筆記</h2>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="icon-btn animated-action-btn" onmousedown="handleFormat(event, 'color', this)" ontouchstart="handleFormat(event, 'color', this)">
+                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="8" fill="#9A871E"></circle>
+                    </svg>
+                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A871E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="icon-btn animated-action-btn" onmousedown="handleFormat(event, 'bold', this)" ontouchstart="handleFormat(event, 'bold', this)">
+                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+                        <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+                    </svg>
+                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="icon-btn animated-action-btn" onclick="copyNoteContent()" id="copy-btn">
+                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="date-ui-wrapper">
+            <div class="date-ui-display" id="date-ui-display" onclick="toggleCalendar()">
+                <span id="date-text">選擇日期</span>
+                <span style="font-size: 12px;">▼</span>
+            </div>
+        </div>
+        <input type="hidden" id="note-date-val">
+        <div id="note-content" contenteditable="true" placeholder="開始記錄..."></div>
+        
+        <div class="modal-actions">
+            <button class="btn-delete" id="btn-delete-note" onclick="showDeleteConfirm('note')">刪除筆記</button>
+            <div class="right-actions">
+                <button class="btn-primary btn-cancel" onclick="closeAllEditors()">取消</button>
+                <button class="btn-primary" onclick="saveNote()">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bookmark-modal" class="glass-effect">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin:0;">編輯收藏</h2>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="icon-btn animated-action-btn" onclick="copyBookmarkUrl()" id="copy-bm-btn">
+                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <input type="hidden" id="bookmark-id-val">
+        <input type="text" id="bookmark-title" class="custom-input" placeholder="網站名稱">
+        <input type="url" id="bookmark-url" class="custom-input" placeholder="網址 (https://...)">
+        
+        <div class="category-input-wrapper">
+            <input type="text" id="bookmark-category" class="custom-input" placeholder="分類 (例如：工具、設計)">
+            <button class="btn-add-category" onclick="openCategoryModal()" title="選擇已有分類">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </button>
+        </div>
+
+        <textarea id="bookmark-desc" placeholder="備註內容..."></textarea>
+        
+        <div class="modal-actions">
+            <button class="btn-delete" id="btn-delete-bookmark" onclick="showDeleteConfirm('bookmark')">刪除收藏</button>
+            <div class="right-actions">
+                <button class="btn-primary btn-cancel" onclick="closeAllEditors()">取消</button>
+                <button class="btn-primary" onclick="saveBookmark()">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="calendar-overlay" onclick="closeCalendar()"></div>
+    <div id="calendar-modal" class="glass-effect">
+        <div class="cal-header">
+            <button class="cal-btn" onclick="changeYear(-1)">«</button>
+            <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
+            <span class="cal-title" id="cal-month-year"></span>
+            <button class="cal-btn" onclick="changeMonth(1)">›</button>
+            <button class="cal-btn" onclick="changeYear(1)">»</button>
+        </div>
+        <div class="cal-weekdays">
+            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+    </div>
+
+    <div id="confirm-overlay" onclick="closeAllConfirms()"></div>
+    
+    <div id="confirm-modal" class="glass-effect">
+        <h3 style="margin-top:0;">確定要刪除？</h3>
+        <p style="color: var(--text-secondary); font-size: 15px;">刪除後將無法復原資料。</p>
+        <div class="modal-actions">
+            <button class="btn-primary btn-cancel" onclick="closeConfirm()">保留</button>
+            <button class="btn-primary btn-danger" onclick="confirmDelete()">刪除</button>
+        </div>
+    </div>
+
+    <div id="import-confirm-modal" class="glass-effect">
+        <h3 style="margin-top:0; color: var(--danger);">警告：覆蓋資料</h3>
+        <p style="color: var(--text-secondary); font-size: 15px; line-height: 1.5;">
+            匯入新的備份檔案將會<b>完全覆蓋</b>你目前的所有筆記與網站收藏，且無法復原。<br><br>確定要繼續匯入嗎？
+        </p>
+        <div class="modal-actions">
+            <button class="btn-primary btn-cancel" onclick="closeImportConfirm()">取消</button>
+            <button class="btn-primary btn-danger" onclick="confirmImport()">確定匯入</button>
+        </div>
+    </div>
+
+    <div id="title-modal" class="glass-effect">
+        <h3 style="margin-top:0;">修改名稱</h3>
+        <input type="text" id="app-title-input" class="custom-input" placeholder="請輸入新的名稱" onkeydown="if(event.key === 'Enter') saveAppTitle()">
+        <div class="modal-actions">
+            <button class="btn-primary btn-cancel" onclick="closeTitleModal()">取消</button>
+            <button class="btn-primary" onclick="saveAppTitle()">確定</button>
+        </div>
+    </div>
+
+    <div id="category-modal" class="glass-effect">
+        <h3 style="margin-top:0;">選擇分類</h3>
+        <div id="modal-category-list" class="category-tags"></div>
+        <div class="modal-actions">
+            <button class="btn-primary btn-cancel" onclick="closeCategoryModal()">關閉</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
