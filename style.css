@@ -621,7 +621,7 @@ h1 {
 }
 
 .btn-primary {
-    background-color: var(--primary);
+    background: var(--primary);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -641,7 +641,7 @@ h1 {
 }
 
 .btn-danger {
-    background-color: var(--danger) !important;
+    background: var(--danger) !important;
     color: white !important;
     box-shadow: 0 4px 10px rgba(114, 47, 55, 0.4) !important;
     pointer-events: auto !important;
@@ -652,7 +652,7 @@ h1 {
 }
 
 .btn-cancel {
-    background-color: rgba(100, 100, 100, 0.1) !important;
+    background: rgba(100, 100, 100, 0.1) !important;
     color: var(--text) !important;
     box-shadow: 0 4px 10px rgba(100, 100, 100, 0.05) !important; 
     pointer-events: auto !important;
@@ -840,7 +840,7 @@ h1 {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background-color: var(--primary);
+    background: var(--primary);
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(154, 135, 30, 0.5); 
@@ -923,9 +923,6 @@ h1 {
     animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both !important;
 }
 
-/* ============================
-   修改：統一編輯視窗的寬度與動畫
-   ============================ */
 #editor-modal, #bookmark-modal {
     position: fixed;
     top: 50%; left: 50%;
@@ -933,13 +930,13 @@ h1 {
     padding: 30px;
     border-radius: 24px;
     width: 90%;
-    max-width: 400px; /* 統一為較窄尺寸 */
+    max-width: 400px;
     height: auto;
     max-height: 90vh;
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s; /* 統一動畫速度，移除回彈 */
+    transition: all 0.3s;
     box-sizing: border-box;
     background: var(--popup-bg);
     backdrop-filter: blur(60px);
@@ -964,7 +961,7 @@ h1 {
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s; /* 統一動畫速度 */
+    transition: all 0.3s;
     box-sizing: border-box;
     pointer-events: none;
 }
@@ -980,7 +977,7 @@ h1 {
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s; /* 統一動畫速度 */
+    transition: all 0.3s;
     text-align: center;
     box-sizing: border-box;
     background: var(--popup-bg);
@@ -1145,9 +1142,6 @@ input[type="text"].custom-input:focus, input[type="url"].custom-input:focus {
     box-shadow: 0 0 0 3px rgba(154, 135, 30, 0.2);
 }
 
-/* ============================
-   修改：加大的分類標籤
-   ============================ */
 .category-tags {
     display: flex;
     flex-wrap: wrap;
@@ -1305,9 +1299,6 @@ textarea:focus, #note-content:focus {
     margin-bottom: 0;
 }
 
-/* ============================
-   修改：分類選擇按鈕的全新動畫
-   ============================ */
 .btn-add-category {
     width: 50px;
     flex-shrink: 0;
@@ -1353,9 +1344,6 @@ textarea:focus, #note-content:focus {
     transform: rotate(90deg);
 }
 
-/* ============================
-   修改：分類視窗防擠壓排版與動畫
-   ============================ */
 #category-modal {
     position: fixed;
     top: 50%; left: 50%;
@@ -1367,7 +1355,7 @@ textarea:focus, #note-content:focus {
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s; /* 統一動畫速度 */
+    transition: all 0.3s;
     text-align: left;
     box-sizing: border-box;
     background: var(--popup-bg);
@@ -1675,9 +1663,6 @@ textarea, #note-content, #bookmark-desc {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* ============================
-   修改：選單 hover 與大小
-   ============================ */
 @media (hover: hover) {
     .sort-wrapper:hover .sort-menu {
         visibility: visible;
@@ -1824,4 +1809,67 @@ textarea, #note-content, #bookmark-desc {
 
 #settings-toggle-btn.open svg {
     transform: rotate(90deg);
+}
+
+/* 雲端提示動畫圓球 */
+#cloud-toast {
+    position: fixed;
+    top: -60px; 
+    right: 38px;
+    width: 48px;
+    height: 48px;
+    background: var(--primary);
+    border-radius: 24px;
+    z-index: 10005;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 6px 16px rgba(154, 135, 30, 0.4);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+#cloud-toast.drop {
+    transform: translateY(85px); 
+}
+
+#cloud-toast.expand {
+    width: 140px; 
+}
+
+.toast-icon-wrapper {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+#cloud-toast-text {
+    position: absolute;
+    right: 42px; 
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#cloud-toast.expand #cloud-toast-text {
+    opacity: 1;
+    transition-delay: 0.1s;
+}
+
+@media (max-width: 768px) {
+    #cloud-toast {
+        right: 28px;
+    }
+    #cloud-toast.drop {
+        transform: translateY(76px); 
+    }
 }
