@@ -1,3 +1,6 @@
+const GITHUB_TOKEN = '請填寫ghp_開頭的Token';
+const GIST_ID = '請填寫Gist_ID';
+
 let notes = JSON.parse(localStorage.getItem('my_life_notes')) || {};
 let bookmarks = JSON.parse(localStorage.getItem('my_bookmarks')) || {};
 
@@ -15,7 +18,6 @@ let draggedCategory = null;
 let sortOrder = 'newest';
 
 let contextTarget = { type: null, id: null };
-let pendingImportData = null;
 let currentContextMenuCard = null;
 
 let swipeStartX = 0, swipeStartY = 0;
@@ -557,94 +559,6 @@ function handleMainAction() {
         openEditor();
     } else if (currentView === 'bookmarks') {
         openBookmarkEditor();
-    }
-}
-
-function exportData() {
-    const data = {
-        notes: notes,
-        bookmarks: bookmarks,
-        category_order: localStorage.getItem('my_category_order'),
-        app_title: localStorage.getItem('my_app_title')
-    };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    const date = new Date();
-    const dateString = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-    downloadAnchorNode.setAttribute("download", `${dateString}.json`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-}
-
-function importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const importedData = JSON.parse(e.target.result);
-            if (importedData.notes !== undefined) {
-                pendingImportData = importedData;
-                showImportConfirm();
-            } else {
-                alert('檔案格式錯誤，無法匯入。');
-            }
-        } catch (error) {
-            alert('檔案讀取失敗，請確認是否為正確的備份檔案。');
-        }
-        event.target.value = ''; 
-    };
-    reader.readAsText(file);
-}
-
-function showImportConfirm() {
-    const overlay = document.getElementById('confirm-overlay');
-    const modal = document.getElementById('import-confirm-modal');
-    overlay.style.display = 'block';
-    modal.style.display = 'block';
-    setTimeout(() => {
-        overlay.classList.add('active');
-        modal.classList.add('active');
-    }, 10);
-}
-
-function closeImportConfirm() {
-    if (document.activeElement) document.activeElement.blur();
-    const overlay = document.getElementById('confirm-overlay');
-    const modal = document.getElementById('import-confirm-modal');
-    overlay.classList.remove('active');
-    modal.classList.remove('active');
-    setTimeout(() => {
-        overlay.style.display = 'none';
-        modal.style.display = 'none';
-        pendingImportData = null;
-    }, 300);
-}
-
-function confirmImport() {
-    if (pendingImportData) {
-        notes = pendingImportData.notes || {};
-        bookmarks = pendingImportData.bookmarks || {};
-        
-        if (pendingImportData.category_order) {
-            localStorage.setItem('my_category_order', pendingImportData.category_order);
-        }
-        if (pendingImportData.app_title) {
-            localStorage.setItem('my_app_title', pendingImportData.app_title);
-            document.getElementById('app-logo-text').innerText = pendingImportData.app_title;
-            document.title = pendingImportData.app_title;
-        }
-
-        localStorage.setItem('my_life_notes', JSON.stringify(notes));
-        localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
-        
-        closeImportConfirm();
-        setTimeout(() => {
-            renderSidebar();
-        }, 300);
     }
 }
 
@@ -1303,7 +1217,6 @@ function closeConfirm() {
 function closeAllConfirms() {
     if (document.activeElement) document.activeElement.blur();
     closeConfirm();
-    closeImportConfirm();
     closeTitleModal();
     closeCategoryModal();
 }
@@ -1419,5 +1332,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {passive: true});
     }
 });
+
+async function uploadToGist() {
+    const data = {
+        notes: notes,
+        bookmarks: bookmarks,
+        category_order: localStorage.getItem('my_category_order'),
+        app_title: localStorage.getItem('my_app_title')
+    };
+
+    try {
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify({
+                files: {
+                    'my_notes.json': {
+                        content: JSON.stringify(data)
+                    }
+                }
+            })
+        });
+        if (response.ok) {
+            alert('同步至雲端成功');
+        } else {
+            alert('上傳失敗，請檢查 Token 權限');
+        }
+    } catch (error) {
+        alert('網路連線錯誤');
+    }
+}
+
+async function downloadFromGist() {
+    try {
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Cache-Control': 'no-cache'
+            }
+        });
+        const gist = await response.json();
+        const content = gist.files['my_notes.json'].content;
+        const importedData = JSON.parse(content);
+        
+        if (importedData.notes !== undefined) {
+            notes = importedData.notes || {};
+            bookmarks = importedData.bookmarks || {};
+            
+            if (importedData.category_order) {
+                localStorage.setItem('my_category_order', importedData.category_order);
+            }
+            if (importedData.app_title) {
+                localStorage.setItem('my_app_title', importedData.app_title);
+                document.getElementById('app-logo-text').innerText = importedData.app_title;
+                document.title = importedData.app_title;
+            }
+
+            localStorage.setItem('my_life_notes', JSON.stringify(notes));
+            localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
+            
+            renderSidebar();
+            if (currentView === 'notes') {
+                renderNotes();
+            } else {
+                renderBookmarks();
+            }
+            alert('自雲端下載成功');
+        }
+    } catch (error) {
+        alert('下載失敗，請確認檔案格式或網路連線');
+    }
+}
 
 initApp();
