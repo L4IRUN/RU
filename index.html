@@ -175,30 +175,10 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin:0;">編輯筆記</h2>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <button class="icon-btn animated-action-btn" onmousedown="handleFormat(event, 'color', this)" ontouchstart="handleFormat(event, 'color', this)">
-                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="8" fill="#9A871E"></circle>
-                    </svg>
-                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A871E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </button>
-                <button class="icon-btn animated-action-btn" onmousedown="handleFormat(event, 'bold', this)" ontouchstart="handleFormat(event, 'bold', this)">
-                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
-                        <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
-                    </svg>
-                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </button>
-                <button class="icon-btn animated-action-btn" onclick="copyNoteContent()" id="copy-btn">
-                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
+                <button class="icon-btn btn-danger-icon" id="btn-delete-note" onclick="showDeleteConfirm('note')" title="刪除筆記">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
             </div>
@@ -213,7 +193,25 @@
         <div id="note-content" contenteditable="true" placeholder="開始記錄..."></div>
         
         <div class="modal-actions">
-            <button class="btn-delete" id="btn-delete-note" onclick="showDeleteConfirm('note')">刪除筆記</button>
+            <div class="left-actions" style="display: flex; gap: 8px; margin-right: auto;">
+                <button class="icon-btn animated-action-btn" onmousedown="handleFormat(event, 'color', this)" ontouchstart="handleFormat(event, 'color', this)" title="標記顏色">
+                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="8" fill="#9A871E"></circle>
+                    </svg>
+                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A871E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="icon-btn animated-action-btn" onmousedown="handleFormat(event, 'bold', this)" ontouchstart="handleFormat(event, 'bold', this)" title="粗體文字">
+                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+                        <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+                    </svg>
+                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+            </div>
             <div class="right-actions">
                 <button class="btn-primary btn-cancel" onclick="closeAllEditors()">取消</button>
                 <button class="btn-primary" onclick="saveNote()">確定</button>
@@ -225,20 +223,29 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin:0;">編輯收藏</h2>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <button class="icon-btn animated-action-btn" onclick="copyBookmarkUrl()" id="copy-bm-btn">
-                    <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
+                <button class="icon-btn btn-danger-icon" id="btn-delete-bookmark" onclick="showDeleteConfirm('bookmark')" title="刪除收藏">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
             </div>
         </div>
         <input type="hidden" id="bookmark-id-val">
-        <input type="text" id="bookmark-title" class="custom-input" placeholder="網站名稱">
-        <input type="url" id="bookmark-url" class="custom-input" placeholder="網址 (https://...)">
+        <input type="text" id="bookmark-title" class="custom-input" placeholder="網站名稱" style="margin-bottom: 15px;">
+        
+        <div class="input-with-btn-wrapper">
+            <input type="url" id="bookmark-url" class="custom-input" placeholder="網址 (https://...)">
+            <button class="btn-side-action animated-action-btn" onclick="copyBookmarkUrl()" id="copy-bm-btn" title="複製網址">
+                <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </button>
+        </div>
         
         <div class="category-input-wrapper">
             <input type="text" id="bookmark-category" class="custom-input" placeholder="分類 (例如：工具、設計)">
@@ -253,7 +260,6 @@
         <textarea id="bookmark-desc" placeholder="備註內容..."></textarea>
         
         <div class="modal-actions">
-            <button class="btn-delete" id="btn-delete-bookmark" onclick="showDeleteConfirm('bookmark')">刪除收藏</button>
             <div class="right-actions">
                 <button class="btn-primary btn-cancel" onclick="closeAllEditors()">取消</button>
                 <button class="btn-primary" onclick="saveBookmark()">確定</button>
