@@ -1814,12 +1814,12 @@ textarea, #note-content, #bookmark-desc {
 /* 雲端提示動畫圓球 */
 #cloud-toast {
     position: fixed;
-    top: -60px; 
+    top: -70px; 
     right: 38px;
-    width: 48px;
-    height: 48px;
+    width: 54px; 
+    height: 54px;
     background: var(--primary);
-    border-radius: 24px;
+    border-radius: 27px;
     z-index: 10005;
     display: flex;
     align-items: center;
@@ -1830,19 +1830,15 @@ textarea, #note-content, #bookmark-desc {
 }
 
 #cloud-toast.drop {
-    transform: translateY(85px); 
-}
-
-#cloud-toast.expand {
-    width: 140px; 
+    transform: translateY(95px); 
 }
 
 .toast-icon-wrapper {
     position: absolute;
     right: 0;
     top: 0;
-    width: 48px;
-    height: 48px;
+    width: 54px;
+    height: 54px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1851,13 +1847,14 @@ textarea, #note-content, #bookmark-desc {
 
 #cloud-toast-text {
     position: absolute;
-    right: 42px; 
+    right: 54px; 
     color: white;
     font-weight: 600;
     font-size: 15px;
     white-space: nowrap;
     opacity: 0;
     transition: opacity 0.2s ease;
+    padding-right: 15px; 
 }
 
 #cloud-toast.expand #cloud-toast-text {
@@ -1870,6 +1867,6 @@ textarea, #note-content, #bookmark-desc {
         right: 28px;
     }
     #cloud-toast.drop {
-        transform: translateY(76px); 
+        transform: translateY(86px); 
     }
 }
