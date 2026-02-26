@@ -523,9 +523,6 @@ header {
         box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
         transform: scale(1.1);
     }
-    .sort-item:hover {
-        background: rgba(154, 135, 30, 0.15);
-    }
 }
 
 .header-action-btn:active {
@@ -535,7 +532,7 @@ header {
     transform: scale(1.1);
 }
 
-.sort-wrapper, .settings-dropdown-wrapper {
+.sort-wrapper {
     position: relative;
 }
 
@@ -1631,30 +1628,12 @@ textarea, #note-content, #bookmark-desc {
     transform: translate(-50%, -50%) scale(1);
 }
 
-.sort-wrapper, .settings-dropdown-wrapper {
-    position: relative;
-}
-
-#settings-menu {
-    width: 150px; 
-}
-
 .action-settings svg, .action-sort svg {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @media (hover: hover) {
-    .settings-dropdown-wrapper:hover #settings-menu {
-        visibility: visible;
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto; 
-    }
-    .settings-dropdown-wrapper:hover .action-settings svg {
-        transform: rotate(90deg);
-    }
-    
-    .sort-wrapper:hover #sort-menu {
+    .sort-wrapper:hover .sort-menu {
         visibility: visible;
         opacity: 1;
         transform: translateY(0);
@@ -1665,11 +1644,6 @@ textarea, #note-content, #bookmark-desc {
     }
 }
 
-#settings-toggle-btn.open svg {
-    transform: rotate(90deg);
-}
-
-/* 雲端設定與提示彈窗的按鈕排版 */
 #settings-modal .modal-actions, 
 #cloud-alert-modal .modal-actions {
     display: flex;
@@ -1683,4 +1657,118 @@ textarea, #note-content, #bookmark-desc {
 #cloud-alert-modal .modal-actions button {
     margin: 0;
     flex: none;
+}
+
+.settings-dropdown-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+}
+
+.settings-fab-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 99;
+}
+
+.settings-fab-menu.active {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.sub-fab-btn {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    width: 40px; 
+    height: 40px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, color 0.3s;
+}
+
+.sub-fab-btn svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sub-fab-btn::after {
+    content: attr(aria-label);
+    position: absolute;
+    right: calc(100% + 12px);
+    background: var(--tooltip-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--primary);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@media (hover: hover) {
+    .settings-dropdown-wrapper:hover .settings-fab-menu {
+        display: flex;
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto; 
+    }
+    
+    .sub-fab-btn:hover {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
+        transform: scale(1.1);
+    }
+    
+    .sub-fab-btn:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-4px);
+    }
+    
+    .action-dl:hover svg { transform: scale(1.1) translateY(2px); }
+    .action-ul:hover svg { transform: scale(1.1) translateY(-2px); }
+    .action-key:hover svg { transform: scale(1.1) rotate(15deg); }
+    
+    .settings-dropdown-wrapper:hover .action-settings svg { transform: rotate(90deg); }
+}
+
+.sub-fab-btn:active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
+    transform: scale(1.1);
+}
+.action-dl:active svg { transform: scale(1.1) translateY(2px); }
+.action-ul:active svg { transform: scale(1.1) translateY(-2px); }
+.action-key:active svg { transform: scale(1.1) rotate(15deg); }
+
+#settings-toggle-btn.open svg {
+    transform: rotate(90deg);
 }
