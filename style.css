@@ -1854,7 +1854,7 @@ textarea, #note-content, #bookmark-desc {
     white-space: nowrap;
     opacity: 0;
     transition: opacity 0.2s ease;
-    padding-right: 10px; 
+    padding-right: 4px; 
 }
 
 #cloud-toast.expand #cloud-toast-text {
