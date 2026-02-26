@@ -1305,7 +1305,6 @@ textarea:focus, #note-content:focus {
     cursor: pointer;
     transition: all 0.2s;
     padding: 0;
-    outline: none;
 }
 
 .btn-add-category:hover {
@@ -1659,21 +1658,24 @@ textarea, #note-content, #bookmark-desc {
 
 .settings-fab-menu {
     position: absolute;
-    top: calc(100% + 12px);
-    display: none;
+    top: 100%; 
+    padding-top: 16px; 
+    display: flex; 
     flex-direction: column;
     gap: 12px;
     visibility: hidden;
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-15px); 
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 99;
+    pointer-events: none; 
 }
 
 .settings-fab-menu.active {
     visibility: visible;
     opacity: 1;
     transform: translateY(0);
+    pointer-events: auto; 
 }
 
 .sub-fab-btn {
@@ -1725,7 +1727,6 @@ textarea, #note-content, #bookmark-desc {
 
 @media (hover: hover) {
     .settings-dropdown-wrapper:hover .settings-fab-menu {
-        display: flex;
         visibility: visible;
         opacity: 1;
         transform: translateY(0);
