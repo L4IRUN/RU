@@ -1,6 +1,3 @@
-const GITHUB_TOKEN = '請填寫ghp_開頭的Token';
-const GIST_ID = '請填寫Gist_ID';
-
 let notes = JSON.parse(localStorage.getItem('my_life_notes')) || {};
 let bookmarks = JSON.parse(localStorage.getItem('my_bookmarks')) || {};
 
@@ -1219,6 +1216,7 @@ function closeAllConfirms() {
     closeConfirm();
     closeTitleModal();
     closeCategoryModal();
+    closeSettingsModal();
 }
 
 function confirmDelete() {
@@ -1333,7 +1331,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function openSettingsModal() {
+    document.getElementById('setting-github-token').value = localStorage.getItem('github_token') || '';
+    document.getElementById('setting-gist-id').value = localStorage.getItem('gist_id') || '';
+    
+    const overlay = document.getElementById('confirm-overlay'); 
+    const modal = document.getElementById('settings-modal');
+    
+    overlay.style.display = 'block';
+    modal.style.display = 'block';
+    
+    setTimeout(() => {
+        overlay.classList.add('active');
+        modal.classList.add('active');
+        document.getElementById('setting-github-token').focus();
+    }, 10);
+    
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.classList.contains('mobile-open')) {
+            toggleSidebar();
+        }
+    }
+}
+
+function closeSettingsModal() {
+    if (document.activeElement) document.activeElement.blur();
+    const overlay = document.getElementById('confirm-overlay');
+    const modal = document.getElementById('settings-modal');
+    
+    modal.classList.remove('active');
+    overlay.classList.remove('active');
+    
+    setTimeout(() => {
+        modal.style.display = 'none';
+        overlay.style.display = 'none';
+    }, 300);
+}
+
+function saveSettings() {
+    const token = document.getElementById('setting-github-token').value.trim();
+    const gistId = document.getElementById('setting-gist-id').value.trim();
+    localStorage.setItem('github_token', token);
+    localStorage.setItem('gist_id', gistId);
+    closeSettingsModal();
+    alert('設定已儲存');
+}
+
 async function uploadToGist() {
+    const token = localStorage.getItem('github_token');
+    const gistId = localStorage.getItem('gist_id');
+    
+    if (!token || !gistId) {
+        alert('請先在左側選單完成雲端設定');
+        openSettingsModal();
+        return;
+    }
+
     const data = {
         notes: notes,
         bookmarks: bookmarks,
@@ -1342,10 +1396,10 @@ async function uploadToGist() {
     };
 
     try {
-        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json'
             },
             body: JSON.stringify({
@@ -1367,10 +1421,19 @@ async function uploadToGist() {
 }
 
 async function downloadFromGist() {
+    const token = localStorage.getItem('github_token');
+    const gistId = localStorage.getItem('gist_id');
+    
+    if (!token || !gistId) {
+        alert('請先在左側選單完成雲端設定');
+        openSettingsModal();
+        return;
+    }
+
     try {
-        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
             headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json',
                 'Cache-Control': 'no-cache'
             }
