@@ -1505,8 +1505,8 @@ function showCloudToast(message) {
     // 2. 計算需要的總寬度
     const fontStyle = window.getComputedStyle(textSpan).font;
     const textWidth = getTextWidth(message, fontStyle);
-    const iconWidth = 54; // 圖標容器寬度
-    const padding = 20; // 額外邊距 (文字右側 15px + 其他緩衝)
+    const iconWidth = 60; // 對齊新的 60px 圖標尺寸
+    const padding = 20; // 保持額外緩衝邊距，確保左側有空間
     const totalWidth = iconWidth + textWidth + padding;
     
     // 3. 開始落下動畫
@@ -1520,7 +1520,7 @@ function showCloudToast(message) {
         setTimeout(() => {
             // 5. 收縮寬度並隱藏文字
             toast.classList.remove('expand');
-            toast.style.width = '54px'; // 回復到圓形寬度
+            toast.style.width = '60px'; // 回復到新的圓形寬度
             
             setTimeout(() => {
                 // 6. 收回上方
