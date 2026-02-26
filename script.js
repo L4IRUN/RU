@@ -1217,6 +1217,7 @@ function closeAllConfirms() {
     closeTitleModal();
     closeCategoryModal();
     closeSettingsModal();
+    closeCloudAlert();
 }
 
 function confirmDelete() {
@@ -1378,13 +1379,42 @@ function saveSettings() {
     alert('設定已儲存');
 }
 
+function openCloudAlert() {
+    const overlay = document.getElementById('confirm-overlay');
+    const modal = document.getElementById('cloud-alert-modal');
+    overlay.style.display = 'block';
+    modal.style.display = 'block';
+    setTimeout(() => {
+        overlay.classList.add('active');
+        modal.classList.add('active');
+    }, 10);
+}
+
+function closeCloudAlert() {
+    if (document.activeElement) document.activeElement.blur();
+    const overlay = document.getElementById('confirm-overlay');
+    const modal = document.getElementById('cloud-alert-modal');
+    modal.classList.remove('active');
+    overlay.classList.remove('active');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        overlay.style.display = 'none';
+    }, 300);
+}
+
+function openSettingsFromAlert() {
+    closeCloudAlert();
+    setTimeout(() => {
+        openSettingsModal();
+    }, 300);
+}
+
 async function uploadToGist() {
     const token = localStorage.getItem('github_token');
     const gistId = localStorage.getItem('gist_id');
     
     if (!token || !gistId) {
-        alert('請先在左側選單完成雲端設定');
-        openSettingsModal();
+        openCloudAlert();
         return;
     }
 
@@ -1425,8 +1455,7 @@ async function downloadFromGist() {
     const gistId = localStorage.getItem('gist_id');
     
     if (!token || !gistId) {
-        alert('請先在左側選單完成雲端設定');
-        openSettingsModal();
+        openCloudAlert();
         return;
     }
 
