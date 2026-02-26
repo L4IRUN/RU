@@ -1413,11 +1413,11 @@ textarea:focus, #note-content:focus {
         z-index: 1001;
     }
     aside.mobile-open {
-        width: 230px !important; /* 縮小手機版展開的寬度 */
+        width: 230px !important; 
     }
     
     aside.mobile-open .logo-container {
-        padding-left: 22px !important; /* 強制對齊未展開時的 icon 位置 */
+        padding-left: 22px !important; 
     }
     
     main {
@@ -1618,4 +1618,24 @@ textarea, #note-content, #bookmark-desc {
     touch-action: pan-y !important; 
     overscroll-behavior: contain;
     overflow-y: auto;
+}
+
+#settings-modal, #cloud-alert-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%) scale(0.95);
+    padding: 25px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 350px;
+    z-index: 10001;
+    opacity: 0;
+    transition: all 0.3s;
+}
+
+#settings-modal.active, #cloud-alert-modal.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
 }
