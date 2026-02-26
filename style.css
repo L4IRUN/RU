@@ -1150,19 +1150,26 @@ input[type="text"].custom-input:focus, input[type="url"].custom-input:focus {
 }
 
 .cat-tag {
-    padding: 6px 12px;
+    padding: 10px 18px;
     background: rgba(154, 135, 30, 0.1);
     border: 1px solid var(--primary);
     color: var(--text);
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
-    font-size: 13px;
-    transition: background 0.2s, color 0.2s;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .cat-tag:hover {
     background: var(--primary);
     color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(154, 135, 30, 0.2);
+}
+
+.cat-tag:active {
+    transform: scale(0.95);
 }
 
 textarea, #note-content {
@@ -1303,14 +1310,38 @@ textarea:focus, #note-content:focus {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, color 0.3s, box-shadow 0.3s, border-color 0.3s;
     padding: 0;
+    outline: none;
 }
 
-.btn-add-category:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: rgba(154, 135, 30, 0.1);
+.btn-add-category svg {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@media (hover: hover) {
+    .btn-add-category:hover {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
+        border-color: transparent;
+        transform: scale(1.1);
+    }
+    .btn-add-category:hover svg {
+        transform: rotate(90deg);
+    }
+}
+
+.btn-add-category:active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
+    border-color: transparent;
+    transform: scale(1.1);
+}
+
+.btn-add-category:active svg {
+    transform: rotate(90deg);
 }
 
 #category-modal {
@@ -1331,8 +1362,9 @@ textarea:focus, #note-content:focus {
     backdrop-filter: blur(60px);
     -webkit-backdrop-filter: blur(60px);
     border: 1px solid var(--glass-border);
-    min-height: 250px;
+    display: none;
     flex-direction: column;
+    max-height: 85vh; 
     z-index: 10001 !important;
     pointer-events: none !important;
 }
@@ -1341,12 +1373,21 @@ textarea:focus, #note-content:focus {
     transform: translate(-50%, -50%) scale(1);
     pointer-events: auto !important;
     opacity: 1;
+    display: flex; 
+}
+
+#category-modal h3 {
+    flex-shrink: 0;
+    margin-top: 0;
+    margin-bottom: 5px;
 }
 
 #category-modal .modal-actions {
     display: flex;
-    margin-top: 25px;
+    margin-top: auto; 
     width: 100%;
+    flex-shrink: 0; 
+    padding-top: 10px;
 }
 
 #category-modal .modal-actions button {
@@ -1358,12 +1399,13 @@ textarea:focus, #note-content:focus {
 
 #modal-category-list {
     flex-grow: 1;
-    overflow-y: auto;
-    margin: 15px 0;
+    overflow-y: auto; 
+    margin: 15px 0 20px 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 12px; 
     align-content: flex-start;
+    padding-bottom: 5px; 
 }
 
 @keyframes fadeIn {
@@ -1632,6 +1674,9 @@ textarea, #note-content, #bookmark-desc {
     .sort-wrapper:hover .action-sort svg {
         transform: rotate(180deg);
     }
+    .sort-item:hover {
+        background: rgba(154, 135, 30, 0.15);
+    }
 }
 
 #settings-modal .modal-actions, 
@@ -1684,8 +1729,8 @@ textarea, #note-content, #bookmark-desc {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     border-radius: 50%;
-    width: 40px; 
-    height: 40px;
+    width: 48px; 
+    height: 48px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     display: flex;
     align-items: center;
@@ -1701,8 +1746,8 @@ textarea, #note-content, #bookmark-desc {
 }
 
 .sub-fab-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
