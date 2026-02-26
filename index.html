@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>筆記</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='37.5' fill='%239A871E'/></svg>">
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
     <div id="mobile-sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -174,14 +174,12 @@
     <div id="editor-modal" class="glass-effect">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin:0;">編輯筆記</h2>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <button class="icon-btn btn-danger-icon" id="btn-delete-note" onclick="showDeleteConfirm('note')" title="刪除筆記">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
+            <button class="btn-danger-icon" id="btn-delete-note" onclick="showDeleteConfirm('note')" title="刪除筆記">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
         <div class="date-ui-wrapper">
             <div class="date-ui-display" id="date-ui-display" onclick="toggleCalendar()">
@@ -222,34 +220,33 @@
     <div id="bookmark-modal" class="glass-effect">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin:0;">編輯收藏</h2>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <button class="icon-btn btn-danger-icon" id="btn-delete-bookmark" onclick="showDeleteConfirm('bookmark')" title="刪除收藏">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
+            <button class="btn-danger-icon" id="btn-delete-bookmark" onclick="showDeleteConfirm('bookmark')" title="刪除收藏">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
+        
         <input type="hidden" id="bookmark-id-val">
         <input type="text" id="bookmark-title" class="custom-input" placeholder="網站名稱" style="margin-bottom: 15px;">
         
-        <div class="input-with-btn-wrapper">
+        <div class="input-row">
             <input type="url" id="bookmark-url" class="custom-input" placeholder="網址 (https://...)">
-            <button class="btn-side-action animated-action-btn" onclick="copyBookmarkUrl()" id="copy-bm-btn" title="複製網址">
+            <button class="input-side-btn animated-action-btn" onclick="copyBookmarkUrl()" id="copy-bm-btn" title="複製網址">
                 <svg class="icon-main" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                 </svg>
-                <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
             </button>
         </div>
         
-        <div class="category-input-wrapper">
+        <div class="input-row">
             <input type="text" id="bookmark-category" class="custom-input" placeholder="分類 (例如：工具、設計)">
-            <button class="btn-add-category" onclick="openCategoryModal()" title="選擇已有分類">
+            <button class="input-side-btn" onclick="openCategoryModal()" title="選擇已有分類">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -329,6 +326,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>
