@@ -212,7 +212,11 @@ function toggleSortMenu(e) {
         }
         
         btn.classList.add('open');
-        menu.classList.add('active');
+        menu.style.display = 'block';
+        
+        setTimeout(() => {
+            menu.classList.add('active');
+        }, 10);
     }
 }
 
@@ -220,7 +224,14 @@ function closeSortMenu() {
     const btn = document.getElementById('sort-toggle-btn');
     const menu = document.getElementById('sort-menu');
     if(btn) btn.classList.remove('open');
-    if(menu) menu.classList.remove('active');
+    if(menu) {
+        menu.classList.remove('active');
+        setTimeout(() => {
+            if (!menu.classList.contains('active')) {
+                menu.style.display = '';
+            }
+        }, 200);
+    }
 }
 
 function setSortOrder(order) {
@@ -255,7 +266,11 @@ function toggleSettingsMenu(e) {
         }
         
         btn.classList.add('open');
-        menu.classList.add('active');
+        menu.style.display = 'block';
+        
+        setTimeout(() => {
+            menu.classList.add('active');
+        }, 10);
     }
 }
 
@@ -263,8 +278,34 @@ function closeSettingsMenu() {
     const btn = document.getElementById('settings-toggle-btn');
     const menu = document.getElementById('settings-menu');
     if(btn) btn.classList.remove('open');
-    if(menu) menu.classList.remove('active');
+    if(menu) {
+        menu.classList.remove('active');
+        setTimeout(() => {
+            if (!menu.classList.contains('active')) {
+                menu.style.display = '';
+            }
+        }, 200);
+    }
 }
+
+document.addEventListener('click', function(e) {
+    const sortMenu = document.getElementById('sort-menu');
+    const sortBtn = document.getElementById('sort-toggle-btn');
+    if (sortMenu && sortMenu.classList.contains('active') && !sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
+        closeSortMenu();
+    }
+
+    const settingsMenu = document.getElementById('settings-menu');
+    const settingsBtn = document.getElementById('settings-toggle-btn');
+    if (settingsMenu && settingsMenu.classList.contains('active') && !settingsMenu.contains(e.target) && !settingsBtn.contains(e.target)) {
+        closeSettingsMenu();
+    }
+
+    const cm = document.getElementById('custom-context-menu');
+    if (cm && cm.classList.contains('active') && !cm.contains(e.target)) {
+        hideContextMenu();
+    }
+});
 
 document.addEventListener('touchstart', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.id === 'note-content') return;
@@ -461,25 +502,6 @@ function triggerContextDelete() {
         showDeleteConfirm('bookmark');
     }
 }
-
-document.addEventListener('click', function(e) {
-    const sortMenu = document.getElementById('sort-menu');
-    const sortBtn = document.getElementById('sort-toggle-btn');
-    if (sortMenu && sortMenu.classList.contains('active') && !sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
-        closeSortMenu();
-    }
-
-    const settingsMenu = document.getElementById('settings-menu');
-    const settingsBtn = document.getElementById('settings-toggle-btn');
-    if (settingsMenu && settingsMenu.classList.contains('active') && !settingsMenu.contains(e.target) && !settingsBtn.contains(e.target)) {
-        closeSettingsMenu();
-    }
-
-    const cm = document.getElementById('custom-context-menu');
-    if (cm && cm.classList.contains('active') && !cm.contains(e.target)) {
-        hideContextMenu();
-    }
-});
 
 function switchView(view) {
     if (currentView === view) {
@@ -1495,6 +1517,7 @@ async function uploadToGist() {
             })
         });
         if (response.ok) {
+            closeSettingsMenu();
             alert('同步至雲端成功');
         } else {
             alert('上傳失敗，請檢查 Token 權限');
@@ -1514,43 +1537,60 @@ async function downloadFromGist() {
     }
 
     try {
-        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+        const response = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
             headers: {
                 'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Cache-Control': 'no-cache'
+                'Accept': 'application/vnd.github.v3+json'
             }
         });
-        const gist = await response.json();
-        const content = gist.files['my_notes.json'].content;
-        const importedData = JSON.parse(content);
         
-        if (importedData.notes !== undefined) {
-            notes = importedData.notes || {};
-            bookmarks = importedData.bookmarks || {};
-            
-            if (importedData.category_order) {
-                localStorage.setItem('my_category_order', importedData.category_order);
-            }
-            if (importedData.app_title) {
-                localStorage.setItem('my_app_title', importedData.app_title);
-                document.getElementById('app-logo-text').innerText = importedData.app_title;
-                document.title = importedData.app_title;
-            }
-
-            localStorage.setItem('my_life_notes', JSON.stringify(notes));
-            localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
-            
-            renderSidebar();
-            if (currentView === 'notes') {
-                renderNotes();
-            } else {
-                renderBookmarks();
-            }
-            alert('自雲端下載成功');
+        if (!response.ok) {
+            throw new Error(`伺服器連線異常 (狀態碼: ${response.status})`);
         }
+
+        const gist = await response.json();
+        
+        if (!gist.files || !gist.files['my_notes.json']) {
+            throw new Error('雲端沒有找到 my_notes.json 檔案');
+        }
+
+        const rawUrl = gist.files['my_notes.json'].raw_url;
+        const fileResponse = await fetch(`${rawUrl}?t=${Date.now()}`);
+        
+        if (!fileResponse.ok) {
+            throw new Error('無法讀取雲端真實檔案內容');
+        }
+
+        const importedData = await fileResponse.json();
+        
+        notes = importedData.notes || {};
+        bookmarks = importedData.bookmarks || {};
+        
+        if (importedData.category_order) {
+            localStorage.setItem('my_category_order', importedData.category_order);
+        }
+        if (importedData.app_title) {
+            localStorage.setItem('my_app_title', importedData.app_title);
+            document.getElementById('app-logo-text').innerText = importedData.app_title;
+            document.title = importedData.app_title;
+        }
+
+        localStorage.setItem('my_life_notes', JSON.stringify(notes));
+        localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
+        
+        renderSidebar();
+        if (currentView === 'notes') {
+            renderNotes();
+        } else {
+            renderBookmarks();
+        }
+        
+        closeSettingsMenu();
+        alert('自雲端下載成功');
+        
     } catch (error) {
-        alert('下載失敗，請確認檔案格式或網路連線');
+        console.error(error);
+        alert(`下載失敗！\n錯誤資訊：${error.message}\n請檢查 Gist ID 是否正確，或確認網路狀態。`);
     }
 }
 
