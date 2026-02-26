@@ -641,7 +641,7 @@ h1 {
 }
 
 .btn-danger {
-    background: var(--danger) !important;
+    background-color: var(--danger) !important;
     color: white !important;
     box-shadow: 0 4px 10px rgba(114, 47, 55, 0.4) !important;
     pointer-events: auto !important;
@@ -1229,23 +1229,62 @@ textarea:focus, #note-content:focus {
     margin-top: 20px;
 }
 
-.btn-delete {
-    color: var(--danger);
-    background: transparent;
-    border: none;
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-    padding: 10px 5px; 
-    margin-right: auto; 
-    display: none;
-    transition: transform 0.2s, opacity 0.2s;
+/* 紅底白叉的刪除圖標按鈕 */
+.btn-danger-icon {
+    background-color: var(--danger) !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(114, 47, 55, 0.3);
+    display: none; 
 }
 
-.btn-delete:hover {
-    transform: scale(1.05);
-    opacity: 0.8;
+.btn-danger-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(114, 47, 55, 0.5);
 }
+
+.btn-danger-icon:active {
+    transform: scale(0.95);
+}
+
+/* 網址框與右側按鈕的包裝容器 */
+.input-with-btn-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: stretch;
+}
+
+.input-with-btn-wrapper .custom-input {
+    margin-bottom: 0;
+}
+
+/* 右側等高的功能按鈕 */
+.btn-side-action {
+    width: 50px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+    outline: none;
+}
+
+.btn-side-action:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(154, 135, 30, 0.1);
+}
+
+.btn-side-action:active {
+    transform: scale(0.95);
+}
+
 
 .right-actions {
     display: flex;
