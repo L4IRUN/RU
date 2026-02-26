@@ -484,7 +484,7 @@ header {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     position: fixed;
     top: 30px;
     right: 40px;
@@ -497,8 +497,8 @@ header {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, color 0.3s;
     display: flex;
@@ -511,8 +511,8 @@ header {
 }
 
 .header-action-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -522,9 +522,6 @@ header {
         color: white;
         box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
         transform: scale(1.1);
-    }
-    .action-sort:hover svg {
-        transform: scale(1.1) rotate(180deg);
     }
     .sort-item:hover {
         background: rgba(154, 135, 30, 0.15);
@@ -537,13 +534,8 @@ header {
     box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
     transform: scale(1.1);
 }
-.action-sort:active svg { transform: scale(1.1) rotate(180deg); }
 
-#sort-toggle-btn.open svg {
-    transform: rotate(180deg);
-}
-
-.sort-wrapper {
+.sort-wrapper, .settings-dropdown-wrapper {
     position: relative;
 }
 
@@ -1632,7 +1624,7 @@ textarea, #note-content, #bookmark-desc {
     transform: translate(-50%, -50%) scale(1);
 }
 
-.settings-dropdown-wrapper {
+.sort-wrapper, .settings-dropdown-wrapper {
     position: relative;
 }
 
@@ -1640,7 +1632,7 @@ textarea, #note-content, #bookmark-desc {
     width: 150px; 
 }
 
-.action-settings svg {
+.action-settings svg, .action-sort svg {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -1653,6 +1645,16 @@ textarea, #note-content, #bookmark-desc {
     }
     .settings-dropdown-wrapper:hover .action-settings svg {
         transform: rotate(90deg);
+    }
+    
+    .sort-wrapper:hover #sort-menu {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+    .sort-wrapper:hover .action-sort svg {
+        transform: rotate(180deg);
     }
 }
 
