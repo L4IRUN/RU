@@ -1305,6 +1305,7 @@ textarea:focus, #note-content:focus {
     cursor: pointer;
     transition: all 0.2s;
     padding: 0;
+    outline: none;
 }
 
 .btn-add-category:hover {
@@ -1581,16 +1582,6 @@ textarea:focus, #note-content:focus {
     }
 }
 
-.btn-add-category svg {
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.btn-add-category:hover svg {
-    transform: rotate(90deg) scale(1.1);
-}
-.btn-add-category:active svg {
-    transform: rotate(90deg) scale(0.9);
-}
-
 body.no-scroll,
 body.no-scroll main,
 body.no-scroll aside {
@@ -1703,6 +1694,8 @@ textarea, #note-content, #bookmark-desc {
     padding: 0;
     position: relative;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, color 0.3s;
+    outline: none;
+    -webkit-appearance: none;
 }
 
 .sub-fab-btn svg {
