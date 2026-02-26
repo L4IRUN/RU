@@ -1485,6 +1485,27 @@ function openSettingsFromAlert() {
     }, 300);
 }
 
+// 雲端提示圓球動畫函數
+function showCloudToast(message) {
+    const toast = document.getElementById('cloud-toast');
+    const text = document.getElementById('cloud-toast-text');
+    
+    text.innerText = message;
+    toast.classList.add('drop'); 
+    
+    setTimeout(() => {
+        toast.classList.add('expand'); 
+        
+        setTimeout(() => {
+            toast.classList.remove('expand'); 
+            
+            setTimeout(() => {
+                toast.classList.remove('drop'); 
+            }, 300); 
+        }, 2000); 
+    }, 400); 
+}
+
 async function uploadToGist() {
     const token = localStorage.getItem('github_token');
     const gistId = localStorage.getItem('gist_id');
@@ -1518,7 +1539,7 @@ async function uploadToGist() {
         });
         if (response.ok) {
             closeSettingsMenu();
-            alert('同步至雲端成功');
+            showCloudToast('備份成功'); // 使用新動畫提示
         } else {
             alert('上傳失敗，請檢查 Token 權限');
         }
@@ -1586,7 +1607,7 @@ async function downloadFromGist() {
         }
         
         closeSettingsMenu();
-        alert('自雲端下載成功');
+        showCloudToast('下載成功'); // 使用新動畫提示
         
     } catch (error) {
         console.error(error);
