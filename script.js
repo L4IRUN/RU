@@ -1485,25 +1485,53 @@ function openSettingsFromAlert() {
     }, 300);
 }
 
-// 雲端提示圓球動畫函數
+// 輔助函數：測量文字寬度
+function getTextWidth(text, font) {
+    const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+    const context = canvas.getContext("2d");
+    context.font = font;
+    const metrics = context.measureText(text);
+    return metrics.width;
+}
+
+// 雲端提示動畫圓球函數
 function showCloudToast(message) {
     const toast = document.getElementById('cloud-toast');
-    const text = document.getElementById('cloud-toast-text');
+    const textSpan = document.getElementById('cloud-toast-text');
     
-    text.innerText = message;
+    // 1. 設定文字
+    textSpan.innerText = message;
+
+    // 2. 計算需要的總寬度
+    const fontStyle = window.getComputedStyle(textSpan).font;
+    const textWidth = getTextWidth(message, fontStyle);
+    const iconWidth = 54; // 圖標容器寬度
+    const padding = 20; // 額外邊距 (文字右側 15px + 其他緩衝)
+    const totalWidth = iconWidth + textWidth + padding;
+    
+    // 3. 開始落下動畫
     toast.classList.add('drop'); 
     
     setTimeout(() => {
-        toast.classList.add('expand'); 
+        // 4. 設定寬度並展開
+        toast.style.width = `${totalWidth}px`;
+        toast.classList.add('expand'); // 觸發文字透明度變化
         
         setTimeout(() => {
-            toast.classList.remove('expand'); 
+            // 5. 收縮寬度並隱藏文字
+            toast.classList.remove('expand');
+            toast.style.width = '54px'; // 回復到圓形寬度
             
             setTimeout(() => {
-                toast.classList.remove('drop'); 
-            }, 300); 
-        }, 2000); 
-    }, 400); 
+                // 6. 收回上方
+                toast.classList.remove('drop');
+                // 動畫結束後清除 inline style，避免影響下次計算
+                setTimeout(() => {
+                     toast.style.width = '';
+                }, 400)
+            }, 300); // 等待寬度收縮動畫完成
+        }, 2000); // 停留時間
+    }, 400); // 等待落下動畫完成
 }
 
 async function uploadToGist() {
