@@ -523,12 +523,6 @@ header {
         box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
         transform: scale(1.1);
     }
-    .action-export:hover svg {
-        transform: scale(1.1) translateY(-3px);
-    }
-    .action-import:hover svg {
-        transform: scale(1.1) translateY(3px);
-    }
     .action-sort:hover svg {
         transform: scale(1.1) rotate(180deg);
     }
@@ -543,8 +537,6 @@ header {
     box-shadow: 0 6px 15px rgba(154, 135, 30, 0.3);
     transform: scale(1.1);
 }
-.action-export:active svg { transform: scale(1.1) translateY(-3px); }
-.action-import:active svg { transform: scale(1.1) translateY(3px); }
 .action-sort:active svg { transform: scale(1.1) rotate(180deg); }
 
 #sort-toggle-btn.open svg {
@@ -1638,4 +1630,27 @@ textarea, #note-content, #bookmark-desc {
 #settings-modal.active, #cloud-alert-modal.active {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+}
+
+.settings-dropdown-wrapper {
+    position: relative;
+}
+
+.action-settings svg {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@media (hover: hover) {
+    .settings-dropdown-wrapper:hover .sort-menu {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .settings-dropdown-wrapper:hover .action-settings svg {
+        transform: rotate(90deg);
+    }
+}
+
+#settings-toggle-btn.open svg {
+    transform: rotate(90deg);
 }
