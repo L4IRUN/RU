@@ -266,7 +266,7 @@ function toggleSettingsMenu(e) {
         }
         
         btn.classList.add('open');
-        menu.style.display = 'block';
+        menu.style.display = 'flex';
         
         setTimeout(() => {
             menu.classList.add('active');
