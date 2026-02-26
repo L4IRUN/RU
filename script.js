@@ -192,18 +192,35 @@ function toggleTheme() {
 }
 
 function toggleSortMenu(e) {
-    if(e) e.stopPropagation();
+    if(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
     const btn = document.getElementById('sort-toggle-btn');
     const menu = document.getElementById('sort-menu');
     
+    if (!menu || !btn) return;
+
     if (menu.classList.contains('active')) {
-        btn.classList.remove('open');
-        menu.classList.remove('active');
+        closeSortMenu();
     } else {
+        const settingsMenu = document.getElementById('settings-menu');
+        const settingsBtn = document.getElementById('settings-toggle-btn');
+        if (settingsMenu && settingsMenu.classList.contains('active')) {
+            settingsMenu.classList.remove('active');
+            if (settingsBtn) settingsBtn.classList.remove('open');
+        }
+        
         btn.classList.add('open');
-        menu.style.display = 'block';
-        setTimeout(() => menu.classList.add('active'), 10);
+        menu.classList.add('active');
     }
+}
+
+function closeSortMenu() {
+    const btn = document.getElementById('sort-toggle-btn');
+    const menu = document.getElementById('sort-menu');
+    if(btn) btn.classList.remove('open');
+    if(menu) menu.classList.remove('active');
 }
 
 function setSortOrder(order) {
@@ -214,7 +231,7 @@ function setSortOrder(order) {
     
     if (currentView === 'notes') renderNotes();
     
-    toggleSortMenu();
+    closeSortMenu();
 }
 
 function toggleSettingsMenu(e) {
@@ -238,11 +255,7 @@ function toggleSettingsMenu(e) {
         }
         
         btn.classList.add('open');
-        menu.style.display = 'block';
-        
-        setTimeout(() => {
-            menu.classList.add('active');
-        }, 10);
+        menu.classList.add('active');
     }
 }
 
@@ -250,14 +263,7 @@ function closeSettingsMenu() {
     const btn = document.getElementById('settings-toggle-btn');
     const menu = document.getElementById('settings-menu');
     if(btn) btn.classList.remove('open');
-    if(menu) {
-        menu.classList.remove('active');
-        setTimeout(() => {
-            if (!menu.classList.contains('active')) {
-                menu.style.display = '';
-            }
-        }, 200);
-    }
+    if(menu) menu.classList.remove('active');
 }
 
 document.addEventListener('touchstart', function(e) {
@@ -460,8 +466,7 @@ document.addEventListener('click', function(e) {
     const sortMenu = document.getElementById('sort-menu');
     const sortBtn = document.getElementById('sort-toggle-btn');
     if (sortMenu && sortMenu.classList.contains('active') && !sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
-        sortBtn.classList.remove('open');
-        sortMenu.classList.remove('active');
+        closeSortMenu();
     }
 
     const settingsMenu = document.getElementById('settings-menu');
