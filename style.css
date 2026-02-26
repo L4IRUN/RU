@@ -1661,3 +1661,19 @@ textarea, #note-content, #bookmark-desc {
 #settings-toggle-btn.open svg {
     transform: rotate(90deg);
 }
+
+/* 雲端設定與提示彈窗的按鈕排版 */
+#settings-modal .modal-actions, 
+#cloud-alert-modal .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    width: 100%;
+}
+
+#settings-modal .modal-actions button, 
+#cloud-alert-modal .modal-actions button {
+    margin: 0;
+    flex: none;
+}
