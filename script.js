@@ -218,15 +218,31 @@ function setSortOrder(order) {
 }
 
 function toggleSettingsMenu(e) {
-    if(e) e.stopPropagation();
+    if(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
     const btn = document.getElementById('settings-toggle-btn');
     const menu = document.getElementById('settings-menu');
     
+    if (!menu || !btn) return;
+
     if (menu.classList.contains('active')) {
         closeSettingsMenu();
     } else {
+        const sortMenu = document.getElementById('sort-menu');
+        const sortBtn = document.getElementById('sort-toggle-btn');
+        if (sortMenu && sortMenu.classList.contains('active')) {
+            sortMenu.classList.remove('active');
+            if (sortBtn) sortBtn.classList.remove('open');
+        }
+        
         btn.classList.add('open');
-        menu.classList.add('active');
+        menu.style.display = 'block';
+        
+        setTimeout(() => {
+            menu.classList.add('active');
+        }, 10);
     }
 }
 
@@ -234,7 +250,14 @@ function closeSettingsMenu() {
     const btn = document.getElementById('settings-toggle-btn');
     const menu = document.getElementById('settings-menu');
     if(btn) btn.classList.remove('open');
-    if(menu) menu.classList.remove('active');
+    if(menu) {
+        menu.classList.remove('active');
+        setTimeout(() => {
+            if (!menu.classList.contains('active')) {
+                menu.style.display = '';
+            }
+        }, 200);
+    }
 }
 
 document.addEventListener('touchstart', function(e) {
