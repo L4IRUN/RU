@@ -289,13 +289,13 @@
         </div>
     </div>
 
-    <div id="settings-modal" class="glass-effect" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -40%) scale(0.95); padding:30px; border-radius:20px; width:90%; max-width:350px; box-shadow:0 20px 50px rgba(0,0,0,0.2); opacity:0; transition:all 0.3s; z-index:10001; text-align:left; background:var(--popup-bg); backdrop-filter:blur(60px); border:1px solid var(--glass-border); flex-direction:column; justify-content:space-between; min-height:250px;">
+    <div id="settings-modal" class="glass-effect">
         <h3 style="margin-top:0;">雲端同步設定</h3>
-        <input type="text" id="setting-github-token" class="custom-input" placeholder="GitHub Token (ghp_...)" style="margin-bottom: 15px;">
-        <input type="text" id="setting-gist-id" class="custom-input" placeholder="Gist ID" style="margin-bottom: 15px;">
-        <div class="modal-actions" style="display:flex; justify-content:space-between; gap:15px; margin-top:25px; width:100%;">
-            <button class="btn-primary btn-cancel" onclick="closeSettingsModal()" style="flex:1; margin:0;">取消</button>
-            <button class="btn-primary" onclick="saveSettings()" style="flex:1; margin:0;">儲存</button>
+        <input type="text" id="setting-github-token" class="custom-input" placeholder="GitHub Token (ghp_...)">
+        <input type="text" id="setting-gist-id" class="custom-input" placeholder="Gist ID">
+        <div class="modal-actions">
+            <button class="btn-primary btn-cancel" onclick="closeSettingsModal()">取消</button>
+            <button class="btn-primary" onclick="saveSettings()">儲存</button>
         </div>
     </div>
 
