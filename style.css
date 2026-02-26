@@ -840,7 +840,7 @@ h1 {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background-color: var(--primary);
+    background: var(--primary);
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(154, 135, 30, 0.5); 
@@ -1142,10 +1142,13 @@ input[type="text"].custom-input:focus, input[type="url"].custom-input:focus {
     box-shadow: 0 0 0 3px rgba(154, 135, 30, 0.2);
 }
 
+/* ============================
+   修改：加大的分類標籤
+   ============================ */
 .category-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 12px;
     margin-bottom: 20px;
 }
 
@@ -1299,6 +1302,9 @@ textarea:focus, #note-content:focus {
     margin-bottom: 0;
 }
 
+/* ============================
+   修改：分類選擇按鈕的全新動畫
+   ============================ */
 .btn-add-category {
     width: 50px;
     flex-shrink: 0;
@@ -1344,6 +1350,9 @@ textarea:focus, #note-content:focus {
     transform: rotate(90deg);
 }
 
+/* ============================
+   修改：分類視窗防擠壓排版
+   ============================ */
 #category-modal {
     position: fixed;
     top: 50%; left: 50%;
@@ -1362,7 +1371,6 @@ textarea:focus, #note-content:focus {
     backdrop-filter: blur(60px);
     -webkit-backdrop-filter: blur(60px);
     border: 1px solid var(--glass-border);
-    display: none;
     flex-direction: column;
     max-height: 85vh; 
     z-index: 10001 !important;
@@ -1373,7 +1381,7 @@ textarea:focus, #note-content:focus {
     transform: translate(-50%, -50%) scale(1);
     pointer-events: auto !important;
     opacity: 1;
-    display: flex; 
+    display: flex !important; 
 }
 
 #category-modal h3 {
@@ -1664,6 +1672,9 @@ textarea, #note-content, #bookmark-desc {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* ============================
+   修改：選單 hover 與大小
+   ============================ */
 @media (hover: hover) {
     .sort-wrapper:hover .sort-menu {
         visibility: visible;
