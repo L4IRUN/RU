@@ -840,7 +840,7 @@ h1 {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: var(--primary);
+    background-color: var(--primary);
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(154, 135, 30, 0.5); 
@@ -923,6 +923,9 @@ h1 {
     animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both !important;
 }
 
+/* ============================
+   修改：統一編輯視窗的寬度與動畫
+   ============================ */
 #editor-modal, #bookmark-modal {
     position: fixed;
     top: 50%; left: 50%;
@@ -930,13 +933,13 @@ h1 {
     padding: 30px;
     border-radius: 24px;
     width: 90%;
-    max-width: 840px;
+    max-width: 400px; /* 統一為較窄尺寸 */
     height: auto;
     max-height: 90vh;
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s; /* 統一動畫速度，移除回彈 */
     box-sizing: border-box;
     background: var(--popup-bg);
     backdrop-filter: blur(60px);
@@ -961,7 +964,7 @@ h1 {
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s; /* 統一動畫速度 */
     box-sizing: border-box;
     pointer-events: none;
 }
@@ -977,7 +980,7 @@ h1 {
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s; /* 統一動畫速度 */
     text-align: center;
     box-sizing: border-box;
     background: var(--popup-bg);
@@ -1351,7 +1354,7 @@ textarea:focus, #note-content:focus {
 }
 
 /* ============================
-   修改：分類視窗防擠壓排版
+   修改：分類視窗防擠壓排版與動畫
    ============================ */
 #category-modal {
     position: fixed;
@@ -1364,7 +1367,7 @@ textarea:focus, #note-content:focus {
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s; /* 統一動畫速度 */
     text-align: left;
     box-sizing: border-box;
     background: var(--popup-bg);
