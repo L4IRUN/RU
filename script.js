@@ -78,7 +78,7 @@ function scrollToMonth(direction) {
     if (titles.length === 0) return;
 
     const main = document.querySelector('main');
-    const exportBtn = document.querySelector('.action-export');
+    const exportBtn = document.querySelector('.action-settings');
     
     let btnCenterY = 50; 
     if (exportBtn) {
@@ -215,6 +215,26 @@ function setSortOrder(order) {
     if (currentView === 'notes') renderNotes();
     
     toggleSortMenu();
+}
+
+function toggleSettingsMenu(e) {
+    if(e) e.stopPropagation();
+    const btn = document.getElementById('settings-toggle-btn');
+    const menu = document.getElementById('settings-menu');
+    
+    if (menu.classList.contains('active')) {
+        closeSettingsMenu();
+    } else {
+        btn.classList.add('open');
+        menu.classList.add('active');
+    }
+}
+
+function closeSettingsMenu() {
+    const btn = document.getElementById('settings-toggle-btn');
+    const menu = document.getElementById('settings-menu');
+    if(btn) btn.classList.remove('open');
+    if(menu) menu.classList.remove('active');
 }
 
 document.addEventListener('touchstart', function(e) {
@@ -419,6 +439,12 @@ document.addEventListener('click', function(e) {
     if (sortMenu && sortMenu.classList.contains('active') && !sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
         sortBtn.classList.remove('open');
         sortMenu.classList.remove('active');
+    }
+
+    const settingsMenu = document.getElementById('settings-menu');
+    const settingsBtn = document.getElementById('settings-toggle-btn');
+    if (settingsMenu && settingsMenu.classList.contains('active') && !settingsMenu.contains(e.target) && !settingsBtn.contains(e.target)) {
+        closeSettingsMenu();
     }
 
     const cm = document.getElementById('custom-context-menu');
