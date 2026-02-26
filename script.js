@@ -635,17 +635,6 @@ function handleMainAction() {
     }
 }
 
-function copyNoteContent() {
-    const content = document.getElementById('note-content').innerText;
-    if (!content) return;
-    
-    navigator.clipboard.writeText(content).then(() => {
-        const btn = document.getElementById('copy-btn');
-        btn.classList.add('success');
-        setTimeout(() => { btn.classList.remove('success'); }, 1500);
-    });
-}
-
 function showContextMenu(e, type, id, element) {
     e.preventDefault();
     handleContextMenuTrigger(element, e.pageX, e.pageY);
@@ -1115,7 +1104,7 @@ function openEditor(existingDate = null) {
         }
         contentInput.innerHTML = text;
         
-        deleteBtn.style.display = 'block';
+        deleteBtn.style.display = 'flex';
         
         const parts = existingDate.split('-');
         calDate = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
@@ -1163,7 +1152,7 @@ function openBookmarkEditor(id = null) {
         urlInput.value = bm.url || '';
         catInput.value = bm.category === '未分類' ? '' : bm.category;
         descInput.value = bm.description || '';
-        deleteBtn.style.display = 'block';
+        deleteBtn.style.display = 'flex';
     } else {
         idVal.value = '';
         titleInput.value = '';
@@ -1485,7 +1474,6 @@ function openSettingsFromAlert() {
     }, 300);
 }
 
-// 輔助函數：測量文字寬度
 function getTextWidth(text, font) {
     const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
     const context = canvas.getContext("2d");
@@ -1494,44 +1482,36 @@ function getTextWidth(text, font) {
     return metrics.width;
 }
 
-// 雲端提示動畫圓球函數
 function showCloudToast(message) {
     const toast = document.getElementById('cloud-toast');
     const textSpan = document.getElementById('cloud-toast-text');
     
-    // 1. 設定文字
     textSpan.innerText = message;
 
-    // 2. 計算需要的總寬度
     const fontStyle = window.getComputedStyle(textSpan).font;
     const textWidth = getTextWidth(message, fontStyle);
-    const iconWidth = 60; // 對齊新的 60px 圖標尺寸
-    const padding = 20; // 保持額外緩衝邊距，確保左側有空間
+    const iconWidth = 60; 
+    const padding = 20; 
     const totalWidth = iconWidth + textWidth + padding;
     
-    // 3. 開始落下動畫
     toast.classList.add('drop'); 
     
     setTimeout(() => {
-        // 4. 設定寬度並展開
         toast.style.width = `${totalWidth}px`;
-        toast.classList.add('expand'); // 觸發文字透明度變化
+        toast.classList.add('expand'); 
         
         setTimeout(() => {
-            // 5. 收縮寬度並隱藏文字
             toast.classList.remove('expand');
-            toast.style.width = '60px'; // 回復到新的圓形寬度
+            toast.style.width = '60px'; 
             
             setTimeout(() => {
-                // 6. 收回上方
                 toast.classList.remove('drop');
-                // 動畫結束後清除 inline style，避免影響下次計算
                 setTimeout(() => {
                      toast.style.width = '';
                 }, 400)
-            }, 300); // 等待寬度收縮動畫完成
-        }, 2000); // 停留時間
-    }, 400); // 等待落下動畫完成
+            }, 300); 
+        }, 2000); 
+    }, 400); 
 }
 
 async function uploadToGist() {
@@ -1567,7 +1547,7 @@ async function uploadToGist() {
         });
         if (response.ok) {
             closeSettingsMenu();
-            showCloudToast('備份成功'); // 使用新動畫提示
+            showCloudToast('備份成功'); 
         } else {
             alert('上傳失敗，請檢查 Token 權限');
         }
@@ -1635,7 +1615,7 @@ async function downloadFromGist() {
         }
         
         closeSettingsMenu();
-        showCloudToast('下載成功'); // 使用新動畫提示
+        showCloudToast('下載成功'); 
         
     } catch (error) {
         console.error(error);
