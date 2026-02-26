@@ -1636,15 +1636,20 @@ textarea, #note-content, #bookmark-desc {
     position: relative;
 }
 
+#settings-menu {
+    width: 150px; 
+}
+
 .action-settings svg {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @media (hover: hover) {
-    .settings-dropdown-wrapper:hover .sort-menu {
+    .settings-dropdown-wrapper:hover #settings-menu {
         visibility: visible;
         opacity: 1;
         transform: translateY(0);
+        pointer-events: auto; 
     }
     .settings-dropdown-wrapper:hover .action-settings svg {
         transform: rotate(90deg);
