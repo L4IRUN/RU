@@ -1250,6 +1250,12 @@ function saveBookmark() {
 
 function showDeleteConfirm(type) {
     deleteTargetType = type;
+    
+    const targetBtn = document.getElementById(type === 'note' ? 'btn-delete-note' : 'btn-delete-bookmark');
+    if (targetBtn) {
+        targetBtn.style.pointerEvents = 'none';
+    }
+
     const overlay = document.getElementById('confirm-overlay');
     const modal = document.getElementById('confirm-modal');
     overlay.style.display = 'block';
@@ -1270,6 +1276,11 @@ function closeConfirm() {
         overlay.style.display = 'none';
         modal.style.display = 'none';
         deleteTargetType = null;
+        
+        const noteBtn = document.getElementById('btn-delete-note');
+        const bookmarkBtn = document.getElementById('btn-delete-bookmark');
+        if (noteBtn) noteBtn.style.pointerEvents = '';
+        if (bookmarkBtn) bookmarkBtn.style.pointerEvents = '';
     }, 300);
 }
 
