@@ -117,7 +117,7 @@ aside {
     background: var(--glass-bg);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    z-index: 1001;
+    z-index: 1005 !important;
     flex-shrink: 0;
     transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1), padding 0.3s, transform 0.3s;
     overflow-x: hidden;
@@ -894,15 +894,24 @@ h1 {
     bottom: 174px;
 }
 
-#mobile-sidebar-overlay { z-index: 1000; }
-#modal-overlay { z-index: 2000; }
-#editor-modal, #bookmark-modal { z-index: 2001; }
-#calendar-overlay { z-index: 3000; }
-#calendar-modal { z-index: 3001; }
-#confirm-overlay { z-index: 10000 !important; }
-#confirm-modal, #import-confirm-modal, #title-modal { z-index: 10001 !important; pointer-events: none !important; }
+#mobile-sidebar-overlay { 
+    z-index: 1004 !important; 
+    visibility: hidden;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--modal-overlay);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
 
-#modal-overlay, #confirm-overlay, #calendar-overlay, #mobile-sidebar-overlay {
+#mobile-sidebar-overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+#modal-overlay, #confirm-overlay, #calendar-overlay {
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -911,7 +920,11 @@ h1 {
     -webkit-backdrop-filter: blur(8px);
     opacity: 0;
     transition: opacity 0.3s;
+    z-index: 2000;
 }
+
+#confirm-overlay { z-index: 10000 !important; }
+#calendar-overlay { z-index: 3000; }
 
 @keyframes shakeError {
     0%, 100% { transform: translate(-50%, -50%) scale(1); }
@@ -944,6 +957,7 @@ h1 {
     border: 1px solid var(--glass-border);
     pointer-events: none;
     overflow: hidden; 
+    z-index: 2001;
 }
 
 #calendar-modal {
@@ -964,6 +978,7 @@ h1 {
     transition: all 0.3s;
     box-sizing: border-box;
     pointer-events: none;
+    z-index: 3001;
 }
 
 #confirm-modal, #import-confirm-modal, #title-modal {
@@ -984,6 +999,8 @@ h1 {
     backdrop-filter: blur(60px);
     -webkit-backdrop-filter: blur(60px);
     border: 1px solid var(--glass-border);
+    z-index: 10001 !important; 
+    pointer-events: none !important;
 }
 
 #title-modal {
@@ -1020,7 +1037,7 @@ h1 {
 
 #modal-overlay.active, #confirm-modal.active, #import-confirm-modal.active, 
 #title-modal.active, #confirm-overlay.active, #calendar-modal.active, 
-#calendar-overlay.active, #mobile-sidebar-overlay.active {
+#calendar-overlay.active {
     opacity: 1;
 }
 
@@ -1448,7 +1465,8 @@ textarea:focus, #note-content:focus {
         width: 76px !important; 
         transform: translateX(0);
         margin-left: 0;
-        z-index: 1001;
+        /* 確保側邊欄在手機版依然置頂 */
+        z-index: 1005 !important;
     }
     aside.mobile-open {
         width: 230px !important; 
