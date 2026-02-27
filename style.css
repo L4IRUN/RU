@@ -894,6 +894,7 @@ h1 {
     bottom: 174px;
 }
 
+/* 提升層級覆蓋 Header actions 和 FAB */
 #mobile-sidebar-overlay { 
     z-index: 1004 !important; 
     visibility: hidden;
@@ -936,7 +937,8 @@ h1 {
     animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both !important;
 }
 
-#editor-modal, #bookmark-modal {
+/* 統一所有的彈出視窗基礎樣式 */
+#editor-modal, #bookmark-modal, #calendar-modal, #confirm-modal, #title-modal, #category-modal, #settings-modal, #cloud-alert-modal, #help-modal {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -40%) scale(0.95);
@@ -945,7 +947,6 @@ h1 {
     width: 90%;
     max-width: 400px;
     height: auto;
-    max-height: 90vh;
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
@@ -956,96 +957,85 @@ h1 {
     -webkit-backdrop-filter: blur(60px);
     border: 1px solid var(--glass-border);
     pointer-events: none;
+    text-align: left;
+}
+
+#editor-modal, #bookmark-modal {
+    max-height: 90vh;
     overflow: hidden; 
     z-index: 2001;
 }
 
 #calendar-modal {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -40%) scale(0.95);
     padding: 24px;
-    border-radius: 24px;
-    width: 90%;
     max-width: 460px;
     background: var(--calendar-bg); 
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-    display: none;
-    opacity: 0;
-    transition: all 0.3s;
-    box-sizing: border-box;
-    pointer-events: none;
     z-index: 3001;
 }
 
-#confirm-modal, #import-confirm-modal, #title-modal {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -40%) scale(0.95);
-    padding: 30px;
-    border-radius: 20px;
-    width: 90%;
+#confirm-modal, #title-modal, #category-modal, #settings-modal, #cloud-alert-modal, #help-modal {
     max-width: 350px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-    display: none;
-    opacity: 0;
-    transition: all 0.3s;
-    text-align: center;
-    box-sizing: border-box;
-    background: var(--popup-bg);
-    backdrop-filter: blur(60px);
-    -webkit-backdrop-filter: blur(60px);
-    border: 1px solid var(--glass-border);
     z-index: 10001 !important; 
-    pointer-events: none !important;
 }
 
 #title-modal {
     text-align: left; 
-    min-height: 250px; 
+}
+
+#category-modal {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    max-height: 85vh; 
 }
 
-.modal-actions {
-    position: relative;
-    z-index: 10;
+#help-modal {
+    max-width: 380px;
+    z-index: 10002 !important; 
 }
 
-#confirm-modal .modal-actions, 
-#import-confirm-modal .modal-actions,
-#title-modal .modal-actions {
-    display: flex;
-    justify-content: space-between !important;
-    gap: 15px !important;
-    margin-top: 25px;
-    width: 100%;
-}
-
-#confirm-modal .modal-actions button, 
-#import-confirm-modal .modal-actions button,
-#title-modal .modal-actions button {
-    flex: 1;
-    margin: 0 !important;
-    position: relative;
-    z-index: 10;
-}
-
-#modal-overlay.active, #confirm-modal.active, #import-confirm-modal.active, 
-#title-modal.active, #confirm-overlay.active, #calendar-modal.active, 
-#calendar-overlay.active {
+/* 啟動狀態 */
+#modal-overlay.active, #confirm-overlay.active, #calendar-overlay.active {
     opacity: 1;
 }
 
-#editor-modal.active, #bookmark-modal.active, #confirm-modal.active, #import-confirm-modal.active, #title-modal.active, #calendar-modal.active {
+#editor-modal.active, #bookmark-modal.active, #calendar-modal.active, #confirm-modal.active, #title-modal.active, #category-modal.active, #settings-modal.active, #cloud-alert-modal.active, #help-modal.active {
     transform: translate(-50%, -50%) scale(1);
     pointer-events: auto !important;
     opacity: 1;
 }
+
+/* 統一所有的彈出視窗按鈕區塊 */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end; /* 全部預設靠右對齊 */
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 20px; /* 統一標準間距 */
+    position: relative;
+    z-index: 10;
+}
+
+.modal-actions button {
+    margin: 0;
+    flex: none; /* 預設不拉伸 */
+}
+
+/* 針對分類與教學視窗，因為只有單一按鈕，讓它填滿寬度 */
+#category-modal .modal-actions button,
+#help-modal .modal-actions button {
+    width: 100%;
+    flex: 1;
+}
+
+#category-modal {
+    display: none; /* Reset back to standard display for toggle logic */
+}
+#category-modal.active {
+    display: flex !important; /* Force flex when active */
+}
+
+/* ===== 視窗內部細節 ===== */
 
 .date-ui-wrapper {
     position: relative;
@@ -1232,15 +1222,7 @@ textarea:focus, #note-content:focus {
     box-shadow: 0 0 0 3px rgba(154, 135, 30, 0.2);
 }
 
-#editor-modal .modal-actions, 
-#bookmark-modal .modal-actions {
-    display: flex;
-    justify-content: flex-end; 
-    align-items: center;
-    width: 100%;
-    margin-top: 20px;
-}
-
+/* 向量風刪除按鈕 */
 .action-delete-btn {
     background: transparent; 
     color: var(--text-secondary); 
@@ -1395,69 +1377,6 @@ textarea:focus, #note-content:focus {
 .animated-action-btn.success .icon-main {
     opacity: 0;
     transform: scale(0.3) rotate(30deg);
-}
-
-#category-modal {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -40%) scale(0.95);
-    padding: 30px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 350px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-    display: none;
-    opacity: 0;
-    transition: all 0.3s;
-    text-align: left;
-    box-sizing: border-box;
-    background: var(--popup-bg);
-    backdrop-filter: blur(60px);
-    -webkit-backdrop-filter: blur(60px);
-    border: 1px solid var(--glass-border);
-    flex-direction: column;
-    max-height: 85vh; 
-    z-index: 10001 !important;
-    pointer-events: none !important;
-}
-
-#category-modal.active {
-    transform: translate(-50%, -50%) scale(1);
-    pointer-events: auto !important;
-    opacity: 1;
-    display: flex !important; 
-}
-
-#category-modal h3 {
-    flex-shrink: 0;
-    margin-top: 0;
-    margin-bottom: 5px;
-}
-
-#category-modal .modal-actions {
-    display: flex;
-    margin-top: auto; 
-    width: 100%;
-    flex-shrink: 0; 
-    padding-top: 10px;
-}
-
-#category-modal .modal-actions button {
-    flex: 1;
-    position: relative;
-    z-index: 10;
-    margin: 0;
-}
-
-#modal-category-list {
-    flex-grow: 1;
-    overflow-y: auto; 
-    margin: 15px 0 20px 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px; 
-    align-content: flex-start;
-    padding-bottom: 5px; 
 }
 
 @keyframes fadeIn {
@@ -1682,36 +1601,6 @@ body.no-scroll aside {
     touch-action: none; 
 }
 
-#editor-modal, #bookmark-modal, #calendar-modal {
-    touch-action: auto; 
-}
-
-textarea, #note-content, #bookmark-desc {
-    touch-action: pan-y !important; 
-    overscroll-behavior: contain;
-    overflow-y: auto;
-}
-
-#settings-modal, #cloud-alert-modal {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -40%) scale(0.95);
-    padding: 25px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 350px;
-    z-index: 10001;
-    opacity: 0;
-    transition: all 0.3s;
-}
-
-#settings-modal.active, #cloud-alert-modal.active {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
-
 .action-settings svg, .action-sort svg {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -1729,20 +1618,6 @@ textarea, #note-content, #bookmark-desc {
     .sort-item:hover {
         background: rgba(154, 135, 30, 0.15);
     }
-}
-
-#settings-modal .modal-actions, 
-#cloud-alert-modal .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    width: 100%;
-}
-
-#settings-modal .modal-actions button, 
-#cloud-alert-modal .modal-actions button {
-    margin: 0;
-    flex: none;
 }
 
 .settings-dropdown-wrapper {
@@ -1920,33 +1795,6 @@ textarea, #note-content, #bookmark-desc {
     #cloud-toast.drop {
         transform: translateY(110px); 
     }
-}
-
-#help-modal {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -40%) scale(0.95);
-    padding: 25px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 380px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-    display: none;
-    opacity: 0;
-    transition: all 0.3s;
-    box-sizing: border-box;
-    background: var(--popup-bg);
-    backdrop-filter: blur(60px);
-    -webkit-backdrop-filter: blur(60px);
-    border: 1px solid var(--glass-border);
-    z-index: 10002 !important; 
-    pointer-events: none;
-}
-
-#help-modal.active {
-    transform: translate(-50%, -50%) scale(1);
-    pointer-events: auto !important;
-    opacity: 1;
 }
 
 #help-modal a:hover {
