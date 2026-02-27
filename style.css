@@ -1219,12 +1219,12 @@ textarea, #note-content {
     pointer-events: none;
 }
 
+/* 修正編輯收藏的備註內容 */
 #bookmark-desc {
-    height: 120px;
-    padding: 13px 15px;
-    line-height: 24px;
+    height: 52px; /* 與其他輸入框等高 */
+    font-size: 12pt; /* 字體縮小為 12pt */
+    line-height: 1.2;
     margin-bottom: 0;
-    overflow-y: auto;
 }
 
 textarea:focus, #note-content:focus {
@@ -1242,7 +1242,7 @@ textarea:focus, #note-content:focus {
     margin-top: 20px;
 }
 
-/* 圓形刪除按鈕 (紅底白叉) */
+/* 圓形刪除按鈕 (紅底白垃圾桶) */
 .btn-danger-icon {
     background-color: var(--danger) !important;
     color: white !important;
@@ -1259,22 +1259,34 @@ textarea:focus, #note-content:focus {
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.btn-danger-icon svg {
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+/* 垃圾桶動畫 */
+.btn-danger-icon .trash-icon {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: bottom center;
+}
+
+.btn-danger-icon .lid-group {
+    transform-origin: 32px 22px; /* 根據SVG viewBox的中心點旋轉 */
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .btn-danger-icon:hover {
-    transform: scale(1.15);
+    transform: scale(1.15); /* 整個按鈕放大 */
     box-shadow: 0 6px 15px rgba(114, 47, 55, 0.5);
 }
 
-.btn-danger-icon:hover svg {
-    transform: rotate(90deg);
+.btn-danger-icon:hover .lid-group {
+    transform: rotate(-35deg); /* 蓋子打開 */
 }
 
 .btn-danger-icon:active {
     transform: scale(0.95);
 }
+
+.btn-danger-icon:active .lid-group {
+    transform: rotate(-45deg);
+}
+
 
 /* 網址/分類與側邊按鈕的統一排版 */
 .input-row {
@@ -1848,7 +1860,7 @@ textarea, #note-content, #bookmark-desc {
 /* 雲端提示動畫圓球 */
 #cloud-toast {
     position: fixed;
-    top: -70px; 
+    top: -100px; /* 修正：徹底推到畫面外，隱藏陰影 */
     right: 38px;
     width: 60px; 
     height: 60px;
@@ -1864,7 +1876,7 @@ textarea, #note-content, #bookmark-desc {
 }
 
 #cloud-toast.drop {
-    transform: translateY(90px); 
+    transform: translateY(120px); /* 修正：配合起始點調整掉落距離 */
 }
 
 .toast-icon-wrapper {
@@ -1901,6 +1913,6 @@ textarea, #note-content, #bookmark-desc {
         right: 28px;
     }
     #cloud-toast.drop {
-        transform: translateY(80px); 
+        transform: translateY(110px); /* 手機版配合調整 */
     }
 }
