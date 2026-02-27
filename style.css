@@ -1274,6 +1274,32 @@ textarea:focus, #note-content:focus {
     transform: translateY(-8px);
 }
 
+/* 設定視窗右上角的教學按鈕 */
+.action-help-btn {
+    background: transparent; 
+    color: var(--text-secondary); 
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.action-help-btn:hover {
+    background: rgba(154, 135, 30, 0.1);
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.action-help-btn:active {
+    transform: scale(0.95);
+}
+
 .input-row {
     display: flex;
     gap: 10px;
@@ -1710,7 +1736,6 @@ textarea, #note-content, #bookmark-desc {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 30px;
     width: 100%;
 }
 
