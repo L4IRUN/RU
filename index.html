@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>筆記</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='37.5' fill='%239A871E'/></svg>">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
     <div id="mobile-sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -173,12 +173,17 @@
     
     <div id="editor-modal" class="glass-effect">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin:0;">編輯筆記</h2>
+            <h2 id="editor-modal-title" style="margin:0;">新增筆記</h2>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button class="btn-danger-icon" id="btn-delete-note" onclick="showDeleteConfirm('note')" title="刪除筆記">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    <svg class="trash-icon" width="20" height="20" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <g class="can-group">
+                            <path d="M16,24 L19,56 C19,58.2 20.8,60 23,60 L41,60 C43.2,60 45,58.2 45,56 L48,24 L16,24 Z M26,52 L24,32 M32,52 L32,32 M38,52 L40,32" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </g>
+                        <g class="lid-group">
+                            <path d="M28,8 L36,8 C37.1,8 38,8.9 38,10 L38,14 L26,14 L26,10 C26,8.9 26.9,8 28,8 Z" fill="currentColor"/>
+                            <path d="M10,14 L54,14 C56.2,14 58,15.8 58,18 L58,20 C58,21.1 57.1,22 56,22 L8,22 C6.9,22 6,21.1 6,20 L6,18 C6,15.8 7.8,14 10,14 Z" fill="currentColor"/>
+                        </g>
                     </svg>
                 </button>
             </div>
@@ -221,11 +226,16 @@
 
     <div id="bookmark-modal" class="glass-effect">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin:0;">編輯收藏</h2>
+            <h2 id="bookmark-modal-title" style="margin:0;">新增收藏</h2>
             <button class="btn-danger-icon" id="btn-delete-bookmark" onclick="showDeleteConfirm('bookmark')" title="刪除收藏">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                <svg class="trash-icon" width="20" height="20" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <g class="can-group">
+                        <path d="M16,24 L19,56 C19,58.2 20.8,60 23,60 L41,60 C43.2,60 45,58.2 45,56 L48,24 L16,24 Z M26,52 L24,32 M32,52 L32,32 M38,52 L40,32" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </g>
+                    <g class="lid-group">
+                        <path d="M28,8 L36,8 C37.1,8 38,8.9 38,10 L38,14 L26,14 L26,10 C26,8.9 26.9,8 28,8 Z" fill="currentColor"/>
+                        <path d="M10,14 L54,14 C56.2,14 58,15.8 58,18 L58,20 C58,21.1 57.1,22 56,22 L8,22 C6.9,22 6,21.1 6,20 L6,18 C6,15.8 7.8,14 10,14 Z" fill="currentColor"/>
+                    </g>
                 </svg>
             </button>
         </div>
@@ -328,6 +338,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>
