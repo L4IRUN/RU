@@ -1280,6 +1280,7 @@ function closeAllConfirms() {
     closeCategoryModal();
     closeSettingsModal();
     closeCloudAlert();
+    closeHelpModal(); 
 }
 
 function confirmDelete() {
@@ -1441,6 +1442,24 @@ function closeSettingsModal() {
         modal.style.display = 'none';
         overlay.style.display = 'none';
     }, 300);
+}
+
+function openHelpModal() {
+    const modal = document.getElementById('help-modal');
+    modal.style.display = 'block';
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
+}
+
+function closeHelpModal() {
+    const modal = document.getElementById('help-modal');
+    if(modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
 }
 
 function saveSettings() {
