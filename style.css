@@ -1247,8 +1247,8 @@ textarea:focus, #note-content:focus {
 .action-delete-btn {
     background: transparent; 
     color: var(--text-secondary); 
-    width: 40px;
-    height: 40px;
+    width: 44px; /* 加大按鈕尺寸 */
+    height: 44px; /* 加大按鈕尺寸 */
     border-radius: 12px;
     display: none; /* 由 JS 控制 flex */
     align-items: center;
@@ -1272,12 +1272,11 @@ textarea:focus, #note-content:focus {
 
 /* 蓋子掀開動畫設定 */
 .action-delete-btn .lid-group {
-    transform-origin: 19px 6px; /* 將旋轉鉸鏈設定在蓋子右側邊緣 */
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .action-delete-btn:hover .lid-group {
-    transform: rotate(35deg) translateY(-1px); /* 蓋子向右上角掀開 */
+    transform: translateY(-8px); /* 平行向上掀開 */
 }
 
 
@@ -1853,7 +1852,7 @@ textarea, #note-content, #bookmark-desc {
 /* 雲端提示動畫圓球 */
 #cloud-toast {
     position: fixed;
-    top: -100px; /* 修正：徹底推到畫面外，隱藏陰影 */
+    top: -100px; /* 徹底推到畫面外，隱藏陰影 */
     right: 38px;
     width: 60px; 
     height: 60px;
@@ -1869,7 +1868,7 @@ textarea, #note-content, #bookmark-desc {
 }
 
 #cloud-toast.drop {
-    transform: translateY(120px); /* 修正：配合起始點調整掉落距離 */
+    transform: translateY(120px); /* 配合起始點調整掉落距離 */
 }
 
 .toast-icon-wrapper {
