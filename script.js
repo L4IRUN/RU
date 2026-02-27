@@ -1056,6 +1056,7 @@ function selectDate(year, month, day) {
 
 function openEditor(existingDate = null) {
     currentEditingDate = existingDate;
+    const titleEl = document.getElementById('editor-modal-title');
     const overlay = document.getElementById('modal-overlay');
     const modal = document.getElementById('editor-modal');
     const dateVal = document.getElementById('note-date-val');
@@ -1074,6 +1075,7 @@ function openEditor(existingDate = null) {
     }, 10);
 
     if (existingDate) {
+        titleEl.innerText = '編輯筆記';
         const noteData = notes[existingDate];
         dateVal.value = existingDate;
         dateText.innerText = existingDate;
@@ -1089,6 +1091,7 @@ function openEditor(existingDate = null) {
         const parts = existingDate.split('-');
         calDate = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
     } else {
+        titleEl.innerText = '新增筆記';
         const today = new Date();
         const yyyy = today.getFullYear();
         const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -1105,6 +1108,7 @@ function openEditor(existingDate = null) {
 
 function openBookmarkEditor(id = null) {
     currentEditingBookmarkId = id;
+    const titleEl = document.getElementById('bookmark-modal-title');
     const overlay = document.getElementById('modal-overlay');
     const modal = document.getElementById('bookmark-modal');
     
@@ -1126,6 +1130,7 @@ function openBookmarkEditor(id = null) {
     }, 10);
 
     if (id && bookmarks[id]) {
+        titleEl.innerText = '編輯收藏';
         const bm = bookmarks[id];
         idVal.value = id;
         titleInput.value = bm.title || '';
@@ -1134,6 +1139,7 @@ function openBookmarkEditor(id = null) {
         descInput.value = bm.description || '';
         deleteBtn.style.display = 'flex';
     } else {
+        titleEl.innerText = '新增收藏';
         idVal.value = '';
         titleInput.value = '';
         urlInput.value = '';
