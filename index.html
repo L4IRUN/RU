@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>筆記</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='37.5' fill='%239A871E'/></svg>">
-    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
     <div id="mobile-sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -324,6 +324,7 @@
             <h2 style="margin:0;">雲端同步設定</h2>
             <button class="action-help-btn" onclick="openHelpModal()" title="設定教學">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 20 A 10 10 0 1 1 18 20"></path>
                     <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                 </svg>
@@ -331,7 +332,7 @@
         </div>
         <input type="text" id="setting-github-token" class="custom-input" placeholder="GitHub Token (ghp_...)" style="margin-bottom: 15px;">
         <input type="text" id="setting-gist-id" class="custom-input" placeholder="Gist ID">
-        <div class="modal-actions">
+        <div class="modal-actions" style="margin-top: 35px;">
             <button class="btn-primary btn-cancel" onclick="closeSettingsModal()">取消</button>
             <button class="btn-primary" onclick="saveSettings()">儲存</button>
         </div>
@@ -367,6 +368,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=13"></script>
+    <script src="script.js?v=14"></script>
 </body>
 </html>
