@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>筆記</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='37.5' fill='%239A871E'/></svg>">
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
     <div id="mobile-sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -294,8 +294,8 @@
     <div id="confirm-overlay" onclick="closeAllConfirms()"></div>
     
     <div id="confirm-modal" class="glass-effect">
-        <h3 style="margin-top:0;">確定要刪除？</h3>
-        <p style="color: var(--text-secondary); font-size: 15px;">刪除後將無法復原資料。</p>
+        <h2 style="margin:0; margin-bottom: 10px;">確定要刪除？</h2>
+        <p style="color: var(--text-secondary); font-size: 15px; margin-top: 0;">刪除後將無法復原資料。</p>
         <div class="modal-actions">
             <button class="btn-primary btn-cancel" onclick="closeConfirm()">保留</button>
             <button class="btn-primary btn-danger" onclick="confirmDelete()">刪除</button>
@@ -303,7 +303,7 @@
     </div>
 
     <div id="title-modal" class="glass-effect">
-        <h3 style="margin-top:0;">修改名稱</h3>
+        <h2 style="margin:0; margin-bottom: 20px;">修改名稱</h2>
         <input type="text" id="app-title-input" class="custom-input" placeholder="請輸入新的名稱" onkeydown="if(event.key === 'Enter') saveAppTitle()">
         <div class="modal-actions">
             <button class="btn-primary btn-cancel" onclick="closeTitleModal()">取消</button>
@@ -312,7 +312,7 @@
     </div>
 
     <div id="category-modal" class="glass-effect">
-        <h3 style="margin-top:0;">選擇分類</h3>
+        <h2 style="margin:0; margin-bottom: 15px;">選擇分類</h2>
         <div id="modal-category-list" class="category-tags"></div>
         <div class="modal-actions">
             <button class="btn-primary btn-cancel" onclick="closeCategoryModal()">關閉</button>
@@ -331,14 +331,14 @@
         </div>
         <input type="text" id="setting-github-token" class="custom-input" placeholder="GitHub Token (ghp_...)" style="margin-bottom: 15px;">
         <input type="text" id="setting-gist-id" class="custom-input" placeholder="Gist ID">
-        <div class="modal-actions" style="margin-top: 35px;">
+        <div class="modal-actions">
             <button class="btn-primary btn-cancel" onclick="closeSettingsModal()">取消</button>
             <button class="btn-primary" onclick="saveSettings()">儲存</button>
         </div>
     </div>
 
     <div id="help-modal" class="glass-effect">
-        <h3 style="margin-top:0; margin-bottom:15px;">同步設定教學</h3>
+        <h2 style="margin:0; margin-bottom:15px;">同步設定教學</h2>
         <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; text-align: left; max-height: 50vh; overflow-y: auto;">
             <p style="margin-top:0;"><b>1. 取得 GitHub Token:</b></p>
             <ul style="padding-left: 20px; margin-top: 5px;">
@@ -353,20 +353,20 @@
                 <li>查看網址列，複製最後一串亂碼。<br><span style="font-size: 12px; opacity: 0.8;">(例如: gist.github.com/帳號/<b>[這串就是ID]</b>)</span></li>
             </ul>
         </div>
-        <div class="modal-actions">
-            <button class="btn-primary" style="width: 100%; margin-top: 5px;" onclick="closeHelpModal()">我知道了</button>
+        <div class="modal-actions" style="margin-top: 25px;">
+            <button class="btn-primary" onclick="closeHelpModal()">我知道了</button>
         </div>
     </div>
 
     <div id="cloud-alert-modal" class="glass-effect">
-        <h3 style="margin-top:0;">尚未設定雲端同步</h3>
-        <p style="color: var(--text-secondary); font-size: 15px;">請先設定 GitHub Token 與 Gist ID 才能使用雲端備份功能。</p>
+        <h2 style="margin:0; margin-bottom: 10px;">尚未設定雲端同步</h2>
+        <p style="color: var(--text-secondary); font-size: 15px; margin-top: 0;">請先設定 GitHub Token 與 Gist ID 才能使用雲端備份功能。</p>
         <div class="modal-actions">
             <button class="btn-primary btn-cancel" onclick="closeCloudAlert()">取消</button>
             <button class="btn-primary" onclick="openSettingsFromAlert()">前往設定</button>
         </div>
     </div>
 
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=13"></script>
 </body>
 </html>
