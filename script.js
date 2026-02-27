@@ -1187,6 +1187,8 @@ function saveNote() {
         return;
     }
 
+    const isNew = !currentEditingDate;
+
     if (currentEditingDate && currentEditingDate !== date) {
         delete notes[currentEditingDate];
     }
@@ -1199,7 +1201,11 @@ function saveNote() {
     
     currentYear = date.split('-')[0];
     closeAllEditors();
-    setTimeout(renderSidebar, 300);
+    
+    setTimeout(() => {
+        renderSidebar();
+        showCloudToast(isNew ? '新增筆記成功' : '儲存筆記成功');
+    }, 300);
 }
 
 function saveBookmark() {
@@ -1220,6 +1226,7 @@ function saveBookmark() {
         url = 'https://' + url;
     }
 
+    const isNew = !currentEditingBookmarkId;
     const id = currentEditingBookmarkId || Date.now().toString();
     const order = (bookmarks[id] && bookmarks[id].order !== undefined) ? bookmarks[id].order : Date.now();
     
@@ -1234,7 +1241,11 @@ function saveBookmark() {
     
     localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
     closeAllEditors();
-    setTimeout(renderBookmarks, 300);
+    
+    setTimeout(() => {
+        renderBookmarks();
+        showCloudToast(isNew ? '新增網站成功' : '儲存網站成功');
+    }, 300);
 }
 
 function showDeleteConfirm(type) {
@@ -1277,13 +1288,19 @@ function confirmDelete() {
         localStorage.setItem('my_life_notes', JSON.stringify(notes));
         closeConfirm();
         closeAllEditors();
-        setTimeout(renderSidebar, 300);
+        setTimeout(() => {
+            renderSidebar();
+            showCloudToast('刪除筆記成功');
+        }, 300);
     } else if (deleteTargetType === 'bookmark' && currentEditingBookmarkId) {
         delete bookmarks[currentEditingBookmarkId];
         localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
         closeConfirm();
         closeAllEditors();
-        setTimeout(renderBookmarks, 300);
+        setTimeout(() => {
+            renderBookmarks();
+            showCloudToast('刪除收藏成功');
+        }, 300);
     }
 }
 
