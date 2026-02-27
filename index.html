@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>筆記</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='37.5' fill='%239A871E'/></svg>">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
     <div id="mobile-sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -174,12 +174,14 @@
     <div id="editor-modal" class="glass-effect">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin:0;">編輯筆記</h2>
-            <button class="btn-danger-icon" id="btn-delete-note" onclick="showDeleteConfirm('note')" title="刪除筆記">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="btn-danger-icon" id="btn-delete-note" onclick="showDeleteConfirm('note')" title="刪除筆記">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
         </div>
         <div class="date-ui-wrapper">
             <div class="date-ui-display" id="date-ui-display" onclick="toggleCalendar()">
@@ -246,7 +248,7 @@
         
         <div class="input-row">
             <input type="text" id="bookmark-category" class="custom-input" placeholder="分類 (例如：工具、設計)">
-            <button class="input-side-btn" onclick="openCategoryModal()" title="選擇已有分類">
+            <button class="input-side-btn btn-add-category" onclick="openCategoryModal()" title="選擇已有分類">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -326,6 +328,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>
