@@ -1204,7 +1204,7 @@ function saveNote() {
     
     setTimeout(() => {
         renderSidebar();
-        showCloudToast(isNew ? '新增筆記成功' : '儲存筆記成功');
+        showCloudToast(isNew ? '新增成功' : '儲存成功');
     }, 300);
 }
 
@@ -1244,7 +1244,7 @@ function saveBookmark() {
     
     setTimeout(() => {
         renderBookmarks();
-        showCloudToast(isNew ? '新增網站成功' : '儲存網站成功');
+        showCloudToast(isNew ? '新增成功' : '儲存成功');
     }, 300);
 }
 
@@ -1290,7 +1290,7 @@ function confirmDelete() {
         closeAllEditors();
         setTimeout(() => {
             renderSidebar();
-            showCloudToast('刪除筆記成功');
+            showCloudToast('刪除成功');
         }, 300);
     } else if (deleteTargetType === 'bookmark' && currentEditingBookmarkId) {
         delete bookmarks[currentEditingBookmarkId];
@@ -1299,7 +1299,7 @@ function confirmDelete() {
         closeAllEditors();
         setTimeout(() => {
             renderBookmarks();
-            showCloudToast('刪除收藏成功');
+            showCloudToast('刪除成功');
         }, 300);
     }
 }
