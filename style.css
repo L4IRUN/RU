@@ -894,7 +894,6 @@ h1 {
     bottom: 174px;
 }
 
-/* 修正：提升層級覆蓋 Header actions 和 FAB */
 #mobile-sidebar-overlay { 
     z-index: 1004 !important; 
     visibility: hidden;
@@ -1220,7 +1219,6 @@ textarea, #note-content {
     pointer-events: none;
 }
 
-/* 修正編輯收藏的備註內容：等高與 12pt 字體 */
 #bookmark-desc {
     height: 52px; 
     font-size: 12pt; 
@@ -1243,14 +1241,13 @@ textarea:focus, #note-content:focus {
     margin-top: 20px;
 }
 
-/* 向量風刪除按鈕 (取代原有的 .btn-danger-icon) */
 .action-delete-btn {
     background: transparent; 
     color: var(--text-secondary); 
-    width: 44px; /* 加大按鈕尺寸 */
-    height: 44px; /* 加大按鈕尺寸 */
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
-    display: none; /* 由 JS 控制 flex */
+    display: none; 
     align-items: center;
     justify-content: center;
     padding: 0;
@@ -1259,7 +1256,6 @@ textarea:focus, #note-content:focus {
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* 懸停時：變微紅與放大 */
 .action-delete-btn:hover {
     background: rgba(114, 47, 55, 0.1); 
     color: var(--danger);
@@ -1270,17 +1266,14 @@ textarea:focus, #note-content:focus {
     transform: scale(0.95);
 }
 
-/* 蓋子掀開動畫設定 */
 .action-delete-btn .lid-group {
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .action-delete-btn:hover .lid-group {
-    transform: translateY(-8px); /* 平行向上掀開 */
+    transform: translateY(-8px);
 }
 
-
-/* 網址/分類與側邊按鈕的統一排版 */
 .input-row {
     display: flex;
     gap: 10px;
@@ -1292,7 +1285,6 @@ textarea:focus, #note-content:focus {
     margin-bottom: 0;
 }
 
-/* 統一側邊按鈕樣式 (複製與分類) */
 .input-side-btn {
     width: 50px !important;
     flex-shrink: 0;
@@ -1344,13 +1336,11 @@ textarea:focus, #note-content:focus {
     justify-content: center;
 }
 
-/* 修正編輯區的按鈕大小以防跑版 */
 .left-actions .animated-action-btn {
     width: 36px;
     height: 36px;
 }
 
-/* 保證圖標永遠置中 */
 .animated-action-btn svg {
     position: absolute;
     top: 0;
@@ -1469,7 +1459,6 @@ textarea:focus, #note-content:focus {
         width: 76px !important; 
         transform: translateX(0);
         margin-left: 0;
-        /* 確保側邊欄在手機版依然置頂 */
         z-index: 1005 !important;
     }
     aside.mobile-open {
@@ -1849,10 +1838,9 @@ textarea, #note-content, #bookmark-desc {
     transform: rotate(90deg);
 }
 
-/* 雲端提示動畫圓球 */
 #cloud-toast {
     position: fixed;
-    top: -100px; /* 徹底推到畫面外，隱藏陰影 */
+    top: -100px; 
     right: 38px;
     width: 60px; 
     height: 60px;
@@ -1868,7 +1856,7 @@ textarea, #note-content, #bookmark-desc {
 }
 
 #cloud-toast.drop {
-    transform: translateY(120px); /* 配合起始點調整掉落距離 */
+    transform: translateY(120px); 
 }
 
 .toast-icon-wrapper {
@@ -1905,6 +1893,37 @@ textarea, #note-content, #bookmark-desc {
         right: 28px;
     }
     #cloud-toast.drop {
-        transform: translateY(110px); /* 手機版配合調整 */
+        transform: translateY(110px); 
     }
+}
+
+#help-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -40%) scale(0.95);
+    padding: 25px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 380px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    display: none;
+    opacity: 0;
+    transition: all 0.3s;
+    box-sizing: border-box;
+    background: var(--popup-bg);
+    backdrop-filter: blur(60px);
+    -webkit-backdrop-filter: blur(60px);
+    border: 1px solid var(--glass-border);
+    z-index: 10002 !important; 
+    pointer-events: none;
+}
+
+#help-modal.active {
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto !important;
+    opacity: 1;
+}
+
+#help-modal a:hover {
+    text-decoration: underline !important;
 }
