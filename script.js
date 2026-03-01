@@ -137,7 +137,7 @@ function closeTitleModal() {
     setTimeout(() => {
         modal.style.display = 'none';
         overlay.style.display = 'none';
-    }, 300);
+    }, 200);
 }
 
 function saveAppTitle() {
@@ -968,7 +968,7 @@ function closeCategoryModal() {
         modal.style.display = 'none';
         overlay.style.display = 'none';
         overlay.style.zIndex = ""; 
-    }, 300);
+    }, 200);
 }
 
 function toggleCalendar() {
@@ -992,7 +992,7 @@ function closeCalendar() {
     setTimeout(() => {
         overlay.style.display = 'none';
         modal.style.display = 'none';
-    }, 300);
+    }, 200);
 }
 
 function renderCalendar() {
@@ -1166,7 +1166,7 @@ function closeAllEditors() {
         modals.forEach(m => m.style.display = 'none');
         currentEditingDate = null;
         currentEditingBookmarkId = null;
-    }, 300);
+    }, 200);
 }
 
 function getTimestamp() {
@@ -1205,7 +1205,7 @@ function saveNote() {
     setTimeout(() => {
         renderSidebar();
         showCloudToast(isNew ? '新增成功' : '儲存成功');
-    }, 300);
+    }, 200);
 }
 
 function saveBookmark() {
@@ -1245,7 +1245,7 @@ function saveBookmark() {
     setTimeout(() => {
         renderBookmarks();
         showCloudToast(isNew ? '新增成功' : '儲存成功');
-    }, 300);
+    }, 200);
 }
 
 function showDeleteConfirm(type) {
@@ -1281,7 +1281,7 @@ function closeConfirm() {
         const bookmarkBtn = document.getElementById('btn-delete-bookmark');
         if (noteBtn) noteBtn.style.pointerEvents = '';
         if (bookmarkBtn) bookmarkBtn.style.pointerEvents = '';
-    }, 300);
+    }, 200);
 }
 
 function closeAllConfirms() {
@@ -1303,7 +1303,7 @@ function confirmDelete() {
         setTimeout(() => {
             renderSidebar();
             showCloudToast('刪除成功');
-        }, 300);
+        }, 200);
     } else if (deleteTargetType === 'bookmark' && currentEditingBookmarkId) {
         delete bookmarks[currentEditingBookmarkId];
         localStorage.setItem('my_bookmarks', JSON.stringify(bookmarks));
@@ -1312,7 +1312,7 @@ function confirmDelete() {
         setTimeout(() => {
             renderBookmarks();
             showCloudToast('刪除成功');
-        }, 300);
+        }, 200);
     }
 }
 
@@ -1452,7 +1452,7 @@ function closeSettingsModal() {
     setTimeout(() => {
         modal.style.display = 'none';
         overlay.style.display = 'none';
-    }, 300);
+    }, 200);
 }
 
 function openHelpModal() {
@@ -1469,7 +1469,7 @@ function closeHelpModal() {
         modal.classList.remove('active');
         setTimeout(() => {
             modal.style.display = 'none';
-        }, 300);
+        }, 200);
     }
 }
 
@@ -1502,14 +1502,14 @@ function closeCloudAlert() {
     setTimeout(() => {
         modal.style.display = 'none';
         overlay.style.display = 'none';
-    }, 300);
+    }, 200);
 }
 
 function openSettingsFromAlert() {
     closeCloudAlert();
     setTimeout(() => {
         openSettingsModal();
-    }, 300);
+    }, 200);
 }
 
 function getTextWidth(text, font) {
