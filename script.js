@@ -30,8 +30,10 @@ function getDefaultTimeTab() {
     return 'evening';
 }
 
-function switchTimeTab(tabName) {
-    tempNoteData[currentTimeTab] = document.getElementById('note-content').innerHTML;
+function switchTimeTab(tabName, isInit = false) {
+    if (!isInit) {
+        tempNoteData[currentTimeTab] = document.getElementById('note-content').innerHTML;
+    }
     currentTimeTab = tabName;
     
     const contentEl = document.getElementById('note-content');
@@ -1153,7 +1155,7 @@ function openEditor(existingDate = null) {
     }
 
     const defaultTab = getDefaultTimeTab();
-    switchTimeTab(defaultTab);
+    switchTimeTab(defaultTab, true);
 }
 
 function openBookmarkEditor(id = null) {
