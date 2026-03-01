@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>筆記</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='37.5' fill='%239A871E'/></svg>">
-    <link rel="stylesheet" href="style.css?v=15">
+    <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
     <div id="mobile-sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -234,7 +234,7 @@
                     <line class="can-body" x1="14" y1="11" x2="14" y2="17"></line>
                     <g class="lid-group">
                         <path d="M3 6h18"></path>
-                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     </g>
                 </svg>
             </button>
@@ -322,15 +322,15 @@
     <div id="settings-modal" class="glass-effect">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
             <h2 style="margin:0;">雲端同步設定</h2>
+            
             <button class="action-help-btn" onclick="openHelpModal()" title="設定教學">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
-                    <g fill="currentColor" stroke="none">
-                        <circle cx="12" cy="10" r="2.5"></circle>
-                        <circle cx="12" cy="17" r="1"></circle>
-                    </g>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
                 </svg>
             </button>
+            
         </div>
         <input type="text" id="setting-github-token" class="custom-input" placeholder="GitHub Token (ghp_...)" style="margin-bottom: 15px;">
         <input type="text" id="setting-gist-id" class="custom-input" placeholder="Gist ID">
@@ -370,6 +370,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=15"></script>
+    <script src="script.js?v=16"></script>
 </body>
 </html>
