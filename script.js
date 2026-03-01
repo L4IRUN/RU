@@ -22,6 +22,22 @@ let fabIdleTimer = null;
 
 let tempNoteData = { morning: '', afternoon: '', evening: '' };
 let currentTimeTab = 'morning';
+let isNoteUnsaved = false;
+
+function setIndicatorState(state) {
+    const wrapper = document.getElementById('save-indicator-wrapper');
+    if (!wrapper) return;
+    
+    wrapper.classList.remove('unsaved', 'saved');
+    if (state === 'unsaved') {
+        wrapper.classList.add('unsaved');
+    } else if (state === 'saved') {
+        wrapper.classList.add('saved');
+        setTimeout(() => {
+            if (!isNoteUnsaved) wrapper.classList.remove('saved');
+        }, 2000);
+    }
+}
 
 function getDefaultTimeTab() {
     const hour = new Date().getHours();
@@ -31,17 +47,35 @@ function getDefaultTimeTab() {
 }
 
 function switchTimeTab(tabName, isInit = false) {
+    if (currentTimeTab === tabName && !isInit) return; 
+
     if (!isInit) {
-        tempNoteData[currentTimeTab] = document.getElementById('note-content').innerHTML;
+        const contentEl = document.getElementById('note-content');
+        let currentHtml = contentEl.innerHTML;
+        
+        if (currentHtml === '<br>' || currentHtml === '<div><br></div>' || currentHtml.trim() === '') {
+            currentHtml = '';
+        }
+        
+        if (tempNoteData[currentTimeTab] !== currentHtml) {
+            tempNoteData[currentTimeTab] = currentHtml;
+            if (!isNoteUnsaved) {
+                isNoteUnsaved = true;
+                setIndicatorState('unsaved');
+            }
+        }
     }
-    currentTimeTab = tabName;
     
+    currentTimeTab = tabName;
     const contentEl = document.getElementById('note-content');
     contentEl.innerHTML = tempNoteData[currentTimeTab] || '';
     
-    contentEl.classList.remove('note-content-anim');
-    void contentEl.offsetWidth; 
-    contentEl.classList.add('note-content-anim');
+    contentEl.classList.remove('note-content-anim', 'slide-in-left', 'slide-in-right');
+    
+    if (isInit) {
+        void contentEl.offsetWidth; 
+        contentEl.classList.add('note-content-anim');
+    }
     
     document.querySelectorAll('.time-tab').forEach(btn => {
         btn.classList.toggle('active', btn.id === `tab-${tabName}`);
@@ -73,6 +107,52 @@ document.addEventListener('touchstart', resetFabIdleTimer, {passive: true});
 document.addEventListener('touchmove', resetFabIdleTimer, {passive: true});
 document.addEventListener('scroll', resetFabIdleTimer, {passive: true, capture: true});
 document.addEventListener('click', resetFabIdleTimer, {passive: true});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const noteContent = document.getElementById('note-content');
+    if (noteContent) {
+        noteContent.addEventListener('input', () => {
+            if (!isNoteUnsaved) {
+                isNoteUnsaved = true;
+                setIndicatorState('unsaved');
+            }
+        });
+    }
+
+    const mainFab = document.querySelector('.fab-main-btn');
+    const scrollFabs = document.querySelectorAll('.fab-scroll-btn');
+    let fabStartX = 0;
+    let fabStartY = 0;
+
+    if (mainFab) {
+        mainFab.addEventListener('touchstart', (e) => {
+            fabStartX = e.touches[0].clientX;
+            fabStartY = e.touches[0].clientY;
+        }, {passive: true});
+
+        mainFab.addEventListener('touchend', (e) => {
+            if (window.innerWidth > 768) return; 
+
+            let fabEndX = e.changedTouches[0].clientX;
+            let fabEndY = e.changedTouches[0].clientY;
+            let diffX = fabEndX - fabStartX;
+            let diffY = Math.abs(fabEndY - fabStartY);
+
+            if (diffY < 30) {
+                if (!isFabTucked && diffX > 20) {
+                    isFabTucked = true;
+                    mainFab.classList.add('tucked');
+                    scrollFabs.forEach(btn => btn.classList.add('tucked'));
+                } else if (isFabTucked && diffX < -20) {
+                    isFabTucked = false;
+                    mainFab.classList.remove('tucked');
+                    scrollFabs.forEach(btn => btn.classList.remove('tucked'));
+                    resetFabIdleTimer();
+                }
+            }
+        }, {passive: true});
+    }
+});
 
 function initApp() {
     const isDark = localStorage.getItem('dark_mode') === 'true';
@@ -367,6 +447,11 @@ function handleFormat(e, command, btn) {
         } else {
             document.execCommand('foreColor', false, '#9A871E');
         }
+    }
+    
+    if (!isNoteUnsaved) {
+        isNoteUnsaved = true;
+        setIndicatorState('unsaved');
     }
     
     selection.collapseToEnd();
@@ -1092,12 +1177,37 @@ function selectDate(year, month, day) {
     document.getElementById('date-text').innerText = dateStr;
     document.getElementById('note-date-val').value = dateStr;
     
+    if (!isNoteUnsaved) {
+        isNoteUnsaved = true;
+        setIndicatorState('unsaved');
+    }
+    
     closeCalendar();
 }
 
 function openEditor(existingDate = null) {
     currentEditingDate = existingDate;
     const titleEl = document.getElementById('editor-modal-title');
+    
+    if (!document.getElementById('save-indicator-wrapper')) {
+        const group = document.createElement('div');
+        group.style.display = 'flex';
+        group.style.alignItems = 'center';
+        titleEl.parentNode.insertBefore(group, titleEl);
+        group.appendChild(titleEl);
+        group.insertAdjacentHTML('beforeend', `
+            <div id="save-indicator-wrapper">
+                <div class="save-dot"></div>
+                <svg class="save-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+        `);
+    }
+
+    isNoteUnsaved = false;
+    setIndicatorState('');
+
     const overlay = document.getElementById('modal-overlay');
     const modal = document.getElementById('editor-modal');
     const dateVal = document.getElementById('note-date-val');
@@ -1258,7 +1368,11 @@ function saveNote() {
     closeAllEditors();
     
     setTimeout(() => {
-        renderSidebar();
+        if (isNew || (currentEditingDate && currentEditingDate !== date)) {
+            renderSidebar();
+        } else {
+            updateNoteDOM(date);
+        }
         showCloudToast(isNew ? '新增成功' : '儲存成功');
     }, 200);
 }
@@ -1284,6 +1398,7 @@ function saveBookmark() {
     const isNew = !currentEditingBookmarkId;
     const id = currentEditingBookmarkId || Date.now().toString();
     const order = (bookmarks[id] && bookmarks[id].order !== undefined) ? bookmarks[id].order : Date.now();
+    const oldCategory = bookmarks[id] ? bookmarks[id].category : null;
     
     bookmarks[id] = {
         title: title,
@@ -1298,7 +1413,11 @@ function saveBookmark() {
     closeAllEditors();
     
     setTimeout(() => {
-        renderBookmarks();
+        if (isNew || oldCategory !== category) {
+            renderBookmarks();
+        } else {
+            updateBookmarkDOM(id);
+        }
         showCloudToast(isNew ? '新增成功' : '儲存成功');
     }, 200);
 }
@@ -1435,42 +1554,6 @@ overlays.forEach(overlay => {
 });
 const mobOverlay = document.getElementById('mobile-sidebar-overlay');
 if(mobOverlay) observer.observe(mobOverlay, { attributes: true, attributeFilter: ['class'] });
-
-document.addEventListener('DOMContentLoaded', () => {
-    const mainFab = document.querySelector('.fab-main-btn');
-    const scrollFabs = document.querySelectorAll('.fab-scroll-btn');
-    let fabStartX = 0;
-    let fabStartY = 0;
-
-    if (mainFab) {
-        mainFab.addEventListener('touchstart', (e) => {
-            fabStartX = e.touches[0].clientX;
-            fabStartY = e.touches[0].clientY;
-        }, {passive: true});
-
-        mainFab.addEventListener('touchend', (e) => {
-            if (window.innerWidth > 768) return; 
-
-            let fabEndX = e.changedTouches[0].clientX;
-            let fabEndY = e.changedTouches[0].clientY;
-            let diffX = fabEndX - fabStartX;
-            let diffY = Math.abs(fabEndY - fabStartY);
-
-            if (diffY < 30) {
-                if (!isFabTucked && diffX > 20) {
-                    isFabTucked = true;
-                    mainFab.classList.add('tucked');
-                    scrollFabs.forEach(btn => btn.classList.add('tucked'));
-                } else if (isFabTucked && diffX < -20) {
-                    isFabTucked = false;
-                    mainFab.classList.remove('tucked');
-                    scrollFabs.forEach(btn => btn.classList.remove('tucked'));
-                    resetFabIdleTimer();
-                }
-            }
-        }, {passive: true});
-    }
-});
 
 function openSettingsModal() {
     document.getElementById('setting-github-token').value = localStorage.getItem('github_token') || '';
@@ -1713,6 +1796,83 @@ async function downloadFromGist() {
     } catch (error) {
         console.error(error);
         alert(`下載失敗！\n錯誤資訊：${error.message}\n請檢查 Gist ID 是否正確，或確認網路狀態。`);
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        const editorModal = document.getElementById('editor-modal');
+        if (editorModal && editorModal.classList.contains('active')) {
+            e.preventDefault();
+            quickSaveNote();
+        }
+    }
+});
+
+function quickSaveNote() {
+    if (!isNoteUnsaved) return;
+    
+    const date = document.getElementById('note-date-val').value;
+    tempNoteData[currentTimeTab] = document.getElementById('note-content').innerHTML;
+    const hasContent = (tempNoteData.morning.trim() || tempNoteData.afternoon.trim() || tempNoteData.evening.trim()) !== '';
+    
+    if (!date || !hasContent) return;
+
+    if (currentEditingDate && currentEditingDate !== date) {
+        delete notes[currentEditingDate];
+    }
+
+    const isNew = !currentEditingDate;
+
+    notes[date] = {
+        morning: tempNoteData.morning,
+        afternoon: tempNoteData.afternoon,
+        evening: tempNoteData.evening,
+        timestamp: getTimestamp()
+    };
+    localStorage.setItem('my_life_notes', JSON.stringify(notes));
+    currentEditingDate = date; 
+    
+    if (isNew) {
+        renderSidebar();
+    } else {
+        updateNoteDOM(date);
+    }
+    
+    isNoteUnsaved = false;
+    setIndicatorState('saved');
+}
+
+function updateNoteDOM(date) {
+    const existingCard = document.querySelector(`.note-card[data-id="${date}"]`);
+    if (existingCard) {
+        const contentEl = existingCard.querySelector('.note-preview');
+        const timeEl = existingCard.querySelector('.note-timestamp');
+        let contentText = '';
+        const n = notes[date];
+        if (n.morning) contentText += `【早】${n.morning} `;
+        if (n.afternoon) contentText += `【午】${n.afternoon} `;
+        if (n.evening) contentText += `【晚】${n.evening}`;
+        
+        if (contentEl) contentEl.innerHTML = contentText;
+        if (timeEl) timeEl.innerText = `上次編輯：${n.timestamp}`;
+    }
+}
+
+function updateBookmarkDOM(id) {
+    const existingCard = document.querySelector(`.note-card[data-id="${id}"]`);
+    if (existingCard) {
+        const titleEl = existingCard.querySelector('.embed-title');
+        const descEl = existingCard.querySelector('.embed-desc');
+        const timeEl = existingCard.querySelector('.note-timestamp');
+        const b = bookmarks[id];
+        
+        if (titleEl) {
+            titleEl.innerText = b.title || b.url;
+            titleEl.href = b.url;
+        }
+        if (descEl) descEl.innerText = b.description || '';
+        if (timeEl) timeEl.innerText = `上次編輯：${b.timestamp}`;
     }
 }
 
