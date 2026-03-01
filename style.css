@@ -941,7 +941,7 @@ h1 {
     animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both !important;
 }
 
-#editor-modal, #bookmark-modal, #calendar-modal, #confirm-modal, #title-modal, #category-modal, #settings-modal, #cloud-alert-modal, #help-modal {
+#editor-modal {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -40%) scale(0.95);
@@ -961,12 +961,55 @@ h1 {
     border: 1px solid var(--glass-border);
     pointer-events: none;
     text-align: left;
+    max-height: 90vh;
+    z-index: 2001;
 }
 
-#editor-modal, #bookmark-modal {
+#bookmark-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -40%) scale(0.95);
+    padding: 30px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    display: none;
+    opacity: 0;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-sizing: border-box;
+    background: var(--popup-bg);
+    backdrop-filter: blur(60px);
+    -webkit-backdrop-filter: blur(60px);
+    border: 1px solid var(--glass-border);
+    pointer-events: none;
+    text-align: left;
     max-height: 90vh;
     overflow: hidden; 
     z-index: 2001;
+}
+
+#calendar-modal, #confirm-modal, #title-modal, #category-modal, #settings-modal, #cloud-alert-modal, #help-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -40%) scale(0.95);
+    padding: 30px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    display: none;
+    opacity: 0;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-sizing: border-box;
+    background: var(--popup-bg);
+    backdrop-filter: blur(60px);
+    -webkit-backdrop-filter: blur(60px);
+    border: 1px solid var(--glass-border);
+    pointer-events: none;
+    text-align: left;
 }
 
 #calendar-modal {
@@ -1004,6 +1047,87 @@ h1 {
     transform: translate(-50%, -50%) scale(1);
     pointer-events: auto !important;
     opacity: 1;
+}
+
+.time-tabs-container {
+    position: absolute;
+    right: 30px;
+    top: -50px; 
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 8px;
+    height: 50px;
+    z-index: -1; 
+    -webkit-clip-path: inset(-50px -50px 0 -50px);
+    clip-path: inset(-50px -50px 0 -50px);
+}
+
+.time-tab {
+    width: 48px;
+    height: 38px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-bottom: none;
+    border-radius: 14px 14px 0 0;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(60px);
+    -webkit-backdrop-filter: blur(60px);
+    padding: 0;
+    transform: none; 
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.time-tab:hover {
+    height: 42px;
+    color: var(--primary);
+}
+
+.time-tab.active {
+    height: 48px; 
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 -4px 12px rgba(154, 135, 30, 0.3);
+}
+
+.time-tab svg {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: translateY(-2px); 
+}
+
+.time-tab.active svg { transform: translateY(-2px) scale(1.2); }
+#tab-morning.active svg { animation: sunRise 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+#tab-afternoon.active svg { animation: sunSpin 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+#tab-evening.active svg { animation: moonRock 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+@keyframes sunRise {
+    0% { transform: translateY(10px) scale(0.5); opacity: 0; }
+    100% { transform: translateY(-2px) scale(1.2); opacity: 1; }
+}
+
+@keyframes sunSpin {
+    0% { transform: translateY(-2px) rotate(-90deg) scale(0.5); opacity: 0; }
+    100% { transform: translateY(-2px) rotate(0) scale(1.2); opacity: 1; }
+}
+
+@keyframes moonRock {
+    0% { transform: translateY(-2px) rotate(30deg) scale(0.5); opacity: 0; }
+    100% { transform: translateY(-2px) rotate(0) scale(1.2); opacity: 1; }
+}
+
+@keyframes fadeInContent {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.note-content-anim {
+    animation: fadeInContent 0.3s ease forwards;
 }
 
 .modal-actions {
