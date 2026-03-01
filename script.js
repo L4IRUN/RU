@@ -18,8 +18,33 @@ let contextTarget = { type: null, id: null };
 let currentContextMenuCard = null;
 
 let swipeStartX = 0, swipeStartY = 0;
-
 let fabIdleTimer = null;
+
+let tempNoteData = { morning: '', afternoon: '', evening: '' };
+let currentTimeTab = 'morning';
+
+function getDefaultTimeTab() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 18) return 'afternoon';
+    return 'evening';
+}
+
+function switchTimeTab(tabName) {
+    tempNoteData[currentTimeTab] = document.getElementById('note-content').innerHTML;
+    currentTimeTab = tabName;
+    
+    const contentEl = document.getElementById('note-content');
+    contentEl.innerHTML = tempNoteData[currentTimeTab] || '';
+    
+    contentEl.classList.remove('note-content-anim');
+    void contentEl.offsetWidth; 
+    contentEl.classList.add('note-content-anim');
+    
+    document.querySelectorAll('.time-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.id === `tab-${tabName}`);
+    });
+}
 
 function resetFabIdleTimer(e) {
     try {
@@ -651,9 +676,23 @@ function renderNotes() {
         
         groupedNotes[month].forEach(date => {
             const noteData = notes[date];
-            const isLegacy = typeof noteData === 'string';
-            const contentText = isLegacy ? noteData : noteData.content;
-            const timeText = isLegacy ? '無時間紀錄' : noteData.timestamp;
+            
+            let contentText = '';
+            let timeText = '無時間紀錄';
+            let isLegacy = false;
+
+            if (typeof noteData === 'string') {
+                contentText = noteData;
+                isLegacy = true;
+            } else if (noteData.content !== undefined) {
+                contentText = noteData.content;
+                timeText = noteData.timestamp || timeText;
+            } else {
+                if (noteData.morning) contentText += `【早】${noteData.morning} `;
+                if (noteData.afternoon) contentText += `【午】${noteData.afternoon} `;
+                if (noteData.evening) contentText += `【晚】${noteData.evening}`;
+                timeText = noteData.timestamp || timeText;
+            }
 
             const card = document.createElement('div');
             card.className = 'note-card glass-effect';
@@ -1061,7 +1100,6 @@ function openEditor(existingDate = null) {
     const modal = document.getElementById('editor-modal');
     const dateVal = document.getElementById('note-date-val');
     const dateText = document.getElementById('date-text');
-    const contentInput = document.getElementById('note-content');
     const deleteBtn = document.getElementById('btn-delete-note');
 
     modal.classList.remove('shake-animation'); 
@@ -1074,17 +1112,27 @@ function openEditor(existingDate = null) {
         modal.classList.add('active');
     }, 10);
 
+    tempNoteData = { morning: '', afternoon: '', evening: '' };
+
     if (existingDate) {
         titleEl.innerText = '編輯筆記';
         const noteData = notes[existingDate];
         dateVal.value = existingDate;
         dateText.innerText = existingDate;
         
-        let text = typeof noteData === 'string' ? noteData : noteData.content;
-        if (!/<[a-z][\s\S]*>/i.test(text)) {
-            text = text.replace(/\n/g, '<br>');
+        if (typeof noteData === 'string') {
+            let text = noteData;
+            if (!/<[a-z][\s\S]*>/i.test(text)) text = text.replace(/\n/g, '<br>');
+            tempNoteData.morning = text;
+        } else if (noteData.content !== undefined) {
+            let text = noteData.content;
+            if (!/<[a-z][\s\S]*>/i.test(text)) text = text.replace(/\n/g, '<br>');
+            tempNoteData.morning = text;
+        } else {
+            tempNoteData.morning = noteData.morning || '';
+            tempNoteData.afternoon = noteData.afternoon || '';
+            tempNoteData.evening = noteData.evening || '';
         }
-        contentInput.innerHTML = text;
         
         deleteBtn.style.display = 'flex';
         
@@ -1101,9 +1149,11 @@ function openEditor(existingDate = null) {
         calDate = new Date();
         dateVal.value = dateString;
         dateText.innerText = dateString;
-        contentInput.innerHTML = '';
         deleteBtn.style.display = 'none';
     }
+
+    const defaultTab = getDefaultTimeTab();
+    switchTimeTab(defaultTab);
 }
 
 function openBookmarkEditor(id = null) {
@@ -1176,10 +1226,11 @@ function getTimestamp() {
 
 function saveNote() {
     const date = document.getElementById('note-date-val').value;
-    const contentHTML = document.getElementById('note-content').innerHTML;
-    const pureText = document.getElementById('note-content').innerText.trim();
+    tempNoteData[currentTimeTab] = document.getElementById('note-content').innerHTML;
     
-    if (!date || !pureText) {
+    const hasContent = (tempNoteData.morning.trim() || tempNoteData.afternoon.trim() || tempNoteData.evening.trim()) !== '';
+    
+    if (!date || !hasContent) {
         const modal = document.getElementById('editor-modal');
         modal.classList.remove('shake-animation');
         void modal.offsetWidth; 
@@ -1194,7 +1245,9 @@ function saveNote() {
     }
 
     notes[date] = {
-        content: contentHTML,
+        morning: tempNoteData.morning,
+        afternoon: tempNoteData.afternoon,
+        evening: tempNoteData.evening,
         timestamp: getTimestamp()
     };
     localStorage.setItem('my_life_notes', JSON.stringify(notes));
