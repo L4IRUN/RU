@@ -735,7 +735,6 @@ h1 {
     flex-grow: 1;
 }
 
-/* 強制約束預覽區內所有元素的樣式，避免被編輯區的 HTML 標籤撐破排版 */
 .note-preview * {
     font-size: 14px !important;
     line-height: 1.5 !important;
@@ -900,7 +899,6 @@ h1 {
     bottom: 174px;
 }
 
-/* 提升層級覆蓋 Header actions 和 FAB */
 #mobile-sidebar-overlay { 
     z-index: 1004 !important; 
     visibility: hidden;
@@ -926,7 +924,7 @@ h1 {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.2s;
     z-index: 2000;
 }
 
@@ -943,7 +941,6 @@ h1 {
     animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both !important;
 }
 
-/* 統一所有的彈出視窗基礎樣式 */
 #editor-modal, #bookmark-modal, #calendar-modal, #confirm-modal, #title-modal, #category-modal, #settings-modal, #cloud-alert-modal, #help-modal {
     position: fixed;
     top: 50%; left: 50%;
@@ -956,7 +953,7 @@ h1 {
     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     display: none;
     opacity: 0;
-    transition: all 0.3s;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
     box-sizing: border-box;
     background: var(--popup-bg);
     backdrop-filter: blur(60px);
@@ -999,7 +996,6 @@ h1 {
     z-index: 10002 !important; 
 }
 
-/* 啟動狀態 */
 #modal-overlay.active, #confirm-overlay.active, #calendar-overlay.active {
     opacity: 1;
 }
@@ -1010,24 +1006,22 @@ h1 {
     opacity: 1;
 }
 
-/* 統一所有的彈出視窗按鈕區塊 */
 .modal-actions {
     display: flex;
-    justify-content: flex-end; /* 全部預設靠右對齊 */
+    justify-content: flex-end; 
     align-items: center;
     gap: 12px;
     width: 100%;
-    margin-top: 20px; /* 統一標準間距 */
+    margin-top: 20px; 
     position: relative;
     z-index: 10;
 }
 
 .modal-actions button {
     margin: 0;
-    flex: none; /* 預設不拉伸 */
+    flex: none; 
 }
 
-/* 針對分類與教學視窗，因為只有單一按鈕，讓它填滿寬度 */
 #category-modal .modal-actions button,
 #help-modal .modal-actions button {
     width: 100%;
@@ -1035,13 +1029,11 @@ h1 {
 }
 
 #category-modal {
-    display: none; /* Reset back to standard display for toggle logic */
+    display: none; 
 }
 #category-modal.active {
-    display: flex !important; /* Force flex when active */
+    display: flex !important; 
 }
-
-/* ===== 視窗內部細節 ===== */
 
 .date-ui-wrapper {
     position: relative;
@@ -1228,7 +1220,6 @@ textarea:focus, #note-content:focus {
     box-shadow: 0 0 0 3px rgba(154, 135, 30, 0.2);
 }
 
-/* 向量風刪除按鈕 */
 .action-delete-btn {
     background: transparent; 
     color: var(--text-secondary); 
@@ -1242,10 +1233,9 @@ textarea:focus, #note-content:focus {
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    flex-shrink: 0; /* 防止按鈕被標題擠壓變形 */
+    flex-shrink: 0; 
 }
 
-/* 讓超出 SVG 畫布邊界的蓋子不會被裁切消失 */
 .action-delete-btn svg {
     overflow: visible;
 }
@@ -1268,7 +1258,6 @@ textarea:focus, #note-content:focus {
     transform: translateY(-8px);
 }
 
-/* 設定視窗右上角的教學按鈕 */
 .action-help-btn {
     background: transparent; 
     color: var(--text-secondary); 
@@ -1282,7 +1271,7 @@ textarea:focus, #note-content:focus {
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    flex-shrink: 0; /* 防止教學按鈕被擠壓 */
+    flex-shrink: 0; 
 }
 
 .action-help-btn:hover {
@@ -1334,11 +1323,8 @@ textarea:focus, #note-content:focus {
         border-color: transparent;
         transform: scale(1.1);
     }
-    
-    /* 修正：將旋轉 icon 改為放大 */
     .input-side-btn.btn-add-category:hover svg {
-        /* transform: rotate(90deg); */ /* OLD */
-        transform: scale(1.2); /* NEW */
+        transform: scale(1.2);
     }
 }
 
@@ -1753,10 +1739,8 @@ textarea, #note-content, #bookmark-desc {
     .action-dl:hover svg { transform: scale(1.1) translateY(2px); }
     .action-ul:hover svg { transform: scale(1.1) translateY(-2px); }
     
-    /* 修正：將鎖頭動畫改為雲朵漂浮放大 */
     .action-key:hover svg {
-        /* transform: scale(1.1) rotate(15deg); */ /* OLD */
-        transform: scale(1.1) translateY(-3px); /* NEW - float up */
+        transform: scale(1.1) translateY(-3px); 
     }
     
     .settings-dropdown-wrapper:hover .action-settings svg { transform: rotate(90deg); }
