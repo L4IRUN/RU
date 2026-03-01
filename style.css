@@ -731,8 +731,14 @@ h1 {
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     color: var(--text-secondary);
-    font-size: 15px;
+    font-size: 14px;
     flex-grow: 1;
+}
+
+/* 強制約束預覽區內所有元素的樣式，避免被編輯區的 HTML 標籤撐破排版 */
+.note-preview * {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
 }
 
 .discord-embed {
@@ -1599,6 +1605,12 @@ body.no-scroll main,
 body.no-scroll aside {
     overflow: hidden !important;
     touch-action: none; 
+}
+
+textarea, #note-content, #bookmark-desc {
+    touch-action: pan-y !important; 
+    overscroll-behavior: contain;
+    overflow-y: auto;
 }
 
 .action-settings svg, .action-sort svg {
