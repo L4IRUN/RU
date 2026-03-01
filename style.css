@@ -1250,12 +1250,18 @@ textarea:focus, #note-content:focus {
     transform: scale(0.95);
 }
 
-.action-delete-btn .lid-group {
+.action-delete-btn .lid-group,
+.action-delete-btn .can-body {
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center;
 }
 
 .action-delete-btn:hover .lid-group {
-    transform: translateY(-8px);
+    transform: translateY(-4px);
+}
+
+.action-delete-btn:hover .can-body {
+    transform: translateY(2px);
 }
 
 .action-help-btn {
@@ -1754,7 +1760,7 @@ textarea, #note-content, #bookmark-desc {
 }
 .action-dl:active svg { transform: scale(1.1) translateY(2px); }
 .action-ul:active svg { transform: scale(1.1) translateY(-2px); }
-.action-key:active svg { transform: scale(1.1) rotate(15deg); }
+.action-key:active svg { transform: scale(1.1); }
 
 #settings-toggle-btn.open svg {
     transform: rotate(90deg);
