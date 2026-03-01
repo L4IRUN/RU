@@ -1242,6 +1242,12 @@ textarea:focus, #note-content:focus {
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-shrink: 0; /* 防止按鈕被標題擠壓變形 */
+}
+
+/* 讓超出 SVG 畫布邊界的蓋子不會被裁切消失 */
+.action-delete-btn svg {
+    overflow: visible;
 }
 
 .action-delete-btn:hover {
@@ -1276,6 +1282,7 @@ textarea:focus, #note-content:focus {
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-shrink: 0; /* 防止教學按鈕被擠壓 */
 }
 
 .action-help-btn:hover {
@@ -1383,6 +1390,17 @@ textarea:focus, #note-content:focus {
 .animated-action-btn.success .icon-main {
     opacity: 0;
     transform: scale(0.3) rotate(30deg);
+}
+
+#modal-category-list {
+    flex-grow: 1;
+    overflow-y: auto; 
+    margin: 0 0 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px; 
+    align-content: flex-start;
+    padding-bottom: 5px; 
 }
 
 @keyframes fadeIn {
