@@ -619,7 +619,9 @@ function switchView(view) {
         document.getElementById('nav-bookmarks').classList.add('active');
         document.querySelector('.sort-wrapper').style.display = 'none'; 
         renderBookmarks();
+        document.querySelector('main').scrollTo(0, 0);
     }
+    
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById('sidebar');
         if (sidebar.classList.contains('mobile-open')) {
@@ -652,6 +654,8 @@ function selectYear(year) {
         }
     });
     renderNotes();
+    document.querySelector('main').scrollTo(0, 0);
+    
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById('sidebar');
         if (sidebar.classList.contains('mobile-open')) {
@@ -1264,8 +1268,7 @@ function openEditor(existingDate = null) {
         deleteBtn.style.display = 'none';
     }
 
-    const defaultTab = getDefaultTimeTab();
-    switchTimeTab(defaultTab, true);
+    switchTimeTab('morning', true);
 }
 
 function openBookmarkEditor(id = null) {
