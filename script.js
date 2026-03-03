@@ -1744,7 +1744,7 @@ async function uploadToGist(isAuto = false) {
             })
         });
         if (response.ok) {
-            showCloudToast('已同步檔案'); 
+            if (!isAuto) showCloudToast('已同步檔案'); 
         } else {
             if (!isAuto) alert('上傳失敗，請檢查 Token 權限');
         }
