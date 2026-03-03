@@ -1729,8 +1729,9 @@ async function uploadToGist(isAuto = false) {
         const response = await fetch(`https://api.github.com/gists/${gistId}`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 files: {
@@ -1741,7 +1742,6 @@ async function uploadToGist(isAuto = false) {
             })
         });
         if (response.ok) {
-            closeSettingsMenu();
             if (!isAuto) showCloudToast('備份成功'); 
         } else {
             if (!isAuto) alert('上傳失敗，請檢查 Token 權限');
@@ -1763,30 +1763,40 @@ async function downloadFromGist(isAuto = false) {
     try {
         const response = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
             headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Cache-Control': 'no-cache'
             }
         });
         
         if (!response.ok) {
-            throw new Error(`伺服器連線異常 (狀態碼: ${response.status})`);
+            throw new Error(`狀態碼: ${response.status}`);
         }
 
         const gist = await response.json();
+        const fileData = gist.files['my_notes.json'];
         
-        if (!gist.files || !gist.files['my_notes.json']) {
+        if (!fileData) {
             throw new Error('雲端沒有找到 my_notes.json 檔案');
         }
 
-        const rawUrl = gist.files['my_notes.json'].raw_url;
-        const fileResponse = await fetch(`${rawUrl}?t=${Date.now()}`);
+        let importedData;
         
-        if (!fileResponse.ok) {
-            throw new Error('無法讀取雲端真實檔案內容');
+        if (fileData.content && !fileData.truncated) {
+            try {
+                importedData = JSON.parse(fileData.content);
+            } catch (e) {
+                console.warn("JSON解析失敗，準備讀取原始檔案");
+            }
         }
 
-        const importedData = await fileResponse.json();
-        
+        if (!importedData) {
+            const rawUrl = fileData.raw_url;
+            const fileResponse = await fetch(`${rawUrl}?t=${Date.now()}`, { cache: 'no-store' });
+            if (!fileResponse.ok) throw new Error('讀取檔案內容失敗');
+            importedData = await fileResponse.json();
+        }
+
         notes = importedData.notes || {};
         bookmarks = importedData.bookmarks || {};
         
@@ -1809,12 +1819,11 @@ async function downloadFromGist(isAuto = false) {
             renderBookmarks();
         }
         
-        closeSettingsMenu();
         if (!isAuto) showCloudToast('下載成功'); 
         
     } catch (error) {
         console.error(error);
-        if (!isAuto) alert(`下載失敗！\n錯誤資訊：${error.message}\n請檢查 Gist ID 是否正確，或確認網路狀態。`);
+        if (!isAuto) alert(`下載失敗\n錯誤資訊：${error.message}`);
     }
 }
 
