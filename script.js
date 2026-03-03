@@ -1509,7 +1509,7 @@ document.addEventListener('visibilitychange', function() {
         hiddenTime = Date.now();
     } else if (document.visibilityState === 'visible') {
         if (hiddenTime > 0 && (Date.now() - hiddenTime > reloadThreshold)) {
-            location.reload();
+            downloadFromGist(true);
         }
         hiddenTime = 0; 
     }
