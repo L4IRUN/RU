@@ -171,9 +171,10 @@ function initApp() {
         document.getElementById('sidebar').classList.remove('collapsed');
     }
     
-    const appTitle = localStorage.getItem('my_app_title') || '筆記';
-    document.getElementById('app-logo-text').innerText = appTitle;
-    document.title = appTitle;
+    const rawTitle = localStorage.getItem('my_app_title') || '我';
+    const displayTitle = rawTitle + '的筆記';
+    document.getElementById('app-logo-text').innerText = displayTitle;
+    document.title = displayTitle;
 
     renderSidebar();
 
@@ -223,7 +224,7 @@ function scrollToMonth(direction) {
 }
 
 function openTitleModal() {
-    const currentTitle = localStorage.getItem('my_app_title') || '筆記';
+    const currentTitle = localStorage.getItem('my_app_title') || '我';
     document.getElementById('app-title-input').value = currentTitle;
     
     const overlay = document.getElementById('confirm-overlay'); 
@@ -257,8 +258,9 @@ function saveAppTitle() {
     const newTitle = document.getElementById('app-title-input').value.trim();
     if (newTitle !== '') {
         localStorage.setItem('my_app_title', newTitle);
-        document.getElementById('app-logo-text').innerText = newTitle;
-        document.title = newTitle;
+        const displayTitle = newTitle + '的筆記';
+        document.getElementById('app-logo-text').innerText = displayTitle;
+        document.title = displayTitle;
         uploadToGist(true);
     }
     closeTitleModal();
@@ -1742,7 +1744,7 @@ async function uploadToGist(isAuto = false) {
             })
         });
         if (response.ok) {
-            if (!isAuto) showCloudToast('備份成功'); 
+            showCloudToast('已同步檔案'); 
         } else {
             if (!isAuto) alert('上傳失敗，請檢查 Token 權限');
         }
@@ -1803,10 +1805,13 @@ async function downloadFromGist(isAuto = false) {
         if (importedData.category_order) {
             localStorage.setItem('my_category_order', importedData.category_order);
         }
-        if (importedData.app_title) {
-            localStorage.setItem('my_app_title', importedData.app_title);
-            document.getElementById('app-logo-text').innerText = importedData.app_title;
-            document.title = importedData.app_title;
+        
+        if (importedData.app_title !== undefined) {
+            const rawTitle = importedData.app_title || '我';
+            localStorage.setItem('my_app_title', rawTitle);
+            const displayTitle = rawTitle + '的筆記';
+            document.getElementById('app-logo-text').innerText = displayTitle;
+            document.title = displayTitle;
         }
 
         localStorage.setItem('my_life_notes', JSON.stringify(notes));
@@ -1819,7 +1824,7 @@ async function downloadFromGist(isAuto = false) {
             renderBookmarks();
         }
         
-        if (!isAuto) showCloudToast('下載成功'); 
+        showCloudToast('已同步檔案'); 
         
     } catch (error) {
         console.error(error);
@@ -1833,6 +1838,30 @@ document.addEventListener('keydown', function(e) {
         if (editorModal && editorModal.classList.contains('active')) {
             e.preventDefault();
             quickSaveNote();
+        }
+    }
+
+    if (e.key === 'Escape') {
+        closeAllEditors();
+    }
+
+    const editorModal = document.getElementById('editor-modal');
+    
+    if (e.key === 'Tab' && editorModal && editorModal.classList.contains('active')) {
+        e.preventDefault();
+        const tabs = ['morning', 'afternoon', 'evening'];
+        let currentIndex = tabs.indexOf(currentTimeTab);
+        let nextIndex = (currentIndex + 1) % tabs.length;
+        switchTimeTab(tabs[nextIndex]);
+    }
+
+    if (e.key === 'Delete') {
+        if (editorModal && editorModal.classList.contains('active') && currentEditingDate) {
+            showDeleteConfirm('note');
+        }
+        const bookmarkModal = document.getElementById('bookmark-modal');
+        if (bookmarkModal && bookmarkModal.classList.contains('active') && currentEditingBookmarkId) {
+            showDeleteConfirm('bookmark');
         }
     }
 });
