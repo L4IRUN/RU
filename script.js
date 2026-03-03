@@ -157,11 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApp() {
     const isDark = localStorage.getItem('dark_mode') === 'true';
     const themeMeta = document.getElementById('theme-color-meta');
+    const themeBtn = document.querySelector('.action-theme');
+    
     if (isDark) {
         document.body.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-checkbox').checked = true;
         if (themeMeta) themeMeta.setAttribute('content', '#121212');
+        if (themeBtn) themeBtn.setAttribute('aria-label', '切換淺色模式');
+    } else {
+        if (themeBtn) themeBtn.setAttribute('aria-label', '切換深色模式');
     }
+    
     if (window.innerWidth > 768) {
         document.getElementById('sidebar').classList.remove('collapsed');
     }
@@ -284,17 +289,20 @@ function toggleSidebar() {
 
 function toggleTheme() {
     const body = document.body;
-    const checkbox = document.getElementById('theme-checkbox');
     const themeMeta = document.getElementById('theme-color-meta');
+    const themeBtn = document.querySelector('.action-theme');
+    const isDark = body.getAttribute('data-theme') === 'dark';
     
-    if (checkbox.checked) {
+    if (!isDark) {
         body.setAttribute('data-theme', 'dark');
         localStorage.setItem('dark_mode', 'true');
         if (themeMeta) themeMeta.setAttribute('content', '#121212');
+        if (themeBtn) themeBtn.setAttribute('aria-label', '切換淺色模式');
     } else {
         body.removeAttribute('data-theme');
         localStorage.setItem('dark_mode', 'false');
         if (themeMeta) themeMeta.setAttribute('content', '#F7F3E8');
+        if (themeBtn) themeBtn.setAttribute('aria-label', '切換深色模式');
     }
 }
 
