@@ -597,8 +597,8 @@ export function renderNotes() {
         return;
     }
 
-    // 清理非筆記檢視殘留之結構（例如語錄網格或空狀態元素）
-    const legacyElements = container.querySelectorAll('.quotes-masonry, .empty-state-view');
+    // 清理非筆記檢視殘留之結構（語錄瀑布流、空狀態、資料儲存分類網格及非月份網格/標題）
+    const legacyElements = container.querySelectorAll('.quotes-masonry, .empty-state-view, .note-grid[data-category], .note-grid:not([data-month]), .month-title:not([data-month])');
     legacyElements.forEach(el => el.remove());
 
     const today = new Date();
