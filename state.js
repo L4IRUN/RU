@@ -73,14 +73,15 @@ export const state = {
     tempReminderIsDone: false,
     tempSelectedReminderDate: '',
 
-    // 分類與子分類選擇視窗暫存狀態
+    // 分類與子分類選擇視窗暫存狀態（分類 - 子分類 - 卡片）
     tempModalCategory: '',
     tempModalSubCategory: '',
-    categoryModalStep: 1, // 1: 主分類未選, 2: 已選主分類, 3: 瀏覽子分類, 4: 已選子分類
+    categoryModalStep: 1, // 1: 分類, 2: 子分類, 3: 卡片
     isAddingCategoryInline: false,
     isAddingSubCategoryInline: false,
     tempCategoryModalCategoryOrder: [],
     tempCategoryModalSubCategoryOrders: {},
+    tempCategoryModalCardOrders: {},
 
     // 排序視窗暫存狀態（分類 - 子分類 - 卡片）
     tempSortCategory: '',

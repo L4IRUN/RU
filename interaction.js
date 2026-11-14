@@ -11,7 +11,8 @@ import {
     positionCategoryConfirmBtn, updateCategoryPathHeader, scrollToCategorySlide,
     renderCategoryModalColumns, updateReminderPreviewDisplay,
     updateBookmarkPreviewDisplay, updateFloatingCategoryTitle, stopReminderCountdownTimer,
-    isTransitionCategory, updateChapterNav, getLocalDateString, renderUserProfileUI
+    isTransitionCategory, updateChapterNav, getLocalDateString, renderUserProfileUI,
+    updateAvatarAuthStatusUI
 } from './ui.js';
 import { 
     uploadToDrive, 
@@ -21,6 +22,8 @@ import {
     signOutGoogle, 
     isGoogleLinked,
     isTokenValid,
+    isGoogleConnected,
+    promptAuthOncePerSession,
     initGisTokenClient,
     sanitizeDatasetPayload,
     getMonotonicTimestamp,
@@ -728,6 +731,8 @@ function highlightChapterTick(activeIndex) {
 
 export function toggleSidebarDesktop() {
     hideCategoryPopoverMenu(true);
+    hideSidebarProfilePopover(true);
+    hideSidebarCollapsedMenu(true);
     if (state._cachedInnerWidth > 768) {
         document.getElementById('sidebar').classList.toggle('collapsed');
     } else {
@@ -749,11 +754,15 @@ export function syncSidebarActiveState() {
 export function handleSidebarCategoryClick(category, itemEl) {
     if (itemEl && itemEl.classList.contains('is-renaming')) return;
     hideCategoryPopoverMenu(true);
+    hideSidebarProfilePopover(true);
+    hideSidebarCollapsedMenu(true);
     selectCategory(category, true);
 }
 
 export function handleSidebarRemindersClick(itemEl) {
     hideCategoryPopoverMenu(true);
+    hideSidebarProfilePopover(true);
+    hideSidebarCollapsedMenu(true);
     selectRemindersView(true);
 }
 
@@ -766,6 +775,8 @@ export function toggleSidebar(e) {
     
     if (state._cachedInnerWidth <= 768) {
         hideCategoryPopoverMenu(true);
+        hideSidebarProfilePopover(true);
+        hideSidebarCollapsedMenu(true);
         closeFloatingAvatarPopover();
         if (sidebar.classList.contains('mobile-open')) {
             sidebar.classList.remove('mobile-open');
@@ -1765,12 +1776,174 @@ function initProfileUsernameInput() {
     });
 }
 
+export function hideSidebarProfilePopover(immediate = false) {
+    const popover = document.getElementById('sidebar-profile-popover');
+    const trigger = document.getElementById('sidebar-profile-trigger');
+    if (trigger) trigger.classList.remove('active');
+    if (!popover) return;
+
+    if (!popover.classList.contains('active')) {
+        if (immediate) popover.style.display = 'none';
+        return;
+    }
+
+    popover.classList.remove('active');
+    popover.setAttribute('aria-hidden', 'true');
+    if (immediate) {
+        popover.style.display = 'none';
+    } else {
+        setTimeout(() => {
+            if (!popover.classList.contains('active')) {
+                popover.style.display = 'none';
+            }
+        }, 200);
+    }
+}
+
+export function hideSidebarCollapsedMenu(immediate = false) {
+    const menu = document.getElementById('sidebar-collapsed-menu');
+    const trigger = document.getElementById('sidebar-profile-trigger');
+    if (trigger) trigger.classList.remove('menu-open');
+    if (!menu) return;
+
+    if (!menu.classList.contains('active')) {
+        if (immediate) menu.style.display = 'none';
+        return;
+    }
+
+    menu.classList.remove('active');
+    if (immediate) {
+        menu.style.display = 'none';
+    } else {
+        setTimeout(() => {
+            if (!menu.classList.contains('active')) {
+                menu.style.display = 'none';
+            }
+        }, 160);
+    }
+}
+
+export function handleSidebarProfileClick(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    const trigger = document.getElementById('sidebar-profile-trigger');
+    if (!sidebar || !trigger) return;
+
+    const isCollapsed = sidebar.classList.contains('collapsed') && state._cachedInnerWidth > 768;
+
+    hideCategoryPopoverMenu(true);
+    hideHeaderPopoverMenu(true);
+    closeFloatingAvatarPopover();
+
+    if (isCollapsed) {
+        hideSidebarProfilePopover(true);
+        const menu = document.getElementById('sidebar-collapsed-menu');
+        if (!menu) return;
+
+        if (menu.classList.contains('active')) {
+            hideSidebarCollapsedMenu();
+            return;
+        }
+
+        const logoutItem = document.getElementById('sidebar-collapsed-logout-item');
+        if (logoutItem) {
+            logoutItem.style.display = isGoogleLinked() ? 'flex' : 'none';
+        }
+
+        menu.style.display = 'block';
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const triggerRect = trigger.getBoundingClientRect();
+        const menuWidth = menu.offsetWidth || 156;
+        const menuHeight = menu.offsetHeight || 128;
+
+        let left = sidebarRect.right + 12;
+        let top = triggerRect.bottom - menuHeight;
+
+        if (left + menuWidth > window.innerWidth - 10) {
+            left = window.innerWidth - menuWidth - 10;
+        }
+        if (top < 10) top = 10;
+        if (top + menuHeight > window.innerHeight - 10) {
+            top = window.innerHeight - menuHeight - 10;
+        }
+
+        menu.style.left = `${Math.round(left)}px`;
+        menu.style.top = `${Math.round(top)}px`;
+        trigger.classList.add('menu-open');
+
+        requestAnimationFrame(() => {
+            menu.classList.add('active');
+        });
+    } else {
+        hideSidebarCollapsedMenu(true);
+        const popover = document.getElementById('sidebar-profile-popover');
+        if (!popover) return;
+
+        if (popover.classList.contains('active')) {
+            hideSidebarProfilePopover();
+            return;
+        }
+
+        renderUserProfileUI();
+
+        const section = sidebar.querySelector('.sidebar-settings-section') || trigger;
+        const sectionRect = section.getBoundingClientRect();
+        const left = Math.round(sectionRect.left + 10);
+        const width = Math.max(200, Math.round(sectionRect.width - 20));
+        const bottom = Math.max(12, Math.round(window.innerHeight - sectionRect.top + 8));
+
+        popover.style.left = `${left}px`;
+        popover.style.width = `${width}px`;
+        popover.style.bottom = `${bottom}px`;
+        popover.style.display = 'block';
+        popover.setAttribute('aria-hidden', 'false');
+        trigger.classList.add('active');
+
+        requestAnimationFrame(() => {
+            popover.classList.add('active');
+        });
+    }
+}
+
+export function triggerCollapsedMenuSettings(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    hideSidebarCollapsedMenu(true);
+    openSettingsModal();
+}
+
+export async function triggerCollapsedMenuSync(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    hideSidebarCollapsedMenu(true);
+    await downloadFromDrive(false);
+}
+
+export async function triggerCollapsedMenuLogout(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    hideSidebarCollapsedMenu(true);
+    await handleGoogleSignOutClick();
+}
+
 export function toggleFloatingAvatarPopover(e) {
     if (e) {
         e.stopPropagation();
         e.preventDefault();
     }
     const popover = document.getElementById('floating-avatar-popover');
+    const avatarBtn = document.getElementById('floating-avatar-btn');
+    const avatarGroup = document.getElementById('floating-avatar-group');
     if (!popover) return;
 
     if (popover.classList.contains('active')) {
@@ -1780,26 +1953,47 @@ export function toggleFloatingAvatarPopover(e) {
 
     hideCategoryPopoverMenu(true);
     hideHeaderPopoverMenu(true);
+    hideSidebarProfilePopover(true);
+    hideSidebarCollapsedMenu(true);
     if (typeof closeChapterPopover === 'function') closeChapterPopover();
 
+    renderUserProfileUI();
+
+    const logoutBtn = document.getElementById('floating-logout-btn');
+    if (logoutBtn) {
+        logoutBtn.style.display = isGoogleLinked() ? 'flex' : 'none';
+    }
+
     popover.classList.add('active');
+    if (avatarBtn) avatarBtn.classList.add('is-enlarged');
+    if (avatarGroup) avatarGroup.classList.add('is-open');
 }
 
 export function closeFloatingAvatarPopover() {
     const popover = document.getElementById('floating-avatar-popover');
+    const avatarBtn = document.getElementById('floating-avatar-btn');
+    const avatarGroup = document.getElementById('floating-avatar-group');
     if (popover) {
         popover.classList.remove('active');
     }
+    if (avatarBtn) {
+        avatarBtn.classList.remove('is-enlarged');
+    }
+    if (avatarGroup) {
+        avatarGroup.classList.remove('is-open');
+    }
 }
 
-export async function handleFloatingReconnect(e) {
+export async function handleFloatingManualSync(e) {
     if (e) {
         e.stopPropagation();
         e.preventDefault();
     }
     closeFloatingAvatarPopover();
-    await handleGoogleAuthClick();
+    await downloadFromDrive(false);
 }
+
+export const handleFloatingReconnect = handleFloatingManualSync;
 
 export async function handleFloatingSignOut(e) {
     if (e) {
@@ -2000,12 +2194,11 @@ export function updateGoogleAccountUIState() {
     const statusText = document.getElementById('google-auth-status-text');
     const loginBtnText = document.getElementById('google-login-btn-text');
     const logoutBtn = document.getElementById('google-logout-btn');
-    const dot = document.getElementById('sync-modal-status-dot');
 
     if (isLinked && isValid) {
         // 狀態 1：已連線（Connected）
         if (statusText) {
-            statusText.textContent = '已連接 Google 雲端';
+            statusText.textContent = '已連接';
             statusText.className = 'google-auth-status-badge connected';
         }
         if (loginBtnText) {
@@ -2015,10 +2208,7 @@ export function updateGoogleAccountUIState() {
             logoutBtn.textContent = '登出';
             logoutBtn.style.display = 'inline-flex';
         }
-        if (dot) {
-            dot.classList.remove('red', 'gray');
-            dot.classList.add('primary');
-        }
+        updateAvatarAuthStatusUI('connected');
     } else if (isLinked && !isValid) {
         // 狀態 2：授權已過期 / 需重新驗證（Expired / Needs Reauth）
         if (statusText) {
@@ -2032,10 +2222,7 @@ export function updateGoogleAccountUIState() {
             logoutBtn.textContent = '登出';
             logoutBtn.style.display = 'inline-flex';
         }
-        if (dot) {
-            dot.classList.remove('primary', 'red');
-            dot.classList.add('gray');
-        }
+        updateAvatarAuthStatusUI('expired');
     } else {
         // 狀態 3：未連接（Disconnected）
         if (statusText) {
@@ -2048,10 +2235,7 @@ export function updateGoogleAccountUIState() {
         if (logoutBtn) {
             logoutBtn.style.display = 'none';
         }
-        if (dot) {
-            dot.classList.remove('primary', 'red');
-            dot.classList.add('gray');
-        }
+        updateAvatarAuthStatusUI('disconnected');
     }
 }
 
@@ -2676,6 +2860,10 @@ function commitCategoryAdd(newCategory) {
 }
 
 export function openCategorySubCategoryModal() {
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+    }
+
     const curCatInput = document.getElementById('bookmark-category');
     const curSubCatInput = document.getElementById('bookmark-sub-category');
     const curCat = curCatInput ? curCatInput.value.trim() : '';
@@ -2685,7 +2873,7 @@ export function openCategorySubCategoryModal() {
     state.tempModalSubCategory = curSubCat || '';
 
     if (state.tempModalCategory && state.tempModalSubCategory) {
-        state.categoryModalStep = 4;
+        state.categoryModalStep = 3;
     } else if (state.tempModalCategory) {
         state.categoryModalStep = 2;
     } else {
@@ -2696,6 +2884,7 @@ export function openCategorySubCategoryModal() {
     state.isAddingSubCategoryInline = false;
     state.tempCategoryModalCategoryOrder = safeJSONParse(localStorage.getItem('my_category_order'), []);
     state.tempCategoryModalSubCategoryOrders = safeJSONParse(localStorage.getItem('my_subcategory_order'), {});
+    state.tempCategoryModalCardOrders = {};
 
     renderCategoryModalColumns({ animate: false });
 
@@ -2709,8 +2898,9 @@ export function openCategorySubCategoryModal() {
     if (topBar) topBar.style.display = 'flex';
     if (bottomBar) bottomBar.style.display = 'flex';
     modal.style.display = 'flex';
+    positionCategoryConfirmBtn();
 
-    const initialSlide = (state.categoryModalStep >= 2 && state.tempModalCategory) ? 1 : 0;
+    const initialSlide = Math.max(0, Math.min(2, (state.categoryModalStep || 1) - 1));
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
         overlay.classList.add('active');
@@ -2721,9 +2911,18 @@ export function openCategorySubCategoryModal() {
         if (bottomBar) bottomBar.classList.add('active');
         const leftList = document.getElementById('modal-category-column-list');
         const rightList = document.getElementById('modal-subcategory-column-list');
+        const cardList = document.getElementById('modal-category-card-column-list');
         if (leftList) leftList.scrollTop = 0;
         if (rightList) rightList.scrollTop = 0;
+        if (cardList) cardList.scrollTop = 0;
         modal.scrollTop = 0;
+
+        onTransitionEnd(modal, 'opacity', 300, () => {
+            if (modal.classList.contains('active')) {
+                positionCategoryConfirmBtn();
+                scrollToCategorySlide(Math.max(0, Math.min(2, (state.categoryModalStep || 1) - 1)), false);
+            }
+        });
     }));
 }
 
@@ -2747,6 +2946,10 @@ export function triggerBatchMove() {
 }
 
 export function openMoveModal() {
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+    }
+
     state.tempModalCategory = '';
     state.tempModalSubCategory = '';
     state.categoryModalStep = 1;
@@ -2754,6 +2957,7 @@ export function openMoveModal() {
     state.isAddingSubCategoryInline = false;
     state.tempCategoryModalCategoryOrder = safeJSONParse(localStorage.getItem('my_category_order'), []);
     state.tempCategoryModalSubCategoryOrders = safeJSONParse(localStorage.getItem('my_subcategory_order'), {});
+    state.tempCategoryModalCardOrders = {};
 
     renderCategoryModalColumns({ animate: false });
 
@@ -2767,6 +2971,7 @@ export function openMoveModal() {
     if (topBar) topBar.style.display = 'flex';
     if (bottomBar) bottomBar.style.display = 'flex';
     modal.style.display = 'flex';
+    positionCategoryConfirmBtn();
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
         overlay.classList.add('active');
@@ -2777,41 +2982,42 @@ export function openMoveModal() {
         if (bottomBar) bottomBar.classList.add('active');
         const leftList = document.getElementById('modal-category-column-list');
         const rightList = document.getElementById('modal-subcategory-column-list');
+        const cardList = document.getElementById('modal-category-card-column-list');
         if (leftList) leftList.scrollTop = 0;
         if (rightList) rightList.scrollTop = 0;
+        if (cardList) cardList.scrollTop = 0;
         modal.scrollTop = 0;
+
+        onTransitionEnd(modal, 'opacity', 300, () => {
+            if (modal.classList.contains('active')) {
+                positionCategoryConfirmBtn();
+                scrollToCategorySlide(Math.max(0, Math.min(2, (state.categoryModalStep || 1) - 1)), false);
+            }
+        });
     }));
 }
 
 export function handleCategoryPathClick(targetLevel) {
     const level = Number(targetLevel) || 1;
-    const isMoveCategoryOnly = Boolean(state.isMoveSelectionActive && state.moveTargetType === 'subcategory');
     const currentStep = state.categoryModalStep || 1;
 
     state.isAddingCategoryInline = false;
     state.isAddingSubCategoryInline = false;
 
-    if (level === 1 && currentStep >= 2) {
+    if (level === 1 && currentStep !== 1) {
         state.categoryModalStep = 1;
         renderCategoryModalColumns({ animate: true });
-    } else if (level === 2 && !isMoveCategoryOnly && currentStep === 1 && state.tempModalCategory) {
-        state.categoryModalStep = state.tempModalSubCategory ? 4 : 2;
+    } else if (level === 2 && currentStep !== 2 && state.tempModalCategory) {
+        state.categoryModalStep = 2;
+        renderCategoryModalColumns({ animate: true });
+    } else if (level === 3 && currentStep !== 3 && state.tempModalCategory && state.tempModalSubCategory) {
+        state.categoryModalStep = 3;
         renderCategoryModalColumns({ animate: true });
     }
 }
 
 export function handleSelectModalCategory(cat) {
     if (window.justFinishedCategoryDrag || window.justFinishedCategoryCarouselDrag) return;
-
-    if (state.isMoveSelectionActive && state.moveTargetType === 'subcategory') {
-        state.tempModalCategory = (state.tempModalCategory === cat) ? '' : cat;
-        state.tempModalSubCategory = '';
-        state.categoryModalStep = 1;
-        state.isAddingCategoryInline = false;
-        state.isAddingSubCategoryInline = false;
-        renderCategoryModalColumns({ animate: true });
-        return;
-    }
 
     if (state.tempModalCategory === cat) {
         state.tempModalCategory = '';
@@ -2835,27 +3041,31 @@ export function handleSelectModalCategory(cat) {
 export function handleSelectModalSubCategory(sub) {
     if (window.justFinishedCategoryDrag || window.justFinishedCategoryCarouselDrag) return;
 
-    if (state.tempModalSubCategory === sub && state.categoryModalStep === 4) {
+    if (state.tempModalSubCategory === sub && state.categoryModalStep === 3) {
         state.tempModalSubCategory = '';
         state.categoryModalStep = 2;
     } else {
         state.tempModalSubCategory = sub;
-        state.categoryModalStep = 4;
+        state.categoryModalStep = 3;
     }
     state.isAddingCategoryInline = false;
     state.isAddingSubCategoryInline = false;
     renderCategoryModalColumns({ animate: true });
+
+    requestAnimationFrame(() => {
+        const cardList = document.getElementById('modal-category-card-column-list');
+        if (cardList) cardList.scrollTop = 0;
+    });
 }
 
 export function triggerAddNewCategoryOrSubCategory() {
-    const isMoveCategoryOnly = Boolean(state.isMoveSelectionActive && state.moveTargetType === 'subcategory');
     const step = state.categoryModalStep || 1;
 
-    if ((isMoveCategoryOnly && step >= 2) || step > 4 || (step >= 2 && !state.tempModalCategory)) {
+    if (step >= 3 || (step === 2 && !state.tempModalCategory)) {
         return;
     }
 
-    if (step >= 2 && !isMoveCategoryOnly && state.tempModalCategory) {
+    if (step === 2 && state.tempModalCategory) {
         state.isAddingSubCategoryInline = true;
         state.isAddingCategoryInline = false;
     } else {
@@ -2908,6 +3118,22 @@ export async function confirmCategorySubCategorySelection() {
         orderChanged = true;
     }
 
+    const pendingCardOrderUpdates = {};
+    if (state.tempCategoryModalCardOrders && Object.keys(state.tempCategoryModalCardOrders).length > 0) {
+        Object.values(state.tempCategoryModalCardOrders).forEach(cardIdList => {
+            if (Array.isArray(cardIdList)) {
+                cardIdList.forEach((id, index) => {
+                    if (state.bookmarks[id] && state.bookmarks[id].order !== index) {
+                        state.bookmarks[id].order = index;
+                        state.bookmarks[id].updatedAt = now;
+                        pendingCardOrderUpdates[id] = state.bookmarks[id];
+                        orderChanged = true;
+                    }
+                });
+            }
+        });
+    }
+
     if (state.isMoveSelectionActive) {
         if (state.moveTargetType === 'subcategory') {
             const targetCategory = state.tempModalCategory;
@@ -2925,7 +3151,7 @@ export async function confirmCategorySubCategorySelection() {
             const targetSubOrder = Array.isArray(subOrdersMap[targetCategory]) ? subOrdersMap[targetCategory] : [];
             const sourceSubOrder = Array.isArray(subOrdersMap[state.currentCategory]) ? subOrdersMap[state.currentCategory] : [];
 
-            const updatedBookmarks = {};
+            const updatedBookmarks = { ...pendingCardOrderUpdates };
             Object.keys(state.bookmarks).forEach(id => {
                 const bm = state.bookmarks[id];
                 const cat = (bm.category && bm.category.trim() !== '') ? bm.category.trim() : '未分類';
@@ -2975,18 +3201,9 @@ export async function confirmCategorySubCategorySelection() {
             }, 100);
             return;
         } else if (state.moveTargetType === 'card') {
-            let finalCat = '';
-            let finalSubCat = '';
-            if (state.categoryModalStep === 4) {
-                finalCat = state.tempModalCategory;
-                finalSubCat = state.tempModalSubCategory;
-            } else if (state.categoryModalStep >= 2) {
-                finalCat = state.tempModalCategory;
-                finalSubCat = '';
-            } else if (state.tempModalCategory) {
-                finalCat = state.tempModalCategory;
-                finalSubCat = state.tempModalSubCategory || '';
-            }
+            const finalCat = (state.tempModalCategory || '').trim();
+            const rawSub = (state.tempModalSubCategory || '').trim();
+            const finalSubCat = rawSub === '未分類' ? '' : rawSub;
             if (!finalCat) return;
 
             const cardIdsToMove = Array.from(state.selectedBookmarkIds || [])
@@ -3017,7 +3234,7 @@ export async function confirmCategorySubCategorySelection() {
                 .map(bm => typeof bm.order === 'number' ? bm.order : 0);
             let nextOrder = existingOrders.length > 0 ? Math.max(...existingOrders) + 1 : 0;
 
-            const updatedBookmarks = {};
+            const updatedBookmarks = { ...pendingCardOrderUpdates };
             cardIdsToMove.forEach(id => {
                 const bm = state.bookmarks[id];
                 if (bm) {
@@ -3070,19 +3287,13 @@ export async function confirmCategorySubCategorySelection() {
         }
     }
 
-    let finalCat = '';
-    let finalSubCat = '';
-
-    if (state.categoryModalStep === 4) {
-        finalCat = state.tempModalCategory;
-        finalSubCat = state.tempModalSubCategory;
-    } else if (state.categoryModalStep >= 2) {
-        finalCat = state.tempModalCategory;
-        finalSubCat = '';
-    } else if (state.tempModalCategory) {
-        finalCat = state.tempModalCategory;
-        finalSubCat = state.tempModalSubCategory || '';
+    if (Object.keys(pendingCardOrderUpdates).length > 0) {
+        await StorageAPI.saveItems('bookmarks', pendingCardOrderUpdates);
     }
+
+    const finalCat = (state.tempModalCategory || '').trim();
+    const rawSub = (state.tempModalSubCategory || '').trim();
+    const finalSubCat = rawSub === '未分類' ? '' : rawSub;
 
     updateBookmarkCategoryDisplayUI(finalCat, finalSubCat);
     closeCategoryModal();
@@ -3113,6 +3324,7 @@ export function closeCategoryModal() {
     state.moveTargetType = null;
     state.tempCategoryModalCategoryOrder = [];
     state.tempCategoryModalSubCategoryOrders = {};
+    state.tempCategoryModalCardOrders = {};
 
     setTimeout(() => {
         if (modal && !modal.classList.contains('active')) modal.style.display = 'none';
@@ -3163,6 +3375,8 @@ export function closeAllConfirms() {
     closeCloudAlert();
     hideCategoryPopoverMenu();
     hideHeaderPopoverMenu();
+    hideSidebarProfilePopover();
+    hideSidebarCollapsedMenu();
     closeFloatingAvatarPopover();
     closeAllEditors();
 }
@@ -3273,12 +3487,11 @@ export async function saveReminder() {
         else renderReminders();
         if (hadConflict) {
             showCloudToast('已以本地修改覆蓋並同步雲端');
-        } else if (isGoogleLinked() && !isTokenValid()) {
-            showCloudToast('已存至本機 (點此連線雲端)', {
-                onClick: () => window.handleGoogleAuthClick()
-            });
         } else {
-            showCloudToast(isNew ? '新增成功' : '儲存成功');
+            const didPromptAuth = (isNew && !isGoogleConnected()) ? promptAuthOncePerSession() : false;
+            if (!didPromptAuth) {
+                showCloudToast(isNew ? '新增成功' : '儲存成功');
+            }
         }
     }, 250);
 }
@@ -3398,12 +3611,11 @@ export async function saveBookmark() {
         }
         if (hadConflict) {
             showCloudToast('已以本地修改覆蓋並同步雲端');
-        } else if (isGoogleLinked() && !isTokenValid()) {
-            showCloudToast('已存至本機 (點此連線雲端)', {
-                onClick: () => window.handleGoogleAuthClick()
-            });
         } else {
-            showCloudToast(isNew ? '新增成功' : '儲存成功');
+            const didPromptAuth = (isNew && !isGoogleConnected()) ? promptAuthOncePerSession() : false;
+            if (!didPromptAuth) {
+                showCloudToast(isNew ? '新增成功' : '儲存成功');
+            }
         }
     }, 250);
 }
@@ -3499,13 +3711,7 @@ export async function confirmDelete() {
 
         setTimeout(() => {
             renderSidebar();
-            if (isGoogleLinked() && !isTokenValid()) {
-                showCloudToast('已從本機刪除 (點此連線雲端)', {
-                    onClick: () => window.handleGoogleAuthClick()
-                });
-            } else {
-                showCloudToast('刪除成功');
-            }
+            showCloudToast('刪除成功');
             scheduleDeleteCloudSync();
         }, 100);
     } else if (state.deleteTargetType === 'reminder' && state.currentEditingReminderId) {
@@ -3528,13 +3734,7 @@ export async function confirmDelete() {
 
         setTimeout(() => {
             renderReminders();
-            if (isGoogleLinked() && !isTokenValid()) {
-                showCloudToast('已從本機刪除 (點此連線雲端)', {
-                    onClick: () => window.handleGoogleAuthClick()
-                });
-            } else {
-                showCloudToast('刪除成功');
-            }
+            showCloudToast('刪除成功');
             scheduleDeleteCloudSync();
         }, 100);
     } else if (state.deleteTargetType === 'batch-reminders' && state.selectedReminderIds && state.selectedReminderIds.size > 0) {
@@ -3560,13 +3760,7 @@ export async function confirmDelete() {
 
         setTimeout(() => {
             renderReminders();
-            if (isGoogleLinked() && !isTokenValid()) {
-                showCloudToast(`已從本機刪除 ${idsToDelete.length} 項提醒 (點此連線雲端)`, {
-                    onClick: () => window.handleGoogleAuthClick()
-                });
-            } else {
-                showCloudToast(`已成功刪除 ${idsToDelete.length} 項提醒`);
-            }
+            showCloudToast(`已成功刪除 ${idsToDelete.length} 項提醒`);
             scheduleDeleteCloudSync();
         }, 100);
     } else if (state.deleteTargetType === 'batch-bookmarks' && state.selectedBookmarkIds && state.selectedBookmarkIds.size > 0) {
@@ -3603,13 +3797,7 @@ export async function confirmDelete() {
 
         setTimeout(() => {
             renderSidebar();
-            if (isGoogleLinked() && !isTokenValid()) {
-                showCloudToast(`已從本機刪除 ${idsToDelete.length} 項資料 (點此連線雲端)`, {
-                    onClick: () => window.handleGoogleAuthClick()
-                });
-            } else {
-                showCloudToast(`已成功刪除 ${idsToDelete.length} 項資料`);
-            }
+            showCloudToast(`已成功刪除 ${idsToDelete.length} 項資料`);
             scheduleDeleteCloudSync();
         }, 100);
     } else if (state.deleteTargetType === 'batch-subcategories' && state.selectedSubCategories && state.selectedSubCategories.size > 0) {
@@ -3666,13 +3854,7 @@ export async function confirmDelete() {
 
         setTimeout(() => {
             renderSidebar();
-            if (isGoogleLinked() && !isTokenValid()) {
-                showCloudToast(`已從本機刪除 ${subCatsToDelete.length} 個子分類 (點此連線雲端)`, {
-                    onClick: () => window.handleGoogleAuthClick()
-                });
-            } else {
-                showCloudToast(`已成功刪除 ${subCatsToDelete.length} 個子分類`);
-            }
+            showCloudToast(`已成功刪除 ${subCatsToDelete.length} 個子分類`);
             scheduleDeleteCloudSync();
         }, 100);
     } else if (state.deleteTargetType === 'user-avatar') {
@@ -3691,13 +3873,7 @@ export async function confirmDelete() {
         closeConfirm();
 
         setTimeout(() => {
-            if (isGoogleLinked() && !isTokenValid()) {
-                showCloudToast('已從本機刪除頭像 (點此連線雲端)', {
-                    onClick: () => window.handleGoogleAuthClick()
-                });
-            } else {
-                showCloudToast('頭像已刪除');
-            }
+            showCloudToast('頭像已刪除');
             scheduleDeleteCloudSync();
         }, 100);
     }
@@ -5441,15 +5617,13 @@ export function initCategoryCarousel() {
     };
 
     const getMaxAllowedSlideIndex = () => {
-        const isMoveCategoryOnly = Boolean(state.isMoveSelectionActive && state.moveTargetType === 'subcategory');
-        if (isMoveCategoryOnly) return 0;
+        if (state.tempModalCategory && state.tempModalSubCategory) return 2;
         if (state.tempModalCategory) return 1;
         return 0;
     };
 
     const getCurrentSlideIndex = () => {
-        const isMoveCategoryOnly = Boolean(state.isMoveSelectionActive && state.moveTargetType === 'subcategory');
-        return (!isMoveCategoryOnly && (state.categoryModalStep || 1) >= 2 && Boolean(state.tempModalCategory)) ? 1 : 0;
+        return Math.max(0, Math.min(2, (state.categoryModalStep || 1) - 1));
     };
 
     const handlePointerDown = (clientX, clientY, target) => {
@@ -5541,20 +5715,14 @@ export function initCategoryCarousel() {
         }
 
         currentDx = 0;
-        if (nextIndex === 1) {
-            state.categoryModalStep = state.tempModalSubCategory ? 4 : 2;
-        } else {
-            state.categoryModalStep = 1;
-        }
+        state.categoryModalStep = nextIndex + 1;
 
         const addBtn = document.getElementById('btn-add-category-item');
         if (addBtn) {
-            const isMoveCategoryOnly = Boolean(state.isMoveSelectionActive && state.moveTargetType === 'subcategory');
             const step = state.categoryModalStep || 1;
             addBtn.disabled = Boolean(
-                (isMoveCategoryOnly && step >= 2) ||
-                step > 4 ||
-                (step >= 2 && !state.tempModalCategory)
+                step >= 3 ||
+                (step === 2 && !state.tempModalCategory)
             );
         }
 
@@ -5603,13 +5771,19 @@ export function initCategoryCarousel() {
         handlePointerUp();
     }, { passive: true });
 
-    window.addEventListener('resize', () => {
+    const handleCategoryViewportChange = () => {
         const modal = document.getElementById('category-modal');
-        if (modal && modal.classList.contains('active')) {
+        if (modal && (modal.classList.contains('active') || modal.style.display === 'flex')) {
             positionCategoryConfirmBtn();
             scrollToCategorySlide(getCurrentSlideIndex(), false);
         }
-    }, { passive: true });
+    };
+
+    window.addEventListener('resize', handleCategoryViewportChange, { passive: true });
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleCategoryViewportChange, { passive: true });
+        window.visualViewport.addEventListener('scroll', handleCategoryViewportChange, { passive: true });
+    }
 }
 
 export function initCategoryModalDrag() {
@@ -5738,7 +5912,11 @@ export function initCategoryModalDrag() {
         state.isCategoryDragging = true;
         draggingItem = item;
         activeList = item.closest('.category-column-list');
-        dragType = (activeList && activeList.id === 'modal-category-column-list') ? 'category' : 'subcategory';
+        dragType = item.dataset.categoryType || (
+            activeList && activeList.id === 'modal-category-column-list'
+                ? 'category'
+                : (activeList && activeList.id === 'modal-subcategory-column-list' ? 'subcategory' : 'card')
+        );
         lastPointerY = clientY;
 
         placeholder = document.createElement('div');
@@ -5760,6 +5938,7 @@ export function initCategoryModalDrag() {
         dragGhost.style.left = `${clientX}px`;
         dragGhost.style.top = `${clientY}px`;
 
+        window.getSelection()?.removeAllRanges();
         document.body.appendChild(dragGhost);
         document.body.classList.add('no-scroll', 'is-dragging-item');
         startAutoScroll();
@@ -5852,16 +6031,24 @@ export function initCategoryModalDrag() {
         if (activeList) {
             const currentItems = Array.from(activeList.querySelectorAll('.category-modal-item:not(.placeholder)'));
             if (dragType === 'category') {
-                const newOrder = currentItems.map(el => el.querySelector('.category-modal-item-text')?.innerText?.trim()).filter(Boolean);
+                const newOrder = currentItems.map(el => el.dataset.category || el.querySelector('.category-modal-item-text')?.innerText?.trim()).filter(Boolean);
                 if (newOrder.length > 0) {
                     state.tempCategoryModalCategoryOrder = newOrder;
                 }
             } else if (dragType === 'subcategory') {
                 const currentCat = state.tempModalCategory;
                 if (currentCat) {
-                    const newSubOrder = currentItems.map(el => el.querySelector('.category-modal-item-text')?.innerText?.trim()).filter(Boolean);
+                    const newSubOrder = currentItems.map(el => el.dataset.subcategory || el.querySelector('.category-modal-item-text')?.innerText?.trim()).filter(Boolean);
                     if (!state.tempCategoryModalSubCategoryOrders) state.tempCategoryModalSubCategoryOrders = {};
                     state.tempCategoryModalSubCategoryOrders[currentCat] = newSubOrder;
+                }
+            } else if (dragType === 'card') {
+                const currentCat = state.tempModalCategory;
+                const currentSub = state.tempModalSubCategory;
+                if (currentCat && currentSub) {
+                    const cardKey = `${currentCat}:::${currentSub}`;
+                    if (!state.tempCategoryModalCardOrders) state.tempCategoryModalCardOrders = {};
+                    state.tempCategoryModalCardOrders[cardKey] = currentItems.map(el => el.dataset.id).filter(Boolean);
                 }
             }
         }
@@ -5888,6 +6075,10 @@ export let justFinishedSortDrag = false;
 const SORT_CAROUSEL_GAP = 32;
 
 export function openSortModal(options = {}) {
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+    }
+
     const autoLocate = Boolean(options && options.autoLocate);
     const curCat = state.currentCategory;
     let shouldLocate = false;
@@ -6255,13 +6446,19 @@ function initSortCarousel() {
         handlePointerUp();
     }, { passive: true });
 
-    window.addEventListener('resize', () => {
+    const handleSortViewportChange = () => {
         const modal = document.getElementById('sort-modal');
-        if (modal && modal.classList.contains('active')) {
+        if (modal && (modal.classList.contains('active') || modal.style.display === 'flex')) {
             positionSortExternalBars();
             scrollToSortSlide((state.sortModalStep || 1) - 1, false);
         }
-    }, { passive: true });
+    };
+
+    window.addEventListener('resize', handleSortViewportChange, { passive: true });
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleSortViewportChange, { passive: true });
+        window.visualViewport.addEventListener('scroll', handleSortViewportChange, { passive: true });
+    }
 }
 
 export function initSortModalDrag() {
@@ -6411,6 +6608,7 @@ export function initSortModalDrag() {
         dragGhost.style.left = `${clientX}px`;
         dragGhost.style.top = `${clientY}px`;
 
+        window.getSelection()?.removeAllRanges();
         document.body.appendChild(dragGhost);
         document.body.classList.add('no-scroll', 'is-dragging-item');
         startAutoScroll();
@@ -6578,6 +6776,18 @@ function initKeyboardShortcuts() {
             const headerMenu = document.getElementById('header-popover-menu');
             if (headerMenu && headerMenu.classList.contains('active')) {
                 hideHeaderPopoverMenu();
+                return;
+            }
+
+            const sidebarProfilePopover = document.getElementById('sidebar-profile-popover');
+            if (sidebarProfilePopover && sidebarProfilePopover.classList.contains('active')) {
+                hideSidebarProfilePopover();
+                return;
+            }
+
+            const sidebarCollapsedMenu = document.getElementById('sidebar-collapsed-menu');
+            if (sidebarCollapsedMenu && sidebarCollapsedMenu.classList.contains('active')) {
+                hideSidebarCollapsedMenu();
                 return;
             }
 
@@ -6783,7 +6993,13 @@ export function initGlobalInteractions() {
         if (!e.target.closest('#header-popover-menu') && !e.target.closest('#header-more-btn')) {
             hideHeaderPopoverMenu();
         }
-        if (!e.target.closest('#floating-avatar-popover') && !e.target.closest('#floating-avatar-btn')) {
+        if (!e.target.closest('#sidebar-profile-popover') && !e.target.closest('#sidebar-profile-trigger')) {
+            hideSidebarProfilePopover();
+        }
+        if (!e.target.closest('#sidebar-collapsed-menu') && !e.target.closest('#sidebar-profile-trigger')) {
+            hideSidebarCollapsedMenu();
+        }
+        if (!e.target.closest('#floating-avatar-group')) {
             closeFloatingAvatarPopover();
         }
     });
@@ -6803,7 +7019,13 @@ export function initGlobalInteractions() {
         if (!isTargetIn('#header-popover-menu') && !isTargetIn('#header-more-btn')) {
             hideHeaderPopoverMenu();
         }
-        if (!isTargetIn('#floating-avatar-popover') && !isTargetIn('#floating-avatar-btn')) {
+        if (!isTargetIn('#sidebar-profile-popover') && !isTargetIn('#sidebar-profile-trigger')) {
+            hideSidebarProfilePopover();
+        }
+        if (!isTargetIn('#sidebar-collapsed-menu') && !isTargetIn('#sidebar-profile-trigger')) {
+            hideSidebarCollapsedMenu();
+        }
+        if (!isTargetIn('#floating-avatar-group')) {
             closeFloatingAvatarPopover();
         }
         
@@ -7614,8 +7836,10 @@ Object.assign(window, {
     isGoogleLinked,
     justFinishedCategoryDrag, initCategoryModalDrag, initCategoryCarousel,
     handleSidebarCategoryClick, handleSidebarRemindersClick, syncSidebarActiveState,
+    handleSidebarProfileClick, hideSidebarProfilePopover, hideSidebarCollapsedMenu,
+    triggerCollapsedMenuSettings, triggerCollapsedMenuSync, triggerCollapsedMenuLogout,
     toggleFloatingAvatarPopover, closeFloatingAvatarPopover,
-    handleFloatingReconnect, handleFloatingSignOut,
+    handleFloatingManualSync, handleFloatingReconnect, handleFloatingSignOut,
     handleAvatarCircleClick, handleAvatarUpload, triggerDeleteAvatarConfirm, scrollToSettingsSlide,
     flushPendingDeleteSync
 });

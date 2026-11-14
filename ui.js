@@ -325,59 +325,111 @@ export function updateVisualEffectsSegment(isOn) {
     if (offBtn) offBtn.classList.toggle('active', !isOn);
 }
 
+export function updateAvatarAuthStatusUI(explicitStatus = null) {
+    let status = explicitStatus;
+    if (!status) {
+        const isLinked = localStorage.getItem('google_auth_linked') === 'true';
+        const token = localStorage.getItem('google_access_token');
+        const expiresAt = parseInt(localStorage.getItem('google_token_expires_at') || '0', 10);
+        const isValid = Boolean(token && (expiresAt - Date.now() > 60000));
+
+        if (isLinked && isValid) {
+            status = 'connected';
+        } else if (isLinked && !isValid) {
+            status = 'expired';
+        } else {
+            status = 'disconnected';
+        }
+    }
+
+    const targets = [
+        document.querySelector('#sidebar-profile-trigger .sidebar-profile-avatar'),
+        document.getElementById('floating-avatar-btn')
+    ];
+
+    targets.forEach(el => {
+        if (!el) return;
+        el.classList.remove('auth-status-disconnected', 'auth-status-expired', 'auth-status-connected');
+        el.classList.add(`auth-status-${status}`);
+    });
+}
+
 export function renderUserProfileUI() {
     const profile = state.userProfile || {};
     const avatarData = typeof profile.avatarData === 'string' ? profile.avatarData.trim() : '';
-    const username = typeof profile.username === 'string' ? profile.username : '';
+    const rawUsername = typeof profile.username === 'string' ? profile.username.trim() : '';
+    const displayUsername = rawUsername || 'RU';
     const hasAvatar = Boolean(avatarData);
 
-    const floatingImg = document.getElementById('floating-avatar-img');
-    const floatingPlaceholder = document.getElementById('floating-avatar-placeholder');
-    if (floatingImg) {
-        if (hasAvatar) {
-            if (floatingImg.getAttribute('src') !== avatarData) {
-                floatingImg.src = avatarData;
+    const applyAvatarElements = (imgEl, placeholderEl) => {
+        if (imgEl) {
+            if (hasAvatar) {
+                if (imgEl.getAttribute('src') !== avatarData) {
+                    imgEl.src = avatarData;
+                }
+                imgEl.style.display = 'block';
+            } else {
+                imgEl.removeAttribute('src');
+                imgEl.style.display = 'none';
             }
-            floatingImg.style.display = 'block';
-        } else {
-            floatingImg.removeAttribute('src');
-            floatingImg.style.display = 'none';
         }
-    }
-    if (floatingPlaceholder) {
-        floatingPlaceholder.style.display = hasAvatar ? 'none' : 'flex';
-    }
+        if (placeholderEl) {
+            placeholderEl.style.display = hasAvatar ? 'none' : 'flex';
+        }
+    };
 
-    const settingsImg = document.getElementById('settings-avatar-img');
-    const settingsPlaceholder = document.getElementById('settings-avatar-placeholder');
+    applyAvatarElements(
+        document.getElementById('floating-avatar-img'),
+        document.getElementById('floating-avatar-placeholder')
+    );
+
+    applyAvatarElements(
+        document.getElementById('sidebar-avatar-img'),
+        document.getElementById('sidebar-avatar-placeholder')
+    );
+
+    applyAvatarElements(
+        document.getElementById('sidebar-popover-avatar-img'),
+        document.getElementById('sidebar-popover-avatar-placeholder')
+    );
+
+    applyAvatarElements(
+        document.getElementById('settings-avatar-img'),
+        document.getElementById('settings-avatar-placeholder')
+    );
+
     const deleteAvatarBtn = document.getElementById('delete-avatar-btn');
-    if (settingsImg) {
-        if (hasAvatar) {
-            if (settingsImg.getAttribute('src') !== avatarData) {
-                settingsImg.src = avatarData;
-            }
-            settingsImg.style.display = 'block';
-        } else {
-            settingsImg.removeAttribute('src');
-            settingsImg.style.display = 'none';
-        }
-    }
-    if (settingsPlaceholder) {
-        settingsPlaceholder.style.display = hasAvatar ? 'none' : 'flex';
-    }
     if (deleteAvatarBtn) {
         deleteAvatarBtn.style.display = hasAvatar ? 'inline-flex' : 'none';
     }
 
+    const sidebarUsernameEl = document.getElementById('sidebar-username-text');
+    if (sidebarUsernameEl && sidebarUsernameEl.textContent !== displayUsername) {
+        sidebarUsernameEl.textContent = displayUsername;
+    }
+
+    const sidebarPopoverUsernameEl = document.getElementById('sidebar-popover-username');
+    if (sidebarPopoverUsernameEl && sidebarPopoverUsernameEl.textContent !== displayUsername) {
+        sidebarPopoverUsernameEl.textContent = displayUsername;
+    }
+
+    const floatingPopoverUsernameEl = document.getElementById('floating-popover-username');
+    if (floatingPopoverUsernameEl && floatingPopoverUsernameEl.textContent !== displayUsername) {
+        floatingPopoverUsernameEl.textContent = displayUsername;
+    }
+
     const usernameInput = document.getElementById('profile-username-input');
     if (usernameInput && document.activeElement !== usernameInput) {
-        if (usernameInput.value !== username) {
-            usernameInput.value = username;
+        if (usernameInput.value !== rawUsername) {
+            usernameInput.value = rawUsername;
         }
     }
+
+    updateAvatarAuthStatusUI();
 }
 
 window.renderUserProfileUI = renderUserProfileUI;
+window.updateAvatarAuthStatusUI = updateAvatarAuthStatusUI;
 
 export function updateSelectionBarUI() {
     const bar = document.getElementById('selection-bottom-bar');
@@ -2436,22 +2488,37 @@ export function positionCategoryConfirmBtn() {
     const modal = document.getElementById('category-modal');
     if (!modal) return;
 
-    const isMobile = window.innerWidth <= 768;
-    const modalWidth = modal.offsetWidth || Math.min(400, Math.round(window.innerWidth * 0.9));
-    const defaultHeight = isMobile
-        ? Math.min(536, window.innerHeight - 198)
-        : Math.min(536, window.innerHeight - 238);
-    const modalHeight = modal.offsetHeight || defaultHeight;
+    const vv = window.visualViewport;
+    const vpWidth = vv ? vv.width : window.innerWidth;
+    const vpHeight = vv ? vv.height : window.innerHeight;
+    const vpOffsetLeft = vv ? vv.offsetLeft : 0;
+    const vpOffsetTop = vv ? vv.offsetTop : 0;
+
+    const isMobile = vpWidth <= 768;
+    const modalWidth = Math.min(400, Math.round(vpWidth * 0.9));
+    const reservedHeight = isMobile ? 198 : 238;
+    const modalHeight = Math.max(220, Math.min(536, Math.round(vpHeight - reservedHeight)));
     const topBarHeight = isMobile ? 64 : 74;
     const bottomBarHeight = isMobile ? 94 : 112;
     const gap = 12;
 
-    const leftX = Math.round((window.innerWidth - modalWidth) / 2);
-    const topY = Math.max(12, Math.round((window.innerHeight - modalHeight) / 2 - topBarHeight - gap));
-    const bottomY = Math.min(
-        window.innerHeight - bottomBarHeight - 12,
-        Math.round((window.innerHeight + modalHeight) / 2 + gap)
+    const centerX = Math.round(vpOffsetLeft + vpWidth / 2);
+    const centerY = Math.round(vpOffsetTop + vpHeight / 2);
+    const leftX = Math.round(centerX - modalWidth / 2);
+    const topY = Math.max(
+        Math.round(vpOffsetTop + 12),
+        Math.round(centerY - modalHeight / 2 - topBarHeight - gap)
     );
+    const bottomY = Math.min(
+        Math.round(vpOffsetTop + vpHeight - bottomBarHeight - 12),
+        Math.round(centerY + modalHeight / 2 + gap)
+    );
+
+    modal.style.left = `${centerX}px`;
+    modal.style.top = `${centerY}px`;
+    modal.style.width = `${modalWidth}px`;
+    modal.style.height = `${modalHeight}px`;
+    modal.style.maxHeight = `${modalHeight}px`;
 
     if (topBar) {
         topBar.style.left = `${leftX}px`;
@@ -2472,22 +2539,37 @@ export function positionSortExternalBars() {
     const modal = document.getElementById('sort-modal');
     if (!modal) return;
 
-    const isMobile = window.innerWidth <= 768;
-    const modalWidth = modal.offsetWidth || Math.min(400, Math.round(window.innerWidth * 0.9));
-    const defaultHeight = isMobile
-        ? Math.min(536, window.innerHeight - 168)
-        : Math.min(536, window.innerHeight - 190);
-    const modalHeight = modal.offsetHeight || defaultHeight;
+    const vv = window.visualViewport;
+    const vpWidth = vv ? vv.width : window.innerWidth;
+    const vpHeight = vv ? vv.height : window.innerHeight;
+    const vpOffsetLeft = vv ? vv.offsetLeft : 0;
+    const vpOffsetTop = vv ? vv.offsetTop : 0;
+
+    const isMobile = vpWidth <= 768;
+    const modalWidth = Math.min(400, Math.round(vpWidth * 0.9));
+    const reservedHeight = isMobile ? 168 : 190;
+    const modalHeight = Math.max(220, Math.min(536, Math.round(vpHeight - reservedHeight)));
     const topBarHeight = isMobile ? 64 : 74;
     const bottomBarHeight = isMobile ? 52 : 60;
     const gap = 12;
 
-    const leftX = Math.round((window.innerWidth - modalWidth) / 2);
-    const topY = Math.max(12, Math.round((window.innerHeight - modalHeight) / 2 - topBarHeight - gap));
-    const bottomY = Math.min(
-        window.innerHeight - bottomBarHeight - 12,
-        Math.round((window.innerHeight + modalHeight) / 2 + gap)
+    const centerX = Math.round(vpOffsetLeft + vpWidth / 2);
+    const centerY = Math.round(vpOffsetTop + vpHeight / 2);
+    const leftX = Math.round(centerX - modalWidth / 2);
+    const topY = Math.max(
+        Math.round(vpOffsetTop + 12),
+        Math.round(centerY - modalHeight / 2 - topBarHeight - gap)
     );
+    const bottomY = Math.min(
+        Math.round(vpOffsetTop + vpHeight - bottomBarHeight - 12),
+        Math.round(centerY + modalHeight / 2 + gap)
+    );
+
+    modal.style.left = `${centerX}px`;
+    modal.style.top = `${centerY}px`;
+    modal.style.width = `${modalWidth}px`;
+    modal.style.height = `${modalHeight}px`;
+    modal.style.maxHeight = `${modalHeight}px`;
 
     if (topBar) {
         topBar.style.left = `${leftX}px`;
@@ -2591,20 +2673,19 @@ export function scrollToSortSlide(slideIndex = 0, animate = true) {
 }
 
 export function updateCategoryPathHeader() {
-    const isMoveCategoryOnly = Boolean(state.isMoveSelectionActive && state.moveTargetType === 'subcategory');
     const step = state.categoryModalStep || 1;
-    const isSubSlide = !isMoveCategoryOnly && step >= 2 && Boolean(state.tempModalCategory);
-
     const catSeg = document.getElementById('category-path-category');
     const catVal = document.getElementById('category-path-category-value');
     const subSeg = document.getElementById('category-path-subcategory');
     const subVal = document.getElementById('category-path-subcategory-value');
+    const cardSeg = document.getElementById('category-path-card');
+    const cardVal = document.getElementById('category-path-card-value');
 
     const selectedCat = state.tempModalCategory || '';
-    const selectedSub = (!isMoveCategoryOnly && state.tempModalSubCategory) ? state.tempModalSubCategory : '';
+    const selectedSub = state.tempModalSubCategory || '';
 
     if (subSeg) {
-        subSeg.style.display = isMoveCategoryOnly ? 'none' : '';
+        subSeg.style.display = '';
     }
 
     setSortPathSegmentState(
@@ -2612,8 +2693,8 @@ export function updateCategoryPathHeader() {
         catVal,
         'category',
         selectedCat,
-        !isSubSlide,
-        Boolean(selectedCat) && isSubSlide,
+        step === 1,
+        Boolean(selectedCat) && step > 1,
         categoryPathClearTimers
     );
 
@@ -2622,8 +2703,18 @@ export function updateCategoryPathHeader() {
         subVal,
         'subcategory',
         selectedSub,
-        isSubSlide,
-        !isMoveCategoryOnly && Boolean(selectedCat) && !isSubSlide,
+        step === 2,
+        Boolean(selectedSub) && step > 2,
+        categoryPathClearTimers
+    );
+
+    setSortPathSegmentState(
+        cardSeg,
+        cardVal,
+        null,
+        '',
+        step === 3,
+        false,
         categoryPathClearTimers
     );
 }
@@ -2631,7 +2722,7 @@ export function updateCategoryPathHeader() {
 export function scrollToCategorySlide(slideIndex = 0, animate = true) {
     const carousel = document.getElementById('category-carousel');
     if (!carousel) return;
-    const targetIndex = Math.max(0, Math.min(1, Number(slideIndex) || 0));
+    const targetIndex = Math.max(0, Math.min(2, Number(slideIndex) || 0));
     const slideWidth = carousel.offsetWidth || carousel.clientWidth || 0;
     const targetOffset = -targetIndex * (slideWidth + SORT_CAROUSEL_GAP);
 
@@ -2649,22 +2740,22 @@ export function scrollToCategorySlide(slideIndex = 0, animate = true) {
 export function renderCategoryModalColumns(options = {}) {
     const leftList = document.getElementById('modal-category-column-list');
     const rightList = document.getElementById('modal-subcategory-column-list');
+    const cardList = document.getElementById('modal-category-card-column-list');
     const addBtn = document.getElementById('btn-add-category-item');
     const saveBtn = document.getElementById('category-save-btn');
 
     if (!leftList || !rightList) return;
 
     const animate = options.animate !== undefined ? Boolean(options.animate) : true;
-    const isMoveCategoryOnly = Boolean(state.isMoveSelectionActive && state.moveTargetType === 'subcategory');
     const step = state.categoryModalStep || 1;
-    const hasSubCategoryView = !isMoveCategoryOnly && Boolean(state.tempModalCategory);
-    const targetSlideIndex = (!isMoveCategoryOnly && step >= 2 && Boolean(state.tempModalCategory)) ? 1 : 0;
+    const hasSubCategoryView = Boolean(state.tempModalCategory);
+    const hasCardView = Boolean(state.tempModalCategory && state.tempModalSubCategory);
+    const targetSlideIndex = Math.max(0, Math.min(2, step - 1));
 
     if (addBtn) {
         const isDisallowedAddLevel = Boolean(
-            (isMoveCategoryOnly && step >= 2) ||
-            step > 4 ||
-            (step >= 2 && !state.tempModalCategory)
+            step >= 3 ||
+            (step === 2 && !state.tempModalCategory)
         );
         addBtn.disabled = isDisallowedAddLevel;
     }
@@ -2675,22 +2766,12 @@ export function renderCategoryModalColumns(options = {}) {
             if (state.moveTargetType === 'subcategory') {
                 isValidMove = Boolean(state.tempModalCategory && state.tempModalCategory !== state.currentCategory);
             } else if (state.moveTargetType === 'card') {
-                let targetCat = '';
-                let targetSubCat = '';
-                if (state.categoryModalStep === 4) {
-                    targetCat = state.tempModalCategory;
-                    targetSubCat = state.tempModalSubCategory;
-                } else if (state.categoryModalStep >= 2) {
-                    targetCat = state.tempModalCategory;
-                    targetSubCat = '';
-                } else if (state.tempModalCategory) {
-                    targetCat = state.tempModalCategory;
-                    targetSubCat = state.tempModalSubCategory || '';
-                }
+                const targetCat = (state.tempModalCategory || '').trim();
+                const rawTargetSub = (state.tempModalSubCategory || '').trim();
+                const targetSubCat = rawTargetSub === '未分類' ? '' : rawTargetSub;
 
                 if (targetCat) {
-                    const normalizedTargetCat = targetCat.trim() || '未分類';
-                    const normalizedTargetSub = targetSubCat.trim();
+                    const normalizedTargetCat = targetCat || '未分類';
                     const cardIdsToMove = Array.from(state.selectedBookmarkIds || [])
                         .filter(id => !!state.bookmarks[id]);
                     const isAllSameDestination = cardIdsToMove.length > 0 && cardIdsToMove.every(id => {
@@ -2698,7 +2779,7 @@ export function renderCategoryModalColumns(options = {}) {
                         if (!bm) return false;
                         const currentBmCat = (bm.category && bm.category.trim() !== '') ? bm.category.trim() : '未分類';
                         const currentBmSub = (bm.subCategory && bm.subCategory.trim() !== '') ? bm.subCategory.trim() : '';
-                        return currentBmCat === normalizedTargetCat && currentBmSub === normalizedTargetSub;
+                        return currentBmCat === normalizedTargetCat && currentBmSub === targetSubCat;
                     });
                     isValidMove = !isAllSameDestination;
                 }
@@ -2711,6 +2792,7 @@ export function renderCategoryModalColumns(options = {}) {
 
     leftList.innerHTML = '';
     rightList.innerHTML = '';
+    if (cardList) cardList.innerHTML = '';
 
     const cats = new Set();
     Object.values(state.bookmarks || {}).forEach(bm => {
@@ -2763,7 +2845,7 @@ export function renderCategoryModalColumns(options = {}) {
             if (val && val !== '未分類' && !isTransitionCategory(val)) {
                 state.tempModalCategory = val;
                 state.tempModalSubCategory = '';
-                state.categoryModalStep = isMoveCategoryOnly ? 1 : 2;
+                state.categoryModalStep = 2;
 
                 let currentOrder = (Array.isArray(state.tempCategoryModalCategoryOrder) && state.tempCategoryModalCategoryOrder.length > 0)
                     ? state.tempCategoryModalCategoryOrder
@@ -2805,6 +2887,8 @@ export function renderCategoryModalColumns(options = {}) {
         sortedCats.forEach(cat => {
             const item = document.createElement('div');
             item.className = 'category-modal-item';
+            item.dataset.categoryType = 'category';
+            item.dataset.category = cat;
             if (cat === state.tempModalCategory) {
                 item.classList.add('active');
             }
@@ -2833,14 +2917,32 @@ export function renderCategoryModalColumns(options = {}) {
     if (hasSubCategoryView) {
         const currentCat = state.tempModalCategory;
         const subCats = new Set();
+        let hasUncategorizedCards = false;
+
         Object.values(state.bookmarks || {}).forEach(bm => {
+            if (!bm) return;
             const bmCat = (bm.category && bm.category.trim() !== '') ? bm.category.trim() : '未分類';
-            if (bmCat === currentCat && bm.subCategory && bm.subCategory.trim() !== '' && bm.subCategory.trim() !== '未分類') {
-                subCats.add(bm.subCategory.trim());
+            if (bmCat === currentCat) {
+                const rawSub = (bm.subCategory && bm.subCategory.trim() !== '') ? bm.subCategory.trim() : '';
+                if (!rawSub || rawSub === '未分類') {
+                    hasUncategorizedCards = true;
+                } else {
+                    subCats.add(rawSub);
+                }
             }
         });
-        if (state.tempModalSubCategory && state.tempModalSubCategory.trim() !== '' && state.tempModalSubCategory !== '未分類') {
-            subCats.add(state.tempModalSubCategory.trim());
+
+        if (state.tempModalSubCategory && state.tempModalSubCategory.trim() !== '') {
+            const trimmedTempSub = state.tempModalSubCategory.trim();
+            if (trimmedTempSub === '未分類') {
+                hasUncategorizedCards = true;
+            } else {
+                subCats.add(trimmedTempSub);
+            }
+        }
+
+        if (hasUncategorizedCards) {
+            subCats.add('未分類');
         }
 
         const subOrdersMap = (state.tempCategoryModalSubCategoryOrders && Object.keys(state.tempCategoryModalSubCategoryOrders).length > 0)
@@ -2854,6 +2956,8 @@ export function renderCategoryModalColumns(options = {}) {
             if (idxA !== -1 && idxB !== -1) return idxA - idxB;
             if (idxA !== -1) return -1;
             if (idxB !== -1) return 1;
+            if (a === '未分類') return 1;
+            if (b === '未分類') return -1;
             return a.localeCompare(b);
         });
 
@@ -2875,7 +2979,7 @@ export function renderCategoryModalColumns(options = {}) {
                 state.isAddingSubCategoryInline = false;
                 if (val && val !== '未分類') {
                     state.tempModalSubCategory = val;
-                    state.categoryModalStep = 4;
+                    state.categoryModalStep = 3;
 
                     if (!state.tempCategoryModalSubCategoryOrders) {
                         state.tempCategoryModalSubCategoryOrders = safeJSONParse(localStorage.getItem('my_subcategory_order'), {}) || {};
@@ -2886,7 +2990,7 @@ export function renderCategoryModalColumns(options = {}) {
                     targetSubOrder = [val, ...targetSubOrder.filter(s => s !== val)];
                     state.tempCategoryModalSubCategoryOrders[currentCat] = targetSubOrder;
                 }
-                renderCategoryModalColumns({ animate: false });
+                renderCategoryModalColumns({ animate: true });
             };
 
             input.onkeydown = (e) => {
@@ -2921,7 +3025,10 @@ export function renderCategoryModalColumns(options = {}) {
             sortedSubCats.forEach(sub => {
                 const item = document.createElement('div');
                 item.className = 'category-modal-item';
-                if (sub === state.tempModalSubCategory && state.categoryModalStep === 4) {
+                item.dataset.categoryType = 'subcategory';
+                item.dataset.category = currentCat;
+                item.dataset.subcategory = sub;
+                if (sub === state.tempModalSubCategory && step >= 2) {
                     item.classList.add('active');
                 }
 
@@ -2943,6 +3050,63 @@ export function renderCategoryModalColumns(options = {}) {
                 };
 
                 rightList.appendChild(item);
+            });
+        }
+    }
+
+    if (hasCardView && cardList) {
+        const currentCat = state.tempModalCategory;
+        const currentSub = state.tempModalSubCategory;
+        const cardKey = `${currentCat}:::${currentSub}`;
+
+        if (!state.tempCategoryModalCardOrders) state.tempCategoryModalCardOrders = {};
+        if (!Array.isArray(state.tempCategoryModalCardOrders[cardKey])) {
+            const matchedCards = [];
+            Object.keys(state.bookmarks || {}).forEach(id => {
+                const bm = state.bookmarks[id];
+                if (!bm) return;
+                const bmCat = (bm.category && bm.category.trim() !== '') ? bm.category.trim() : '未分類';
+                const bmSub = (bm.subCategory && bm.subCategory.trim() !== '') ? bm.subCategory.trim() : '未分類';
+                if (bmCat === currentCat && bmSub === currentSub) {
+                    matchedCards.push({ id, ...bm });
+                }
+            });
+            matchedCards.sort((a, b) => (a.order || 0) - (b.order || 0));
+            state.tempCategoryModalCardOrders[cardKey] = matchedCards.map(c => c.id);
+        }
+
+        const currentCardIds = (state.tempCategoryModalCardOrders[cardKey] || []).filter(id => !!state.bookmarks[id]);
+        state.tempCategoryModalCardOrders[cardKey] = currentCardIds;
+
+        if (currentCardIds.length === 0) {
+            const emptyCardEl = document.createElement('div');
+            emptyCardEl.className = 'category-empty-hint';
+            emptyCardEl.textContent = '未新增卡片';
+            cardList.appendChild(emptyCardEl);
+        } else {
+            currentCardIds.forEach(id => {
+                const bm = state.bookmarks[id];
+                if (!bm) return;
+
+                const item = document.createElement('div');
+                item.className = 'category-modal-item';
+                item.dataset.categoryType = 'card';
+                item.dataset.id = id;
+                item.dataset.category = currentCat;
+                item.dataset.subcategory = currentSub;
+
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'item-icon category-dot';
+                iconSpan.innerHTML = '<span class="category-dot-circle"></span>';
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'category-modal-item-text';
+                textSpan.textContent = bm.title || bm.url || '未命名項目';
+
+                item.appendChild(iconSpan);
+                item.appendChild(textSpan);
+
+                cardList.appendChild(item);
             });
         }
     }

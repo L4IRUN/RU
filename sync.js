@@ -4,7 +4,7 @@
 
 import { state } from './state.js';
 import * as UI from './ui.js';
-import { showCloudToast, renderSidebar, isTransitionCategory } from './ui.js';
+import { showCloudToast, renderSidebar, isTransitionCategory, updateAvatarAuthStatusUI } from './ui.js';
 import { openCloudAlert, closeSettingsModal } from './interaction.js';
 import { StorageAPI, stripDangerousHtml, sanitizeUrl, notifyCrossTabChange, safeJSONParse } from './storage.js';
 
@@ -19,6 +19,7 @@ let silentRefreshCooldownUntil = 0;
 let isResumingSync = false;
 let resumeSyncDebounceTimer = null;
 let isInteractiveAuthInProgress = false;
+let hasPromptedAuthThisSession = false;
 let localMutationSeq = 0;
 let maxObservedTimestamp = parseInt(localStorage.getItem('sync_max_observed_ts') || '0', 10) || 0;
 
@@ -97,18 +98,18 @@ let lastFileAuditTime = 0;
 const FILE_AUDIT_INTERVAL_MS = 60000;
 
 /**
- * 切換同步設定視窗狀態燈（主題正常金色 / 未連線或過期待機灰色）
+ * 同步更新使用者頭像連線狀態外框（灰色未登入 / 紅色授權過期 / 黃色已連接）與設定面板狀態
  */
 export function updateSyncStatusIndicator(isError = false) {
-    const dot = document.getElementById('sync-modal-status-dot');
-    if (dot) {
-        if (isError) {
-            dot.classList.remove('primary', 'red');
-            dot.classList.add('gray');
-        } else {
-            dot.classList.remove('gray', 'red');
-            dot.classList.add('primary');
-        }
+    let avatarStatus = 'disconnected';
+    if (isGoogleLinked()) {
+        avatarStatus = (!isError && isTokenValid()) ? 'connected' : 'expired';
+    }
+    if (typeof updateAvatarAuthStatusUI === 'function') {
+        updateAvatarAuthStatusUI(avatarStatus);
+    }
+    if (typeof window.updateGoogleAccountUIState === 'function') {
+        window.updateGoogleAccountUIState();
     }
 }
 
@@ -190,25 +191,33 @@ export async function initGisTokenClient(timeoutMs = 10000) {
 }
 
 /**
- * 取得有效的 Google Access Token。支援過期前靜默刷新與失敗重新授權提示
+ * 取得有效的 Google Access Token。非互動模式下絕不主動開啟 Google 登入彈窗
  */
 let tokenRefreshPromise = null;
 let lastReauthToastTime = 0;
 
 export function notifyReauthRequired() {
     updateSyncStatusIndicator(true);
-    const now = Date.now();
-    if (now - lastReauthToastTime > 60000) {
-        lastReauthToastTime = now;
-        showCloudToast('Google 雲端授權已過期，點此重新驗證', {
-            persistent: true,
-            onClick: () => {
-                if (typeof window.handleGoogleAuthClick === 'function') {
-                    window.handleGoogleAuthClick();
-                }
+}
+
+export function promptAuthOncePerSession() {
+    if (isGoogleConnected()) return false;
+    if (hasPromptedAuthThisSession) return false;
+    hasPromptedAuthThisSession = true;
+    lastReauthToastTime = Date.now();
+
+    const message = isGoogleLinked()
+        ? 'Google 授權已過期，點此重新登入'
+        : '尚未登入 Google，點此登入同步雲端';
+
+    showCloudToast(message, {
+        onClick: () => {
+            if (typeof window.handleGoogleAuthClick === 'function') {
+                window.handleGoogleAuthClick();
             }
-        });
-    }
+        }
+    });
+    return true;
 }
 
 export async function getValidAccessToken(forceInteractive = false) {
@@ -228,8 +237,9 @@ export async function getValidAccessToken(forceInteractive = false) {
         return currentToken;
     }
 
-    if (!forceInteractive && tokenRefreshPromise) {
-        return tokenRefreshPromise;
+    if (!forceInteractive) {
+        updateSyncStatusIndicator(true);
+        return null;
     }
 
     if (!gisTokenClient) {
@@ -247,9 +257,7 @@ export async function getValidAccessToken(forceInteractive = false) {
 
         const myGisErrorHandler = (err) => {
             const type = (err && err.type) || 'unknown';
-            if (!forceInteractive && (type === 'popup_failed_to_open' || type === 'popup_closed')) {
-                finish(resolve, null);
-            } else if (forceInteractive && type === 'popup_closed') {
+            if (type === 'popup_closed') {
                 popupCloseTimer = setTimeout(() => {
                     finish(reject, new Error('popup_closed'));
                 }, 1200);
@@ -268,12 +276,8 @@ export async function getValidAccessToken(forceInteractive = false) {
         };
 
         timeoutId = setTimeout(() => {
-            if (!forceInteractive) {
-                finish(resolve, null);
-            } else {
-                finish(reject, new Error('GIS_REQUEST_TIMEOUT'));
-            }
-        }, forceInteractive ? 120000 : 20000);
+            finish(reject, new Error('GIS_REQUEST_TIMEOUT'));
+        }, 120000);
 
         onGisError = myGisErrorHandler;
 
@@ -286,29 +290,18 @@ export async function getValidAccessToken(forceInteractive = false) {
                 localStorage.setItem('google_token_expires_at', newExpiresAt.toString());
                 localStorage.setItem('google_auth_linked', 'true');
                 lastReauthToastTime = 0;
+                hasPromptedAuthThisSession = false;
                 updateSyncStatusIndicator(false);
                 finish(resolve, resp.access_token);
                 return;
             }
 
             const err = resp?.error || 'token_fetch_failed';
-            if (!forceInteractive && (err === 'interaction_required' || err === 'popup_closed_by_user')) {
-                silentRefreshCooldownUntil = Date.now() + SYNC_CONFIG.SILENT_REFRESH_COOLDOWN_MS;
-                finish(resolve, null);
-            } else {
-                if (!forceInteractive) {
-                    silentRefreshCooldownUntil = Date.now() + SYNC_CONFIG.SILENT_REFRESH_COOLDOWN_MS;
-                }
-                finish(reject, new Error(err));
-            }
+            finish(reject, new Error(err));
         };
 
         try {
-            if (forceInteractive) {
-                gisTokenClient.requestAccessToken({ prompt: 'select_account' });
-            } else {
-                gisTokenClient.requestAccessToken({ prompt: '' });
-            }
+            gisTokenClient.requestAccessToken({ prompt: 'select_account' });
         } catch (e) {
             finish(reject, e);
         }
@@ -502,6 +495,7 @@ export async function signOutGoogle() {
     localStorage.removeItem('google_token_expires_at');
     localStorage.removeItem('google_auth_linked');
     localStorage.removeItem('google_account_id');
+    hasPromptedAuthThisSession = false;
 
     stopCloudPolling();
 
@@ -2616,19 +2610,13 @@ export function getPollIntervalMs(now = Date.now(), lastActivity = lastActivityA
 }
 
 /**
- * Token 快過期時嘗試靜默續期；取不到（例如瀏覽器擋彈窗）回傳 false
+ * 檢查本地 Access Token 是否仍有效；若已過期則更新頭像狀態外框，不主動彈出登入視窗
  */
 export async function ensureTokenSilently() {
     if (isTokenValid()) return true;
     if (!isGoogleLinked()) return false;
-    if (Date.now() < silentRefreshCooldownUntil) return false;
-    try {
-        const t = await getValidAccessToken(false);
-        return Boolean(t) && isTokenValid();
-    } catch (e) {
-        silentRefreshCooldownUntil = Date.now() + SYNC_CONFIG.SILENT_REFRESH_COOLDOWN_MS;
-        return false;
-    }
+    updateSyncStatusIndicator(true);
+    return false;
 }
 
 function scheduleNextPoll(generation, customDelay = null) {
