@@ -160,6 +160,127 @@ function applyTypeSelectorState(type) {
     if (bookmarkBtn) bookmarkBtn.classList.toggle('active', type === 'bookmark');
 }
 
+const EDITOR_TYPE_ICONS = {
+    reminder: `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="9" x2="7" y2="15"></line>
+            <line x1="12" y1="4" x2="12" y2="20"></line>
+            <line x1="17" y1="7" x2="17" y2="17"></line>
+        </svg>
+    `,
+    bookmark: `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <g transform="rotate(-45 12 12)">
+                <path d="M9 17H7A5 5 0 0 1 7 7h2"></path>
+                <path d="M15 7h2a5 5 0 1 1 0 10h-2"></path>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </g>
+        </svg>
+    `,
+    note: `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="3" width="15" height="18" rx="2" ry="2"></rect>
+            <line x1="2" y1="8" x2="8" y2="8"></line>
+            <line x1="2" y1="12" x2="8" y2="12"></line>
+            <line x1="2" y1="16" x2="8" y2="16"></line>
+        </svg>
+    `
+};
+
+const EDITOR_EDIT_TITLES = {
+    reminder: '編輯提醒',
+    bookmark: '編輯網址',
+    note: '編輯內容'
+};
+
+export function positionEditorExternalBars() {
+    const topBar = document.getElementById('editor-external-top-bar');
+    const bottomBar = document.getElementById('editor-external-bottom-bar');
+    const modal = document.getElementById('editor-modal');
+    if (!modal) return;
+
+    const vv = window.visualViewport;
+    const vpWidth = vv ? vv.width : window.innerWidth;
+    const vpHeight = vv ? vv.height : window.innerHeight;
+    const vpOffsetLeft = vv ? vv.offsetLeft : 0;
+    const vpOffsetTop = vv ? vv.offsetTop : 0;
+
+    const isMobile = vpWidth <= 768;
+    const modalWidth = Math.min(400, Math.round(vpWidth * 0.9));
+    const reservedHeight = isMobile ? 168 : 190;
+    const modalHeight = Math.max(220, Math.min(536, Math.round(vpHeight - reservedHeight)));
+    const topBarHeight = isMobile ? 64 : 74;
+    const bottomBarHeight = isMobile ? 52 : 60;
+    const gap = 12;
+
+    const centerX = Math.round(vpOffsetLeft + vpWidth / 2);
+    const centerY = Math.round(vpOffsetTop + vpHeight / 2);
+    const leftX = Math.round(centerX - modalWidth / 2);
+    const topY = Math.max(
+        Math.round(vpOffsetTop + 12),
+        Math.round(centerY - modalHeight / 2 - topBarHeight - gap)
+    );
+    const bottomY = Math.min(
+        Math.round(vpOffsetTop + vpHeight - bottomBarHeight - 12),
+        Math.round(centerY + modalHeight / 2 + gap)
+    );
+
+    modal.style.left = `${centerX}px`;
+    modal.style.top = `${centerY}px`;
+    modal.style.width = `${modalWidth}px`;
+    modal.style.height = `${modalHeight}px`;
+    modal.style.maxHeight = `${modalHeight}px`;
+
+    if (topBar) {
+        topBar.style.left = `${leftX}px`;
+        topBar.style.top = `${topY}px`;
+        topBar.style.width = `${modalWidth}px`;
+    }
+
+    if (bottomBar) {
+        bottomBar.style.left = `${leftX}px`;
+        bottomBar.style.top = `${bottomY}px`;
+        bottomBar.style.width = `${modalWidth}px`;
+    }
+}
+
+function updateEditorTopBarUI(type, isEditMode) {
+    const typeSelector = document.getElementById('unified-type-selector');
+    const editHeader = document.getElementById('editor-edit-header');
+    const titleIconEl = document.getElementById('editor-modal-title-icon');
+    const titleEl = document.getElementById('editor-modal-title');
+    const deleteBtn = document.getElementById('btn-delete-unified');
+    const reminderDoneBtn = document.getElementById('reminder-modal-done-btn');
+
+    if (isEditMode) {
+        if (typeSelector) typeSelector.style.display = 'none';
+        if (editHeader) editHeader.style.display = 'flex';
+        if (titleIconEl) titleIconEl.innerHTML = EDITOR_TYPE_ICONS[type] || '';
+        if (titleEl) titleEl.innerText = EDITOR_EDIT_TITLES[type] || '編輯';
+        if (deleteBtn) deleteBtn.style.display = 'flex';
+        if (reminderDoneBtn) {
+            if (type === 'reminder') {
+                reminderDoneBtn.style.display = 'flex';
+                reminderDoneBtn.classList.toggle('checked', !!state.tempReminderIsDone);
+            } else {
+                reminderDoneBtn.style.display = 'none';
+                reminderDoneBtn.classList.remove('checked', 'check-pop');
+            }
+        }
+    } else {
+        if (editHeader) editHeader.style.display = 'none';
+        if (typeSelector) {
+            typeSelector.style.display = 'flex';
+            applyTypeSelectorState(type);
+        }
+        if (deleteBtn) deleteBtn.style.display = 'none';
+        if (reminderDoneBtn) {
+            reminderDoneBtn.style.display = 'none';
+            reminderDoneBtn.classList.remove('checked', 'check-pop');
+        }
+    }
+}
+
 export function switchCreateType(type) {
     if (type !== 'reminder' && type !== 'note' && type !== 'bookmark') return;
     if (state.currentUnifiedType === type) return;
@@ -169,19 +290,12 @@ export function switchCreateType(type) {
     const bookmarkContainer = document.getElementById('bookmark-form-container');
     const reminderContainer = document.getElementById('reminder-form-container');
     const titleEl = document.getElementById('editor-modal-title');
-    const reminderDoneBtn = document.getElementById('reminder-modal-done-btn');
+    const isEditMode = Boolean(state.currentEditingReminderId || state.currentEditingBookmarkId);
 
     if (bookmarkContainer) bookmarkContainer.style.display = 'none';
     if (reminderContainer) reminderContainer.style.display = 'none';
 
-    if (reminderDoneBtn) {
-        if (type === 'reminder' && state.currentEditingReminderId) {
-            reminderDoneBtn.style.display = 'flex';
-            reminderDoneBtn.classList.toggle('checked', !!state.tempReminderIsDone);
-        } else {
-            reminderDoneBtn.style.display = 'none';
-        }
-    }
+    updateEditorTopBarUI(type, isEditMode);
 
     if (type === 'reminder') {
         if (isTransitionCategory(state.currentCategory)) {
@@ -1056,14 +1170,8 @@ export function toggleReminderModalDone() {
     state.tempReminderIsDone = !state.tempReminderIsDone;
     const btn = document.getElementById('reminder-modal-done-btn');
     if (btn) {
-        // 勾勾彈性動畫只在使用者實際點擊切換時播放（.check-pop），開窗時不重播
         btn.classList.remove('check-pop');
         btn.classList.toggle('checked', state.tempReminderIsDone);
-        if (state.tempReminderIsDone) {
-            void btn.offsetWidth;
-            btn.classList.add('check-pop');
-            btn.addEventListener('animationend', () => btn.classList.remove('check-pop'), { once: true });
-        }
     }
 }
 
@@ -1125,17 +1233,13 @@ export function openBookmarkEditor(id = null, forcedType = null) {
 
     const overlay = document.getElementById('modal-overlay');
     const modal = document.getElementById('editor-modal');
+    const topBar = document.getElementById('editor-external-top-bar');
+    const bottomBar = document.getElementById('editor-external-bottom-bar');
     const titleEl = document.getElementById('editor-modal-title');
-    const typeSelector = document.getElementById('unified-type-selector');
     const deleteBtn = document.getElementById('btn-delete-unified');
-    const reminderDoneBtn = document.getElementById('reminder-modal-done-btn');
 
-    if (typeSelector) {
-        typeSelector.style.display = id ? 'none' : 'flex';
-        applyTypeSelectorState(editorType);
-    }
+    updateEditorTopBarUI(editorType, Boolean(id));
 
-    if (reminderDoneBtn) reminderDoneBtn.style.display = 'none';
     document.getElementById('bookmark-form-container').style.display = 'flex';
     const reminderContainer = document.getElementById('reminder-form-container');
     if (reminderContainer) reminderContainer.style.display = 'none';
@@ -1143,11 +1247,28 @@ export function openBookmarkEditor(id = null, forcedType = null) {
     document.getElementById('editor-modal').scrollTop = 0;
 
     modal.classList.remove('shake-animation');
+    modal.style.visibility = 'visible';
+    modal.style.pointerEvents = '';
     overlay.style.display = 'block';
-    modal.style.display = 'block';
+    if (topBar) {
+        topBar.style.visibility = 'visible';
+        topBar.style.pointerEvents = '';
+        topBar.style.display = 'flex';
+    }
+    if (bottomBar) {
+        bottomBar.style.visibility = 'visible';
+        bottomBar.style.pointerEvents = '';
+        bottomBar.style.display = 'flex';
+    }
+    modal.style.display = 'flex';
+    positionEditorExternalBars();
+
     requestAnimationFrame(() => requestAnimationFrame(() => {
         overlay.classList.add('active');
         modal.classList.add('active');
+        positionEditorExternalBars();
+        if (topBar) topBar.classList.add('active');
+        if (bottomBar) bottomBar.classList.add('active');
     }));
 
     if (id && state.bookmarks[id]) {
@@ -1217,15 +1338,13 @@ export function openReminderEditor(id = null) {
 
     const overlay = document.getElementById('modal-overlay');
     const modal = document.getElementById('editor-modal');
+    const topBar = document.getElementById('editor-external-top-bar');
+    const bottomBar = document.getElementById('editor-external-bottom-bar');
     const titleEl = document.getElementById('editor-modal-title');
-    const typeSelector = document.getElementById('unified-type-selector');
     const deleteBtn = document.getElementById('btn-delete-unified');
     const reminderDoneBtn = document.getElementById('reminder-modal-done-btn');
 
-    if (typeSelector) {
-        typeSelector.style.display = id ? 'none' : 'flex';
-        applyTypeSelectorState('reminder');
-    }
+    updateEditorTopBarUI('reminder', Boolean(id));
 
     document.getElementById('bookmark-form-container').style.display = 'none';
     const reminderContainer = document.getElementById('reminder-form-container');
@@ -1234,11 +1353,28 @@ export function openReminderEditor(id = null) {
     document.getElementById('editor-modal').scrollTop = 0;
 
     modal.classList.remove('shake-animation');
+    modal.style.visibility = 'visible';
+    modal.style.pointerEvents = '';
     overlay.style.display = 'block';
-    modal.style.display = 'block';
+    if (topBar) {
+        topBar.style.visibility = 'visible';
+        topBar.style.pointerEvents = '';
+        topBar.style.display = 'flex';
+    }
+    if (bottomBar) {
+        bottomBar.style.visibility = 'visible';
+        bottomBar.style.pointerEvents = '';
+        bottomBar.style.display = 'flex';
+    }
+    modal.style.display = 'flex';
+    positionEditorExternalBars();
+
     requestAnimationFrame(() => requestAnimationFrame(() => {
         overlay.classList.add('active');
         modal.classList.add('active');
+        positionEditorExternalBars();
+        if (topBar) topBar.classList.add('active');
+        if (bottomBar) bottomBar.classList.add('active');
     }));
 
     const today = new Date();
@@ -1398,6 +1534,8 @@ export function closeAllEditors() {
     closeSortModal();
 
     const overlay = document.getElementById('modal-overlay');
+    const topBar = document.getElementById('editor-external-top-bar');
+    const bottomBar = document.getElementById('editor-external-bottom-bar');
     const modals = [document.getElementById('editor-modal'), document.getElementById('sort-modal')];
     const reminderDoneBtn = document.getElementById('reminder-modal-done-btn');
     if (reminderDoneBtn) {
@@ -1406,6 +1544,14 @@ export function closeAllEditors() {
     }
     
     overlay.classList.remove('active');
+    if (topBar) {
+        topBar.classList.remove('active');
+        topBar.style.pointerEvents = '';
+    }
+    if (bottomBar) {
+        bottomBar.classList.remove('active');
+        bottomBar.style.pointerEvents = '';
+    }
     modals.forEach(m => {
         if (!m) return;
         m.classList.remove('active');
@@ -1487,8 +1633,10 @@ export function closeAllEditors() {
     if (closeEditorTimer) clearTimeout(closeEditorTimer);
     closeEditorTimer = setTimeout(async () => {
         closeEditorTimer = null;
-        overlay.style.display = 'none';
-        modals.forEach(m => { if (m) m.style.display = 'none'; });
+        if (!overlay.classList.contains('active')) overlay.style.display = 'none';
+        if (topBar && !topBar.classList.contains('active')) topBar.style.display = 'none';
+        if (bottomBar && !bottomBar.classList.contains('active')) bottomBar.style.display = 'none';
+        modals.forEach(m => { if (m && !m.classList.contains('active')) m.style.display = 'none'; });
 
         if (state.pendingSyncItems) {
             if (!state.deletedRecords) {
@@ -1936,6 +2084,8 @@ export async function triggerCollapsedMenuLogout(e) {
     await handleGoogleSignOutClick();
 }
 
+let floatingAvatarOpenScrollTop = 0;
+
 export function toggleFloatingAvatarPopover(e) {
     if (e) {
         e.stopPropagation();
@@ -1963,6 +2113,9 @@ export function toggleFloatingAvatarPopover(e) {
     if (logoutBtn) {
         logoutBtn.style.display = isGoogleLinked() ? 'flex' : 'none';
     }
+
+    const mainEl = document.querySelector('main');
+    floatingAvatarOpenScrollTop = mainEl ? mainEl.scrollTop : 0;
 
     popover.classList.add('active');
     if (avatarBtn) avatarBtn.classList.add('is-enlarged');
@@ -3903,8 +4056,9 @@ export function openFullEditor() {
     const fullModal = document.getElementById('full-editor-modal');
     const fullContent = document.getElementById('full-note-content');
     const editorModal = document.getElementById('editor-modal');
+    const topBar = document.getElementById('editor-external-top-bar');
+    const bottomBar = document.getElementById('editor-external-bottom-bar');
 
-    // 網址書籤分頁沒有可編輯的內容預覽框，不需開啟全螢幕編輯器
     if (state.currentUnifiedType === 'bookmark') return;
 
     const fullReminderTitleInput = document.getElementById('full-reminder-title-input');
@@ -3927,6 +4081,14 @@ export function openFullEditor() {
     fullModal.style.display = 'flex';
     editorModal.classList.remove('active');
     editorModal.style.pointerEvents = 'none';
+    if (topBar) {
+        topBar.classList.remove('active');
+        topBar.style.pointerEvents = 'none';
+    }
+    if (bottomBar) {
+        bottomBar.classList.remove('active');
+        bottomBar.style.pointerEvents = 'none';
+    }
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
         fullModal.classList.add('active');
@@ -3936,6 +4098,8 @@ export function openFullEditor() {
     onTransitionEnd(fullModal, 'opacity', 260, () => {
         if (fullModal.classList.contains('active')) {
             editorModal.style.visibility = 'hidden';
+            if (topBar) topBar.style.visibility = 'hidden';
+            if (bottomBar) bottomBar.style.visibility = 'hidden';
             fullContent.focus({ preventScroll: true });
         }
     });
@@ -3948,6 +4112,8 @@ export function closeFullEditor() {
 
     const fullModal = document.getElementById('full-editor-modal');
     const editorModal = document.getElementById('editor-modal');
+    const topBar = document.getElementById('editor-external-top-bar');
+    const bottomBar = document.getElementById('editor-external-bottom-bar');
     const content = document.getElementById('full-note-content').innerHTML;
     const fullReminderTitleInput = document.getElementById('full-reminder-title-input');
 
@@ -3973,12 +4139,26 @@ export function closeFullEditor() {
         fullModal.style.display = 'none';
 
         editorModal.style.visibility = 'visible';
-        editorModal.style.display = 'block';
+        editorModal.style.display = 'flex';
         editorModal.style.opacity = '';
         editorModal.style.pointerEvents = '';
 
+        if (topBar) {
+            topBar.style.visibility = 'visible';
+            topBar.style.display = 'flex';
+            topBar.style.pointerEvents = '';
+        }
+        if (bottomBar) {
+            bottomBar.style.visibility = 'visible';
+            bottomBar.style.display = 'flex';
+            bottomBar.style.pointerEvents = '';
+        }
+        positionEditorExternalBars();
+
         requestAnimationFrame(() => requestAnimationFrame(() => {
             editorModal.classList.add('active');
+            if (topBar) topBar.classList.add('active');
+            if (bottomBar) bottomBar.classList.add('active');
         }));
     });
 }
@@ -6898,11 +7078,17 @@ export function initGlobalInteractions() {
         }
 
         const currentScroll = mainContainer.scrollTop;
+        const avatarPopover = document.getElementById('floating-avatar-popover');
+        if (avatarPopover && avatarPopover.classList.contains('active')) {
+            if (Math.abs(currentScroll - floatingAvatarOpenScrollTop) > 24) {
+                closeFloatingAvatarPopover();
+            }
+        }
+
         if (currentScroll > 60) {
             floatingNav.classList.add('visible');
         } else if (currentScroll < 30) {
             floatingNav.classList.remove('visible');
-            closeFloatingAvatarPopover();
         }
     };
 
@@ -7057,6 +7243,8 @@ export function initGlobalInteractions() {
                     isTargetIn('#sort-modal') ||
                     isTargetIn('#sort-external-top-bar') ||
                     isTargetIn('#sort-external-bottom-bar') ||
+                    isTargetIn('#editor-external-top-bar') ||
+                    isTargetIn('#editor-external-bottom-bar') ||
                     isTargetIn('#modal-overlay')
                 ) {
                     return;
@@ -7236,7 +7424,8 @@ export function initGlobalInteractions() {
             hasMoved = false; 
             startX = clientX;
             const currentCount = getEffectiveNumOptions();
-            segmentWidth = Math.max(1, ((segment.offsetWidth || 140) - 8) / currentCount); 
+            const paddingAllowance = isUnifiedType ? 0 : 8;
+            segmentWidth = Math.max(1, ((segment.offsetWidth || 140) - paddingAllowance) / currentCount); 
             let currentIndex = getActiveIndex();
             currentSliderX = currentIndex * segmentWidth;
         };
@@ -7322,6 +7511,14 @@ export function initGlobalInteractions() {
         document.addEventListener('mouseup', (e) => { if (isDragging) endDrag(e.clientX); });
     });
 
+    const handleEditorViewportChange = () => {
+        const editorModal = document.getElementById('editor-modal');
+        if (editorModal && (editorModal.classList.contains('active') || editorModal.style.display === 'flex')) {
+            positionEditorExternalBars();
+        }
+    };
+    window.addEventListener('resize', handleEditorViewportChange, { passive: true });
+
     if (window.visualViewport) {
         let _vpRAF = null;
         const updateViewportHeight = () => {
@@ -7330,6 +7527,7 @@ export function initGlobalInteractions() {
                 _vpRAF = null;
                 document.documentElement.style.setProperty('--vv-height', `${window.visualViewport.height}px`);
                 document.documentElement.style.setProperty('--vv-top', `${window.visualViewport.offsetTop}px`);
+                handleEditorViewportChange();
             });
         };
         window.visualViewport.addEventListener('resize', updateViewportHeight);
@@ -7810,7 +8008,7 @@ Object.assign(window, {
     toggleReminderModalDone,
     showCategoryPopoverMenu, hideCategoryPopoverMenu, triggerCategoryRenameFromMenu, triggerCategoryDeleteFromMenu,
     toggleHeaderPopoverMenu, hideHeaderPopoverMenu, triggerHeaderMenuSelect, triggerHeaderMenuSort,
-    switchCreateType, openCategoryModal,
+    switchCreateType, positionEditorExternalBars, openCategoryModal,
     openSubCategoryModal, openCategorySubCategoryModal, confirmCategorySubCategorySelection,
     handleCategoryPathClick, handleSelectModalCategory, handleSelectModalSubCategory,
     triggerAddNewCategoryOrSubCategory, positionCategoryConfirmBtn,

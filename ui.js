@@ -342,15 +342,27 @@ export function updateAvatarAuthStatusUI(explicitStatus = null) {
         }
     }
 
-    const targets = [
+    const dotTargets = [
+        document.getElementById('sidebar-expanded-status-dot'),
+        document.getElementById('sidebar-collapsed-status-dot'),
+        document.getElementById('floating-avatar-status-dot'),
+        document.getElementById('floating-popover-status-dot')
+    ];
+
+    dotTargets.forEach(el => {
+        if (!el) return;
+        el.classList.remove('auth-status-disconnected', 'auth-status-expired', 'auth-status-connected');
+        el.classList.add(`auth-status-${status}`);
+    });
+
+    const legacyAvatarTargets = [
         document.querySelector('#sidebar-profile-trigger .sidebar-profile-avatar'),
         document.getElementById('floating-avatar-btn')
     ];
 
-    targets.forEach(el => {
+    legacyAvatarTargets.forEach(el => {
         if (!el) return;
         el.classList.remove('auth-status-disconnected', 'auth-status-expired', 'auth-status-connected');
-        el.classList.add(`auth-status-${status}`);
     });
 }
 

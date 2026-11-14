@@ -246,6 +246,8 @@ body[data-no-glass] {
 [data-no-glass] .glass-effect,
 [data-no-glass] .note-card,
 [data-no-glass] #editor-modal,
+[data-no-glass] #editor-external-top-bar,
+[data-no-glass] #editor-external-bottom-bar,
 [data-no-glass] #calendar-modal,
 [data-no-glass] #confirm-modal,
 [data-no-glass] #category-modal,
@@ -1782,11 +1784,11 @@ body.selection-mode-active #content-container {
 }
 
 .reminder-modal-checkbox {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
-    border-radius: 14px;
+    width: 58px;
+    height: 44px;
+    min-width: 58px;
+    min-height: 44px;
+    border-radius: 12px;
     background: var(--input-bg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-inner-highlight);
@@ -1799,7 +1801,7 @@ body.selection-mode-active #content-container {
     padding: 0;
     outline: none !important;
     flex-shrink: 0;
-    margin-left: auto;
+    margin-left: 0;
     margin-right: 0;
     transform: translateZ(0);
     transform-origin: center center;
@@ -1816,12 +1818,13 @@ body.selection-mode-active #content-container {
     height: 22px;
     display: block;
     color: var(--text-secondary);
-    stroke-width: 3;
-    transition: color 0.25s ease, stroke-width 0.25s ease;
+    stroke-width: 3.5;
+    transition: color 0.25s ease;
 }
 
 .reminder-modal-checkbox:active {
-    transform: scale(0.92) translateZ(0) !important;
+    transform: scale(0.85) translateZ(0) !important;
+    transition: transform 0.04s ease-out !important;
 }
 
 .reminder-modal-checkbox.checked {
@@ -1833,27 +1836,7 @@ body.selection-mode-active #content-container {
 
 .reminder-modal-checkbox.checked svg {
     color: #ffffff;
-    stroke-width: 3;
-    animation: reminderModalCheckAnim 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-@keyframes reminderModalCheckAnim {
-    0% {
-        transform: scale(0.35) rotate(-18deg);
-        stroke-dasharray: 30;
-        stroke-dashoffset: 30;
-        opacity: 0.1;
-    }
-    60% {
-        transform: scale(1.24) rotate(4deg);
-        stroke-dashoffset: 0;
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1) rotate(0deg);
-        stroke-dashoffset: 0;
-        opacity: 1;
-    }
+    stroke-width: 3.5;
 }
 
 .reminder-card-title {
@@ -2305,19 +2288,22 @@ body.selection-mode-active #content-container {
 }
 
 .context-item.active,
-.category-popover-item.active,
-.context-item:active,
-.category-popover-item:active {
+.category-popover-item.active {
     background: transparent !important;
     color: var(--primary) !important;
     opacity: 1 !important;
 }
 
 .context-item.active svg,
-.category-popover-item.active svg,
-.context-item:active svg,
-.category-popover-item:active svg {
+.category-popover-item.active svg {
     color: var(--primary) !important;
+}
+
+.context-item:active,
+.category-popover-item:active {
+    background: transparent !important;
+    transform: scale(0.95);
+    opacity: 1 !important;
 }
 
 .context-item.danger,
@@ -2335,13 +2321,14 @@ body.selection-mode-active #content-container {
 .context-item.danger:active,
 .category-popover-item.danger:active {
     background: transparent !important;
-    color: var(--primary) !important;
+    color: #ac4252 !important;
+    transform: scale(0.95);
     opacity: 1 !important;
 }
 
 .context-item.danger:active svg,
 .category-popover-item.danger:active svg {
-    color: var(--primary) !important;
+    color: #ac4252 !important;
 }
 
 @media (hover: hover) {
@@ -2466,17 +2453,220 @@ div[id$="-modal"].active:not(#full-editor-modal) {
     pointer-events: auto;
 }
 
+.editor-external-top-bar {
+    position: fixed;
+    z-index: 2003;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    width: 90%;
+    max-width: 400px;
+    height: 74px;
+    padding: 8px;
+    border-radius: 18px;
+    background: var(--popup-bg);
+    backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), var(--glass-inner-highlight);
+    box-sizing: border-box;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(34px) scale(0.94) translateZ(0);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, opacity 0.18s ease 0s;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.editor-external-top-bar.active {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1) translateZ(0);
+    transition: transform 0.44s cubic-bezier(0.34, 1.38, 0.64, 1) 0.06s, opacity 0.24s ease 0.06s;
+}
+
+#editor-external-top-bar #unified-type-selector {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 12px;
+}
+
+#editor-external-top-bar #unified-type-selector .segment-slider {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: calc(100% / 3);
+}
+
+#editor-external-top-bar #unified-type-selector .segment-slider::before {
+    border-radius: 12px;
+}
+
+#editor-external-top-bar #unified-type-selector .segment-btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+#editor-external-top-bar #unified-type-selector .segment-btn span {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+#editor-external-top-bar #unified-type-selector .segment-btn.active {
+    color: #ffffff;
+}
+
+#editor-external-top-bar #unified-type-selector .segment-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    flex-shrink: 0;
+    transform: scale(1);
+}
+
+#editor-external-top-bar #unified-type-selector .segment-btn.active svg {
+    transform: scale(1.08);
+}
+
+.editor-edit-header {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    box-sizing: border-box;
+    gap: 12px;
+}
+
+.editor-title-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.editor-title-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.editor-title-icon svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+.editor-modal-title {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.editor-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.editor-edit-actions .action-delete-btn {
+    display: flex;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    border-radius: 12px;
+}
+
+.editor-external-bottom-bar {
+    position: fixed;
+    z-index: 2003;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 90%;
+    max-width: 400px;
+    height: 60px;
+    padding: 0 10px;
+    border-radius: 18px;
+    background: var(--popup-bg);
+    backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), var(--glass-inner-highlight);
+    box-sizing: border-box;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-34px) scale(0.94) translateZ(0);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, opacity 0.18s ease 0s;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.editor-external-bottom-bar.active {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1) translateZ(0);
+    transition: transform 0.44s cubic-bezier(0.34, 1.38, 0.64, 1) 0.06s, opacity 0.24s ease 0.06s;
+}
+
+.editor-external-bottom-bar .btn-primary {
+    flex: 1;
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
 #editor-modal {
     position: fixed;
     top: 50%; left: 50%;
-    padding: 30px;
+    padding: 28px 24px;
     border-radius: 24px;
     width: 90%;
     max-width: 400px;
-    height: 536px;
-    max-height: min(90vh, 536px);
+    height: min(536px, calc(100vh - 190px));
+    max-height: min(536px, calc(100vh - 190px));
     box-shadow: 0 20px 50px rgba(0,0,0,0.2), var(--glass-inner-highlight);
     display: none;
+    flex-direction: column;
     box-sizing: border-box;
     background: var(--popup-bg);
     backdrop-filter: blur(var(--blur-val));
@@ -2486,9 +2676,20 @@ div[id$="-modal"].active:not(#full-editor-modal) {
     text-align: left;
     overflow-y: auto;
     z-index: 2001;
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 16px)) scale(0.95);
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0.04s, transform 0.22s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+    text-rendering: auto;
+}
+
+#editor-modal.active {
+    display: flex !important;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+    transition: opacity 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, transform 0.42s cubic-bezier(0.34, 1.38, 0.64, 1) 0s;
 }
 
 #calendar-modal, #confirm-modal, #settings-modal, #cloud-alert-modal {
@@ -2536,14 +2737,11 @@ body.avatar-delete-confirm #confirm-modal {
 #editor-create-container {
     width: 100%;
     height: 100%;
+    min-height: 0;
+    flex: 1;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-}
-
-#editor-create-container .modal-actions {
-    margin-top: auto;
-    flex-shrink: 0;
 }
 
 .sort-empty-state {
@@ -3773,22 +3971,23 @@ body.avatar-delete-confirm #confirm-modal {
 #reminder-form-container {
     display: flex;
     flex-direction: column;
-    height: 340px;
-    min-height: 340px;
-    max-height: 340px;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
     box-sizing: border-box;
     overflow: visible;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 #reminder-form-container #reminder-content {
     display: flex;
     flex-direction: column;
-    flex: none;
+    flex: 1;
     width: 100%;
-    height: 230px !important;
-    min-height: 230px;
-    max-height: 230px;
+    height: auto !important;
+    min-height: 120px;
+    max-height: none;
     margin-bottom: 0;
     padding: 15px 16px;
     font-size: 16px;
@@ -3884,9 +4083,10 @@ body.avatar-delete-confirm #confirm-modal {
 #bookmark-form-container {
     display: flex;
     flex-direction: column;
-    height: 340px;
-    min-height: 340px;
-    max-height: 340px;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
     box-sizing: border-box;
     overflow: visible;
     justify-content: center;
@@ -3965,11 +4165,11 @@ body.avatar-delete-confirm #confirm-modal {
     order: 1;
     display: flex !important;
     flex-direction: column;
-    flex: none;
+    flex: 1;
     width: 100%;
-    height: 212px !important;
-    min-height: 212px;
-    max-height: 212px;
+    height: auto !important;
+    min-height: 120px;
+    max-height: none;
     margin-bottom: 12px;
     padding: 15px 16px;
     font-size: 16px;
@@ -4154,7 +4354,6 @@ textarea:focus {
 
 .action-delete-btn:active {
     transform: scale(0.85) translateZ(0) !important;
-    color: var(--primary) !important;
     transition: transform 0.04s ease-out !important;
 }
 
@@ -4703,6 +4902,19 @@ aside.collapsed .sidebar-profile-trigger {
     gap: 0;
 }
 
+.sidebar-profile-avatar-wrapper {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 .sidebar-profile-avatar {
     width: 34px;
     height: 34px;
@@ -4712,27 +4924,62 @@ aside.collapsed .sidebar-profile-trigger {
     overflow: hidden;
     background: var(--input-bg);
     border: 1.5px solid var(--glass-border);
-    outline: 2.5px solid rgba(160, 160, 160, 0.65) !important;
-    outline-offset: 2px !important;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     color: var(--text-secondary);
     box-sizing: border-box;
-    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease, outline-color 0.25s ease, color 0.2s ease;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease, color 0.2s ease;
 }
 
-.sidebar-profile-avatar.auth-status-disconnected {
-    outline-color: rgba(160, 160, 160, 0.65) !important;
+.avatar-status-dot {
+    display: inline-block;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    background-color: rgba(160, 160, 160, 0.65);
+    transition: background-color 0.25s ease, opacity 0.2s ease, transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.sidebar-profile-avatar.auth-status-expired {
-    outline-color: #ac4252 !important;
+.avatar-status-dot.auth-status-disconnected {
+    background-color: rgba(160, 160, 160, 0.65);
 }
 
-.sidebar-profile-avatar.auth-status-connected {
-    outline-color: var(--primary) !important;
+.avatar-status-dot.auth-status-expired {
+    background-color: #ac4252;
+}
+
+.avatar-status-dot.auth-status-connected {
+    background-color: var(--primary);
+}
+
+.avatar-name-dot {
+    width: 7px;
+    height: 7px;
+    min-width: 7px;
+    min-height: 7px;
+}
+
+.avatar-corner-dot {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    z-index: 4;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+    border: 2px solid var(--sidebar-bg);
+    pointer-events: none;
+}
+
+#sidebar-collapsed-status-dot {
+    display: none;
+}
+
+aside.collapsed #sidebar-collapsed-status-dot {
+    display: block;
 }
 
 aside.collapsed .sidebar-profile-avatar {
@@ -4760,6 +5007,14 @@ aside.collapsed .sidebar-profile-avatar {
     pointer-events: none;
 }
 
+.sidebar-profile-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
 .sidebar-profile-name {
     white-space: nowrap;
     overflow: hidden;
@@ -4771,6 +5026,7 @@ aside.collapsed .sidebar-profile-avatar {
     color: var(--text);
 }
 
+aside.collapsed .sidebar-profile-name-row,
 aside.collapsed .sidebar-profile-name {
     display: none;
 }
@@ -4825,7 +5081,7 @@ aside.collapsed .sidebar-profile-trigger:active {
     background: rgba(150, 150, 150, 0.15) !important;
 }
 
-aside.collapsed .sidebar-profile-trigger.menu-open .sidebar-profile-avatar {
+aside.collapsed .sidebar-profile-trigger.menu-open .sidebar-profile-avatar-wrapper {
     transform: scale(1.1) translateZ(0);
 }
 
@@ -4837,8 +5093,10 @@ aside.collapsed .sidebar-profile-trigger.menu-open .sidebar-profile-avatar {
     aside.collapsed .sidebar-profile-trigger:hover {
         background: transparent !important;
     }
-    aside.collapsed .sidebar-profile-trigger:hover .sidebar-profile-avatar {
+    aside.collapsed .sidebar-profile-trigger:hover .sidebar-profile-avatar-wrapper {
         transform: scale(1.1) translateZ(0);
+    }
+    aside.collapsed .sidebar-profile-trigger:hover .sidebar-profile-avatar {
         border-color: var(--glass-border);
         color: var(--text);
     }
@@ -5204,18 +5462,20 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
         box-shadow: 0 0 24px rgba(154, 135, 30, 0.7), 0 4px 18px rgba(154, 135, 30, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.22);
     }
     .segment-btn:not(.active):hover { color: var(--primary); }
+    #editor-external-top-bar #unified-type-selector .segment-btn:not(.active):hover {
+        color: var(--text) !important;
+    }
     .date-ui-display:hover { border-color: var(--glass-border); box-shadow: var(--glass-inner-highlight); }
     .cal-btn:hover { background: rgba(154, 135, 30, 0.2); }
     .cal-day-cell:not(.selected):hover { background: rgba(154, 135, 30, 0.3); }
     .action-delete-btn:hover:not(:active) { background: transparent; color: #ff5c6a; transform: none !important; }
     .action-delete-btn:hover:active {
         background: transparent;
+        color: #ff5c6a !important;
         transform: scale(0.85) translateZ(0) !important;
-        color: var(--primary) !important;
         transition: transform 0.04s ease-out !important;
     }
-    /* 已觸發刪除確認（按鈕被暫時停用）時，維持主色，不殘留 hover 紅色 */
-    .action-delete-btn[style*="pointer-events: none"]:hover { color: var(--primary) !important; }
+    .action-delete-btn[style*="pointer-events: none"]:hover { color: var(--text-secondary) !important; }
     .input-side-btn:hover { transform: scale(1.1); }
     .fab-main-btn.tucked:hover { transform: translateX(calc(100% + 6px)) scale(1) translateZ(0) !important; opacity: 0.8 !important; }
     .settings-action-btn:hover,
@@ -5457,8 +5717,51 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
     textarea { height: auto; font-size: 14pt; }
 
     #editor-modal {
+        width: 90% !important;
+        max-width: 400px !important;
+        height: min(536px, calc(100dvh - 168px));
+        max-height: min(536px, calc(100dvh - 168px));
         padding: 24px 20px !important;
-        max-height: min(92dvh, 660px) !important;
+    }
+
+    .editor-external-top-bar {
+        height: 64px !important;
+        border-radius: 16px !important;
+        padding: 7px !important;
+    }
+
+    #editor-external-top-bar #unified-type-selector {
+        border-radius: 11px !important;
+    }
+
+    #editor-external-top-bar #unified-type-selector .segment-slider::before {
+        border-radius: 11px !important;
+    }
+
+    #editor-external-top-bar #unified-type-selector .segment-btn {
+        font-size: 16px !important;
+        gap: 5px !important;
+    }
+
+    .editor-edit-header {
+        padding: 0 13px !important;
+    }
+
+    .editor-modal-title {
+        font-size: 18px !important;
+    }
+
+    .editor-external-bottom-bar {
+        height: 52px !important;
+        border-radius: 16px !important;
+        padding: 0 8px !important;
+        gap: 8px !important;
+    }
+
+    .editor-external-bottom-bar .btn-primary {
+        height: 36px !important;
+        border-radius: 11px !important;
+        font-size: 14px !important;
     }
 
     #category-modal {
@@ -5565,37 +5868,42 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
     }
 
     #bookmark-form-container:not(.mode-note) {
-        height: 340px !important;
-        min-height: 340px !important;
-        max-height: 340px !important;
+        flex: 1 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: none !important;
         justify-content: center !important;
     }
 
     #bookmark-form-container.mode-note {
-        height: 340px !important;
-        min-height: 340px !important;
-        max-height: 340px !important;
+        flex: 1 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: none !important;
         justify-content: flex-start !important;
     }
 
     #reminder-form-container {
-        height: 340px !important;
-        min-height: 340px !important;
-        max-height: 340px !important;
-        justify-content: center !important;
+        flex: 1 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        justify-content: flex-start !important;
         padding-top: 0 !important;
     }
 
     #reminder-form-container #reminder-content {
-        height: 230px !important;
-        min-height: 230px !important;
-        max-height: 230px !important;
+        flex: 1 !important;
+        height: auto !important;
+        min-height: 100px !important;
+        max-height: none !important;
     }
 
     #bookmark-form-container.mode-note #bookmark-content {
-        height: 212px !important;
-        min-height: 212px !important;
-        max-height: 212px !important;
+        flex: 1 !important;
+        height: auto !important;
+        min-height: 100px !important;
+        max-height: none !important;
     }
 
     .date-ui-display {
@@ -5616,11 +5924,19 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
         gap: 6px;
     }
     .reminder-modal-checkbox {
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
-        min-height: 44px;
-        border-radius: 12px;
+        width: 52px;
+        height: 40px;
+        min-width: 52px;
+        min-height: 40px;
+        border-radius: 11px;
+    }
+
+    .editor-edit-actions .action-delete-btn {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        border-radius: 11px;
     }
     .text-toolbar .animated-action-btn { width: 44px; height: 44px; }
     
@@ -5769,6 +6085,32 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
         opacity: 0.8;
     }
 
+    aside.collapsed .sidebar-profile-trigger {
+        flex: 1 !important;
+        width: auto !important;
+        margin-left: 0 !important;
+        padding: 6px 10px 6px 8px !important;
+        justify-content: flex-start !important;
+        border-radius: 10px !important;
+        gap: 14px !important;
+    }
+
+    aside.collapsed #sidebar-collapsed-status-dot {
+        display: none !important;
+    }
+
+    aside.collapsed .sidebar-profile-name-row {
+        display: flex !important;
+    }
+
+    aside.collapsed .sidebar-profile-name {
+        display: block !important;
+    }
+
+    aside.collapsed .sidebar-settings-gear-btn {
+        display: flex !important;
+    }
+
     .floating-avatar-group {
         position: relative;
         width: 36px;
@@ -5791,8 +6133,6 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
         padding: 0;
         margin: 0;
         border: 1.5px solid var(--glass-border);
-        outline: 2.5px solid rgba(160, 160, 160, 0.65) !important;
-        outline-offset: 2px !important;
         background: var(--input-bg);
         color: var(--text-secondary);
         display: flex !important;
@@ -5800,23 +6140,23 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
         justify-content: center;
         cursor: pointer;
         -webkit-tap-highlight-color: transparent !important;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
         box-sizing: border-box;
         transform: scale(1) translateZ(0);
         transform-origin: center center;
         will-change: transform;
-        transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, outline-color 0.25s ease, box-shadow 0.2s ease;
+        transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    #floating-avatar-btn.auth-status-disconnected {
-        outline-color: rgba(160, 160, 160, 0.65) !important;
+    #floating-avatar-status-dot {
+        border-color: var(--bg-color);
     }
 
-    #floating-avatar-btn.auth-status-expired {
-        outline-color: #ac4252 !important;
-    }
-
-    #floating-avatar-btn.auth-status-connected {
-        outline-color: var(--primary) !important;
+    #floating-avatar-group.is-open #floating-avatar-status-dot {
+        opacity: 0;
+        transform: scale(0.4);
     }
 
     #floating-avatar-btn:active:not(.is-enlarged) {
@@ -5825,7 +6165,7 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
 
     #floating-avatar-btn.is-enlarged {
         transform: scale(1.12) translateZ(0) !important;
-        box-shadow: 0 4px 12px rgba(154, 135, 30, 0.3) !important;
+        box-shadow: none !important;
     }
 
     #floating-avatar-img {
@@ -5833,6 +6173,7 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
         height: 100%;
         object-fit: cover;
         display: block;
+        pointer-events: none;
     }
 
     #floating-avatar-placeholder {
@@ -5842,6 +6183,7 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
         align-items: center;
         justify-content: center;
         color: var(--text-secondary);
+        pointer-events: none;
     }
 
     #floating-avatar-placeholder svg {
@@ -5890,6 +6232,7 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
     .floating-avatar-header-row {
         display: flex;
         align-items: center;
+        gap: 8px;
         min-height: 36px;
         padding: 0 52px 0 12px;
         box-sizing: border-box;
@@ -5948,7 +6291,6 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
 
     .floating-avatar-menu-item:active {
         background: rgba(150, 150, 150, 0.16);
-        color: var(--primary);
         transform: scale(0.97);
     }
 
@@ -6248,7 +6590,8 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
     cursor: default;
 }
 
-#settings-avatar-img {
+#settings-avatar-img,
+#sidebar-popover-avatar-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -6256,7 +6599,8 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
     pointer-events: none;
 }
 
-#settings-avatar-placeholder {
+#settings-avatar-placeholder,
+#sidebar-popover-avatar-placeholder {
     width: 100%;
     height: 100%;
     display: flex;
@@ -6505,31 +6849,8 @@ textarea, #full-note-content { touch-action: pan-y !important; overscroll-behavi
         3) 開窗後 360ms 內暫停子元件過渡與 hover 縮放（main.js 的 initModalOpenGuard 加上 .is-opening）
    ========================================================================== */
 
-/* 1. 新增 / 編輯視窗：不用 translate(-50%) 置中，避免半像素模糊與位移 */
-div#editor-modal:not(#full-editor-modal) {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: auto;
-    transform: translateY(14px);
-    transition: opacity 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-                transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-div#editor-modal.active:not(#full-editor-modal) {
-    transform: none;
-}
-
-/* 輸入錯誤抖動：原 shakeError 以 translate(-50%) 置中為前提，新置中方式需獨立版本 */
-@keyframes shakeErrorCentered {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-2.5px); }
-    20%, 40%, 60%, 80% { transform: translateX(2.5px); }
-}
-
 #editor-modal.shake-animation {
-    animation: shakeErrorCentered 0.4s cubic-bezier(.36,.07,.19,.97) !important;
+    animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) !important;
 }
 
 /* 2. 視窗內元件靜止時不獨立成圖層（:where 不增加權重，:hover / :active 縮放照常生效） */
@@ -6620,47 +6941,18 @@ div#editor-modal.active:not(#full-editor-modal) {
       剛好與開窗重疊，卡片文字因此跟著抖；開窗期間改用不回彈的曲線（hover / active 回饋不變）。
    ========================================================================== */
 
-/* A. 勾勾圖標：靜止時不播放動畫，點擊切換時才播放 */
-#editor-modal .reminder-modal-checkbox.checked svg {
-    animation: none;
-}
-
-#editor-modal .reminder-modal-checkbox.checked.check-pop svg {
-    animation: reminderModalCheckAnim 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
 /* B. 視窗本體不使用 optimizeLegibility（子元素繼承） */
 #editor-modal {
     text-rendering: auto;
 }
 
-/* C. 新增 / 編輯視窗：整數像素置中（寬高與位置皆取整，避免 0.5px 位置造成文字重新取整）
-      --em-h 為偶數像素高度；水平方向以 5% 邊距或 400px 上限計算，皆向下取整 */
-@supports (top: round(down, 1px, 1px)) and (height: 1dvh) {
-    div#editor-modal:not(#full-editor-modal) {
-        --em-h: min(536px, round(down, 90dvh, 2px));
-        left: max(round(down, 5%, 1px), round(down, calc(50% - 200px), 1px));
-        right: auto;
-        top: round(down, calc((100% - var(--em-h)) / 2), 1px);
-        bottom: auto;
-        margin: 0;
-        width: min(400px, calc(100% - 2 * round(down, 5%, 1px)));
-        height: var(--em-h);
-        max-height: var(--em-h) !important;
-    }
-}
-
-/* D. 其餘彈窗：不縮放，只做 opacity + 位移；原本的 translate(-50%, -50%) 置中保留不動
-      （這些視窗高度為 auto，無法改成 margin:auto 置中）。:not() 疊加讓權重高於原通用規則，且不影響 editor / full-editor */
-div[id$="-modal"]:not(#full-editor-modal):not(#editor-modal) {
+div[id$="-modal"]:not(#full-editor-modal):not(#editor-modal):not(#sort-modal):not(#category-modal) {
     transform: translate(-50%, calc(-50% + 14px));
 }
 
-div[id$="-modal"].active:not(#full-editor-modal):not(#editor-modal) {
+div[id$="-modal"].active:not(#full-editor-modal):not(#editor-modal):not(#sort-modal):not(#category-modal) {
     transform: translate(-50%, -50%);
 }
-
-/* E. 底部切換軌道已移除 */
 
 body:has(#modal-overlay.active, #modal-overlay[style*="display: block"]) :is(.note-card, .reminder-card):not(:active) {
     transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, border-color 0.3s ease;
@@ -6681,6 +6973,8 @@ body:has(#modal-overlay.active, #modal-overlay[style*="display: block"]) :is(.no
 [data-no-glass] #full-editor-modal,
 [data-no-glass] #sort-modal,
 [data-no-glass] #category-modal,
+[data-no-glass] .editor-external-top-bar,
+[data-no-glass] .editor-external-bottom-bar,
 [data-no-glass] .sort-external-top-bar,
 [data-no-glass] .sort-external-bottom-bar,
 [data-no-glass] .category-external-top-bar,
@@ -6689,20 +6983,19 @@ body:has(#modal-overlay.active, #modal-overlay[style*="display: block"]) :is(.no
     transition: none !important;
 }
 
-[data-no-glass] div[id$="-modal"]:not(#full-editor-modal):not(#editor-modal):not(.active),
+[data-no-glass] div[id$="-modal"]:not(#full-editor-modal):not(.active),
+[data-no-glass] #editor-modal:not(.active),
 [data-no-glass] #sort-modal:not(.active),
 [data-no-glass] #category-modal:not(.active) {
     transform: translate(-50%, -50%) !important;
-}
-
-[data-no-glass] div#editor-modal:not(#full-editor-modal):not(.active) {
-    transform: none !important;
 }
 
 [data-no-glass] #full-editor-modal:not(.active) {
     transform: translate(-50%, -50%) !important;
 }
 
+[data-no-glass] .editor-external-top-bar:not(.active),
+[data-no-glass] .editor-external-bottom-bar:not(.active),
 [data-no-glass] .sort-external-top-bar:not(.active),
 [data-no-glass] .sort-external-bottom-bar:not(.active),
 [data-no-glass] .category-external-top-bar:not(.active),
