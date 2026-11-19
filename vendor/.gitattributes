@@ -1,0 +1,2 @@
+# Keep the upstream bytes intact for the HTML integrity check.
+dexie-4.4.6.min.js -text
