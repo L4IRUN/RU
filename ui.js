@@ -29,7 +29,7 @@ export function getLocalDateString(date = new Date()) {
 
 export function formatTimeWithDay(timeStr) {
     if (!timeStr || timeStr === '無時間紀錄') return '無時間紀錄';
-    if (timeStr.includes('(')) return timeStr; 
+    if (timeStr.includes('(')) return timeStr;
     const match = timeStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
     if (match) {
         const dateObj = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
@@ -47,7 +47,7 @@ export function getTimestamp() {
     const now = new Date();
     const days = ['日', '一', '二', '三', '四', '五', '六'];
     const dayStr = `(${days[now.getDay()]})`;
-    return `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${dayStr} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${dayStr} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 }
 
 export function getTextWidth(text, font) {
@@ -837,7 +837,7 @@ export function updateBookmarkDOM(id) {
             let host = '網站連結';
             try {
                 host = safeUrl ? new URL(safeUrl).hostname : '網站連結';
-            } catch(e) {
+            } catch (e) {
                 host = '網站連結';
             }
             capsule.innerText = host;
@@ -916,11 +916,129 @@ export function updateBookmarkDOM(id) {
 // ==========================================
 // 時間顯示功能 (System Clock & Session Timer)
 // ==========================================
-let sessionStartTime = Date.now(); 
+let sessionStartTime = Date.now();
 
-export function initClocks() {
+export function updateClocksDisplay() {
     const systemClock = document.getElementById('system-clock');
     const sessionClock = document.getElementById('session-clock');
+    if (!systemClock || !sessionClock) return;
+
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    systemClock.textContent = h + ':' + m + ':' + s;
+
+    const diffSecs = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const sh = String(Math.floor(diffSecs / 3600)).padStart(2, '0');
+    const sm = String(Math.floor((diffSecs % 3600) / 60)).padStart(2, '0');
+    const ss = String(diffSecs % 60).padStart(2, '0');
+    sessionClock.textContent = sh + ':' + sm + ':' + ss;
+}
+
+export function updateHeaderStatusInfo() {
+    const label1 = document.getElementById('header-status-label-1');
+    const label2 = document.getElementById('header-status-label-2');
+    const val1 = document.getElementById('system-clock');
+    const val2 = document.getElementById('session-clock');
+    if (!val1 || !val2) return;
+
+    if (state.currentView === 'bookmarks') {
+        const normalizedCurrentCat = (state.currentCategory && state.currentCategory.trim() !== '')
+            ? state.currentCategory.trim()
+            : '未分類';
+
+        let cardCount = 0;
+        const subCats = new Set();
+        Object.keys(state.bookmarks || {}).forEach(id => {
+            const bm = state.bookmarks[id];
+            const cat = (bm && bm.category && bm.category.trim() !== '') ? bm.category.trim() : '未分類';
+            if (cat === normalizedCurrentCat) {
+                cardCount++;
+                const sub = (bm.subCategory && bm.subCategory.trim() !== '') ? bm.subCategory.trim() : '未分類';
+                subCats.add(sub);
+            }
+        });
+
+        if (label1) label1.textContent = '子分類';
+        val1.textContent = String(subCats.size);
+        if (label2) label2.textContent = '卡片';
+        val2.textContent = String(cardCount);
+    } else {
+        if (label1) label1.textContent = '目前時間';
+        if (label2) label2.textContent = '使用時間';
+        updateClocksDisplay();
+    }
+}
+
+let currentEntranceAnimToken = 0;
+
+export function triggerViewEntranceAnimations() {
+    if (state.isSelectionMode) return;
+    const isModalOpen = Boolean(
+        hasModal(state, 'editor') ||
+        hasModal(state, 'full-editor') ||
+        state.isEditing
+    );
+    if (isModalOpen || document.body.classList.contains('is-chapter-scrolling')) return;
+
+    const animToken = ++currentEntranceAnimToken;
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (animToken !== currentEntranceAnimToken) return;
+
+            const titleEl = document.getElementById('current-main-title');
+            const timeEl = document.querySelector('.system-time-container');
+            const searchEl = document.querySelector('.search-sort-container') || document.getElementById('search-container');
+            const container = getViewContainer(state.currentView || 'bookmarks');
+            const subTitles = container ? container.querySelectorAll('.month-title') : [];
+
+            const restartAnim = (el, cls) => {
+                if (!el) return;
+                if (el._entranceTimer) {
+                    clearTimeout(el._entranceTimer);
+                    el._entranceTimer = null;
+                }
+                if (el._entranceEndHandler) {
+                    el.removeEventListener('animationend', el._entranceEndHandler);
+                    el._entranceEndHandler = null;
+                }
+
+                el.classList.remove(cls);
+                void el.offsetWidth;
+                el.classList.add(cls);
+
+                const onEnd = (e) => {
+                    if (animToken !== currentEntranceAnimToken) return;
+                    if (!e || e.target === el) {
+                        el.classList.remove(cls);
+                        if (el._entranceTimer) {
+                            clearTimeout(el._entranceTimer);
+                            el._entranceTimer = null;
+                        }
+                        el.removeEventListener('animationend', onEnd);
+                        el._entranceEndHandler = null;
+                    }
+                };
+                el._entranceEndHandler = onEnd;
+                el.addEventListener('animationend', onEnd, { once: true });
+                el._entranceTimer = setTimeout(() => {
+                    if (animToken === currentEntranceAnimToken) {
+                        onEnd(null);
+                    }
+                }, 2000);
+            };
+
+            if (titleEl) restartAnim(titleEl, 'title-entrance');
+            if (timeEl) restartAnim(timeEl, 'time-entrance');
+            if (searchEl) restartAnim(searchEl, 'search-entrance');
+            subTitles.forEach(st => restartAnim(st, 'subtitle-entrance'));
+        });
+    });
+}
+
+export function initClocks() {
     const appVersionDisplay = document.getElementById('app-version-display');
 
     if (appVersionDisplay) {
@@ -928,22 +1046,13 @@ export function initClocks() {
     }
 
     function update() {
-        const now = new Date();
-        
-        const h = String(now.getHours()).padStart(2, '0');
-        const m = String(now.getMinutes()).padStart(2, '0');
-        const s = String(now.getSeconds()).padStart(2, '0');
-        if (systemClock) systemClock.textContent = `${h}:${m}:${s}`;
-
-        const diffSecs = Math.floor((Date.now() - sessionStartTime) / 1000);
-        const sh = String(Math.floor(diffSecs / 3600)).padStart(2, '0');
-        const sm = String(Math.floor((diffSecs % 3600) / 60)).padStart(2, '0');
-        const ss = String(diffSecs % 60).padStart(2, '0');
-        if (sessionClock) sessionClock.textContent = `${sh}:${sm}:${ss}`;
+        if (state.currentView === 'reminders') {
+            updateClocksDisplay();
+        }
     }
 
     setInterval(update, 1000);
-    update(); 
+    updateHeaderStatusInfo();
 }
 
 // ==========================================
@@ -1016,7 +1125,7 @@ export function renderSidebar() {
         let idxA = savedCatOrder.indexOf(a);
         let idxB = savedCatOrder.indexOf(b);
         if (idxA === -1 && idxB === -1) return a.localeCompare(b);
-        if (idxA === -1) return 1; 
+        if (idxA === -1) return 1;
         if (idxB === -1) return -1;
         return idxA - idxB;
     });
@@ -1035,7 +1144,7 @@ export function renderSidebar() {
         iconSpan.className = 'item-icon category-dot';
         iconSpan.innerHTML = '<span class="category-dot-circle"></span>';
         item.appendChild(iconSpan);
-        
+
         const text = document.createElement('span');
         text.className = 'item-text';
         text.innerText = cat;
@@ -1194,7 +1303,7 @@ export function updateChapterNav(items) {
     const rail = document.getElementById('chapter-nav-rail');
     const popover = document.getElementById('chapter-popover');
     const ticksContainer = rail ? rail.querySelector('.chapter-nav-ticks') : null;
-    
+
     if (!rail || !popover) return;
 
     if (!items || items.length === 0) {
@@ -1225,7 +1334,7 @@ export function updateChapterNav(items) {
 
     lastNavSignature = currentSignature;
     popover.innerHTML = '';
-    
+
     // 動態密度控制：最多顯示 20 個刻度，避免刻度線黏在一起
     const maxTicks = 20;
     const step = items.length > maxTicks ? Math.ceil(items.length / maxTicks) : 1;
@@ -1318,19 +1427,19 @@ export function renderBookmarks() {
     const titleEl = document.getElementById('current-main-title');
     titleEl.innerText = state.currentCategory;
     titleEl.style.cursor = '';
-    
+
     const selectionWrapper = document.getElementById('selection-wrapper') || document.querySelector('.sort-wrapper');
-    if (selectionWrapper) selectionWrapper.style.display = 'block'; 
+    if (selectionWrapper) selectionWrapper.style.display = 'block';
     const headerSortBtn = document.getElementById('header-sort-btn');
     if (headerSortBtn && !state.isSelectionMode) headerSortBtn.style.display = 'flex';
     const headerMenuSortItem = document.getElementById('header-menu-sort-item');
     if (headerMenuSortItem && !state.isSelectionMode) headerMenuSortItem.style.display = 'flex';
-    
+
     updateSelectionBarUI();
 
     const container = getViewContainer('bookmarks');
     switchActiveView('bookmarks');
-    
+
     const normalizedCurrentCat = (state.currentCategory && state.currentCategory.trim() !== '')
         ? state.currentCategory.trim()
         : '未分類';
@@ -1340,7 +1449,7 @@ export function renderBookmarks() {
         const cat = (bm.category && bm.category.trim() !== '') ? bm.category.trim() : '未分類';
         if (cat === normalizedCurrentCat) categoryBookmarks.push({ id, ...bm });
     });
-    
+
     if (categoryBookmarks.length === 0) {
         if (state.isSelectionMode) {
             if (state.selectedBookmarkIds) state.selectedBookmarkIds.clear();
@@ -1350,6 +1459,10 @@ export function renderBookmarks() {
         container.replaceChildren(createEmptyStateDOM());
         updateChapterNav([]);
         updateFloatingCategoryTitle(state.currentCategory || '未分類');
+        updateHeaderStatusInfo();
+        if (state.isViewSwitching && !state.isSelectionMode) {
+            triggerViewEntranceAnimations();
+        }
         emitAppEvent(APP_EVENTS.SEARCH_CLEAR);
         return;
     }
@@ -1389,8 +1502,8 @@ export function renderBookmarks() {
     });
 
     const subcategoryOrdersMap = safeJSONParse(localStorage.getItem('my_subcategory_order'), {});
-    const currentCategorySubOrder = Array.isArray(subcategoryOrdersMap[state.currentCategory]) 
-        ? subcategoryOrdersMap[state.currentCategory] 
+    const currentCategorySubOrder = Array.isArray(subcategoryOrdersMap[state.currentCategory])
+        ? subcategoryOrdersMap[state.currentCategory]
         : [];
 
     const sortedSubCategories = Object.keys(groupedBySubCategory).sort((a, b) => {
@@ -1418,6 +1531,8 @@ export function renderBookmarks() {
 
     const navItems = [];
     let nextWrapperChild = container.firstElementChild;
+    const forceEntrance = Boolean(state.isViewSwitching && !state.isSelectionMode);
+    let bookmarkCardIdx = 0;
 
     sortedSubCategories.forEach(subCatName => {
         let wrapper = container.querySelector(`.category-wrapper[data-bookmark-category="${CSS.escape(state.currentCategory)}"][data-subcategory="${CSS.escape(subCatName)}"]`);
@@ -1561,7 +1676,7 @@ export function renderBookmarks() {
                     let host = '網站連結';
                     try {
                         host = safeUrl ? new URL(safeUrl).hostname : '網站連結';
-                    } catch(e) {
+                    } catch (e) {
                         host = '網站連結';
                     }
                     capsule.innerText = host;
@@ -1639,6 +1754,8 @@ export function renderBookmarks() {
                 }
                 const targetTime = `上次編輯：${formatTimeWithDay(bm.timestamp)}`;
                 if (timeEl.innerText !== targetTime) timeEl.innerText = targetTime;
+
+                observeCardEntrance(card, forceEntrance, bookmarkCardIdx++);
             } else {
                 card = document.createElement('div');
                 card.className = `note-card glass-effect ${isCustom ? 'is-custom-record' : ''} ${isSelected ? 'is-selected' : ''} ${state.isSelectionMode ? 'in-selection-mode' : ''} ${isSubCatSelectedAny ? 'selection-disabled' : ''}`;
@@ -1652,7 +1769,7 @@ export function renderBookmarks() {
                     let host = '網站連結';
                     try {
                         host = safeUrl ? new URL(safeUrl).hostname : '網站連結';
-                    } catch(e) {
+                    } catch (e) {
                         host = '網站連結';
                     }
                     capsule.innerText = host;
@@ -1701,7 +1818,7 @@ export function renderBookmarks() {
                 card.appendChild(footer);
 
                 grid.insertBefore(card, nextCardChild);
-                observeCardEntrance(card);
+                observeCardEntrance(card, forceEntrance, bookmarkCardIdx++);
             }
 
             nextCardChild = card.nextElementSibling;
@@ -1713,6 +1830,10 @@ export function renderBookmarks() {
         updateFloatingCategoryTitle(navItems[0].label);
     } else {
         updateFloatingCategoryTitle(state.currentCategory || '未分類');
+    }
+    updateHeaderStatusInfo();
+    if (forceEntrance) {
+        triggerViewEntranceAnimations();
     }
     const searchInput = document.getElementById('main-search-input');
     if (searchInput && searchInput.value) {
@@ -1896,7 +2017,7 @@ export function renderReminders() {
     const titleEl = document.getElementById('current-main-title');
     titleEl.innerText = '提醒';
     titleEl.style.cursor = '';
-    
+
     const selectionWrapper = document.getElementById('selection-wrapper') || document.getElementById('sort-wrapper');
     if (selectionWrapper) selectionWrapper.style.display = 'block';
     const headerSortBtn = document.getElementById('header-sort-btn');
@@ -1915,6 +2036,10 @@ export function renderReminders() {
         container.replaceChildren(createEmptyStateDOM());
         updateChapterNav([]);
         updateFloatingCategoryTitle('提醒');
+        updateHeaderStatusInfo();
+        if (state.isViewSwitching && !state.isSelectionMode) {
+            triggerViewEntranceAnimations();
+        }
         emitAppEvent(APP_EVENTS.SEARCH_CLEAR);
         updateSelectionBarUI();
         return;
@@ -2016,6 +2141,8 @@ export function renderReminders() {
 
     const navItems = [];
     let nextWrapperChild = container.firstElementChild;
+    const forceEntrance = Boolean(state.isViewSwitching && !state.isSelectionMode);
+    let reminderCardIdx = 0;
 
     activeGroups.forEach(group => {
         let wrapper = container.querySelector(`.category-wrapper[data-reminder-group="${group.key}"]`);
@@ -2175,6 +2302,8 @@ export function renderReminders() {
                         card.style.removeProperty('--reminder-delay');
                     }
                 }
+
+                observeCardEntrance(card, forceEntrance, reminderCardIdx++);
             } else {
                 card = document.createElement('div');
                 card.className = `reminder-card glass-effect ${isDone ? 'is-done' : ''} ${isOverdue ? 'is-overdue' : ''} ${isSelected ? 'is-selected' : ''} ${state.isSelectionMode ? 'in-selection-mode' : ''}`;
@@ -2224,7 +2353,7 @@ export function renderReminders() {
                 }
 
                 grid.insertBefore(card, nextCardChild);
-                observeCardEntrance(card);
+                observeCardEntrance(card, forceEntrance, reminderCardIdx++);
             }
 
             nextCardChild = card.nextElementSibling;
@@ -2241,6 +2370,10 @@ export function renderReminders() {
     startReminderCountdownTimer();
     updateSelectionBarUI();
 
+    updateHeaderStatusInfo();
+    if (forceEntrance) {
+        triggerViewEntranceAnimations();
+    }
     const searchInput = document.getElementById('main-search-input');
     if (searchInput && searchInput.value) {
         emitAppEvent(APP_EVENTS.SEARCH_FILTER);
@@ -2249,9 +2382,17 @@ export function renderReminders() {
 
 let cardEntranceObserver = null;
 
-export function observeCardEntrance(card) {
+export function observeCardEntrance(card, force = false, staggerIndex = 0) {
     if (!card) return;
-    if (card.dataset.entranceDone === 'true' || card.classList.contains('card-entrance')) return;
+    if (state.isSelectionMode) {
+        card.classList.remove('card-pending');
+        card.classList.remove('card-entrance');
+        card.style.animationDelay = '';
+        card.dataset.entranceDone = 'true';
+        return;
+    }
+
+    if (!force && (card.dataset.entranceDone === 'true' || card.classList.contains('card-entrance'))) return;
 
     const isModalOpen = Boolean(
         hasModal(state, 'editor') ||
@@ -2263,7 +2404,20 @@ export function observeCardEntrance(card) {
         return;
     }
 
-    card.classList.add('card-pending');
+    if (force) {
+        card.dataset.entranceDone = 'false';
+        card.classList.remove('card-entrance');
+        card.classList.add('card-pending');
+    } else if (!card.dataset.entranceDone || card.dataset.entranceDone === 'false') {
+        card.classList.add('card-pending');
+    }
+
+    // Top-to-bottom sequential cascade:
+    // Header title starts at 0s, Search at 0.12s, Subtitle at 0.24s.
+    // Cards start at 0.48s base delay + (staggerIndex * 0.06s), capped at 0.96s,
+    // ensuring subcategories visually arrive clearly before cards.
+    const delay = (0.48 + Math.min(staggerIndex * 0.06, 0.48)).toFixed(3);
+    card.style.animationDelay = delay + 's';
 
     if (!cardEntranceObserver) {
         cardEntranceObserver = new IntersectionObserver((entries) => {
@@ -2273,8 +2427,9 @@ export function observeCardEntrance(card) {
                     cardEntranceObserver.unobserve(target);
                     target.classList.remove('card-pending');
 
-                    if (document.body.classList.contains('is-chapter-scrolling')) {
+                    if (document.body.classList.contains('is-chapter-scrolling') || state.isSelectionMode) {
                         target.dataset.entranceDone = 'true';
+                        target.style.animationDelay = '';
                         return;
                     }
 
@@ -2282,18 +2437,26 @@ export function observeCardEntrance(card) {
                     target.dataset.entranceDone = 'true';
 
                     const cleanUp = (e) => {
-                        if (!e || e.animationName === 'cardEntrance') {
-                            target.classList.remove('card-entrance');
-                            target.removeEventListener('animationend', cleanUp);
+                            if (!e || e.animationName === 'cardEntrance' || e.animationName === 'cardEntranceDone') {
+                                target.classList.remove('card-entrance');
+                                target.style.animationDelay = '';
+                                target.removeEventListener('animationend', cleanUp);
+                                if (target._cardAnimTimer) {
+                                    clearTimeout(target._cardAnimTimer);
+                                    target._cardAnimTimer = null;
+                                }
+                            }
+                        };
+                        if (target._cardAnimTimer) {
+                            clearTimeout(target._cardAnimTimer);
                         }
-                    };
-                    target.addEventListener('animationend', cleanUp);
-                    setTimeout(cleanUp, 450);
-                }
-            });
+                        target.addEventListener('animationend', cleanUp, { once: true });
+                        target._cardAnimTimer = setTimeout(() => cleanUp(null), 2400);
+                    }
+                });
         }, {
             root: document.querySelector('main'),
-            rootMargin: '0px 0px -10px 0px',
+            rootMargin: '50px 0px 50px 0px',
             threshold: 0.02
         });
     }
@@ -2976,12 +3139,12 @@ export function renderCalendar() {
     const year = draft.calDate.getFullYear();
     const month = draft.calDate.getMonth();
     document.getElementById('cal-month-year').innerText = `${year}年 ${month + 1}月`;
-    
+
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysGrid = document.getElementById('cal-days');
     daysGrid.innerHTML = '';
-    
+
     let startDate = draft.tempSelectedReminderStartDate || '';
     let endDate = draft.tempSelectedReminderEndDate || '';
 
@@ -3016,7 +3179,7 @@ export function renderCalendar() {
         const dayCell = document.createElement('div');
         dayCell.className = 'cal-day-cell';
         dayCell.innerText = i;
-        
+
         const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
         dayCell.dataset.date = cellDateStr;
         dayCell.dataset.action = 'selectCalendarDay';

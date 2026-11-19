@@ -82,16 +82,16 @@ export function initFabInteractions() {
         mainFab.addEventListener('touchstart', (e) => {
             lastFabTouchAt = Date.now();
             startFabInteraction(e.touches[0].clientX, e.touches[0].clientY);
-        }, {passive: true});
+        }, { passive: true });
         mainFab.addEventListener('touchend', (e) => {
             lastFabTouchAt = Date.now();
             if (e.changedTouches.length > 0) endFabInteraction(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
             else cancelFabInteraction();
-        }, {passive: true});
+        }, { passive: true });
         mainFab.addEventListener('touchcancel', () => {
             lastFabTouchAt = Date.now();
             cancelFabInteraction();
-        }, {passive: true});
+        }, { passive: true });
     }
 
     // 視窗尺寸變更（旋轉、桌面/手機寬度切換）或頁面從背景／快取回來時，重新校正按鈕狀態
@@ -123,10 +123,19 @@ export function initEditorViewportInteractions() {
     };
     window.addEventListener('resize', updateEditorViewport, { passive: true });
     viewport?.addEventListener('resize', updateEditorViewport, { passive: true });
-    viewport?.addEventListener('scroll', updateEditorViewport, { passive: true });
+    viewport?.addEventListener('scroll', () => {
+        if (hasModal(state, 'editor') && window.scrollY !== 0) {
+            window.scrollTo(0, 0);
+        }
+        updateEditorViewport();
+    }, { passive: true });
     const editor = document.getElementById('editor-modal');
-    editor?.addEventListener('focusin', updateEditorViewport);
-    editor?.addEventListener('focusout', updateEditorViewport);
+    editor?.addEventListener('focusin', () => {
+        if (window.scrollY !== 0) {
+            window.scrollTo(0, 0);
+        }
+        updateEditorViewport();
+    });
     if (viewport) updateEditorViewport();
 }
 
@@ -281,4 +290,5 @@ export function initTextSelectionInteractions() {
     document.addEventListener('touchend', handleSelectionPointerEnd, true);
     document.addEventListener('touchcancel', handleSelectionPointerEnd, true);
     document.addEventListener('keyup', () => queueTextToolbar(140));
-    document.addEventListener('selectionchange', () => queueTextToolbar());}
+    document.addEventListener('selectionchange', () => queueTextToolbar());
+}

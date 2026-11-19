@@ -579,6 +579,7 @@ export function toggleFloatingAvatarPopover(e) {
 
     const mainEl = document.querySelector('main');
     state.floatingAvatarOpenScrollTop = mainEl ? mainEl.scrollTop : 0;
+    state.floatingAvatarOpenedAt = Date.now();
 
     popover.classList.add('active');
     if (avatarBtn) avatarBtn.classList.add('is-enlarged');

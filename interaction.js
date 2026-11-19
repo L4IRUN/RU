@@ -629,7 +629,7 @@ const CLICK_ACTIONS = {
             if (b && b.url) {
                 navigator.clipboard.writeText(b.url).then(() => {
                     showCloudToast('已複製網址');
-                }).catch(() => {});
+                }).catch(() => { });
             }
         }
     },
@@ -1007,7 +1007,7 @@ function initOutsideInteractions() {
             const el = activeModals[i];
             if (el.id.endsWith('-modal') || el.id.endsWith('-overlay')) {
                 e.preventDefault();
-                return; 
+                return;
             }
         }
 
@@ -1017,7 +1017,7 @@ function initOutsideInteractions() {
         }
 
         e.preventDefault();
-        e.stopPropagation(); 
+        e.stopPropagation();
 
         const element = e.target.closest('.note-card') || e.target.closest('.reminder-card') || document.getElementById('content-container');
         if (element || e.target instanceof Element) {
@@ -1075,9 +1075,11 @@ function initOutsideInteractions() {
             hideSidebarCollapsedMenu();
         }
         if (!isTargetIn('#floating-avatar-group')) {
-            closeFloatingAvatarPopover();
+            if (Date.now() - (state.floatingAvatarOpenedAt || 0) > 400) {
+                closeFloatingAvatarPopover();
+            }
         }
-        
+
         if (state._cachedInnerWidth <= 768) {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('mobile-sidebar-overlay');
@@ -1140,7 +1142,7 @@ function initSegmentedControls() {
         let isDragging = false, startX = 0, currentSliderX = 0, segmentWidth = 0;
         let hasMoved = false;
         const isUnifiedType = segment.id === 'unified-type-selector';
-        const typeTabs = ['reminder', 'bookmark', 'note']; 
+        const typeTabs = ['reminder', 'bookmark', 'note'];
         const isVisualType = segment.id === 'visual-effects-segment';
 
         const getEffectiveNumOptions = () => numOptions;
@@ -1153,11 +1155,11 @@ function initSegmentedControls() {
 
         const startDrag = (clientX) => {
             isDragging = true;
-            hasMoved = false; 
+            hasMoved = false;
             startX = clientX;
             const currentCount = getEffectiveNumOptions();
             const paddingAllowance = isUnifiedType ? 0 : 8;
-            segmentWidth = Math.max(1, ((segment.offsetWidth || 140) - paddingAllowance) / currentCount); 
+            segmentWidth = Math.max(1, ((segment.offsetWidth || 140) - paddingAllowance) / currentCount);
             let currentIndex = getActiveIndex();
             currentSliderX = currentIndex * segmentWidth;
         };
@@ -1166,9 +1168,9 @@ function initSegmentedControls() {
             if (!isDragging || !slider) return;
             let diffX = clientX - startX;
             if (Math.abs(diffX) > 5) hasMoved = true;
-            
+
             if (hasMoved) {
-                slider.style.transition = 'none'; 
+                slider.style.transition = 'none';
                 let newX = currentSliderX + diffX;
                 const currentCount = getEffectiveNumOptions();
                 let maxTranslate = segmentWidth * (currentCount - 1);
@@ -1179,7 +1181,7 @@ function initSegmentedControls() {
                 let targetIndex = Math.round(newX / segmentWidth);
                 if (targetIndex < 0) targetIndex = 0;
                 if (targetIndex >= currentCount) targetIndex = currentCount - 1;
-                
+
                 btns.forEach((btn, index) => {
                     btn.classList.toggle('active', index === targetIndex);
                 });
@@ -1190,14 +1192,14 @@ function initSegmentedControls() {
             if (!isDragging) return;
             isDragging = false;
             if (slider) { slider.style.transition = ''; slider.style.transform = ''; }
-            if (!hasMoved) return; 
+            if (!hasMoved) return;
 
             const currentCount = getEffectiveNumOptions();
             let finalX = currentSliderX + (clientX - startX);
             let targetIndex = Math.round(finalX / segmentWidth);
             if (targetIndex < 0) targetIndex = 0;
             if (targetIndex >= currentCount) targetIndex = currentCount - 1;
-            
+
             if (isUnifiedType) {
                 const targetType = typeTabs[targetIndex];
                 if (state.currentUnifiedType === targetType) btns.forEach((btn, idx) => btn.classList.toggle('active', idx === targetIndex));
@@ -1212,7 +1214,7 @@ function initSegmentedControls() {
 
         btns.forEach((btn, index) => {
             const handleTap = (e) => {
-                if (e.cancelable) e.preventDefault(); 
+                if (e.cancelable) e.preventDefault();
                 if (isUnifiedType) {
                     if (btn.id === 'unified-type-reminder') switchCreateType('reminder');
                     else if (btn.id === 'unified-type-note') switchCreateType('note');
@@ -1222,22 +1224,22 @@ function initSegmentedControls() {
                 }
             };
             btn.addEventListener('mousedown', handleTap);
-            btn.addEventListener('touchstart', handleTap, {passive: false});
+            btn.addEventListener('touchstart', handleTap, { passive: false });
         });
 
-        segment.addEventListener('touchstart', (e) => { startDrag(e.touches[0].clientX); }, {passive: true});
+        segment.addEventListener('touchstart', (e) => { startDrag(e.touches[0].clientX); }, { passive: true });
         segment.addEventListener('mousedown', (e) => { startDrag(e.clientX); });
-        
-        document.addEventListener('touchmove', (e) => { 
+
+        document.addEventListener('touchmove', (e) => {
             if (isDragging) {
                 if (e.cancelable) e.preventDefault();
-                moveDrag(e.touches[0].clientX); 
+                moveDrag(e.touches[0].clientX);
             }
-        }, {passive: false});
-        
-        document.addEventListener('touchend', (e) => { 
-            if (isDragging && e.changedTouches.length > 0) endDrag(e.changedTouches[0].clientX); 
-        }, {passive: true});
+        }, { passive: false });
+
+        document.addEventListener('touchend', (e) => {
+            if (isDragging && e.changedTouches.length > 0) endDrag(e.changedTouches[0].clientX);
+        }, { passive: true });
 
         document.addEventListener('mousemove', (e) => { if (isDragging) moveDrag(e.clientX); });
         document.addEventListener('mouseup', (e) => { if (isDragging) endDrag(e.clientX); });
@@ -1259,7 +1261,7 @@ export function initGlobalInteractions() {
     initKeyboardShortcuts();
     initEditorDraftInputs();
     initCleanPasteHandling();
-    initCalendarDragInteractions(); 
+    initCalendarDragInteractions();
     initSortModalDrag();
     initSortCarousel();
     initCategoryModalDrag();

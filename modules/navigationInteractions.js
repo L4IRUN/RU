@@ -50,7 +50,8 @@ export function initMainScrollInteractions() {
         const currentScroll = mainContainer.scrollTop;
         const avatarPopover = document.getElementById('floating-avatar-popover');
         if (avatarPopover && avatarPopover.classList.contains('active')) {
-            if (Math.abs(currentScroll - state.floatingAvatarOpenScrollTop) > 24) {
+            const timeSinceOpen = Date.now() - (state.floatingAvatarOpenedAt || 0);
+            if (timeSinceOpen > 500 && Math.abs(currentScroll - state.floatingAvatarOpenScrollTop) > 24) {
                 closeFloatingAvatarPopover();
             }
         }

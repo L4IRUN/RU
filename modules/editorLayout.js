@@ -48,14 +48,14 @@ export function positionEditorExternalBars() {
     const minModalHeight = isMobile ? 80 : 220;
     let modalHeight = Math.max(minModalHeight, Math.min(536, vpHeight - reservedHeight));
     let modalTop = (vpHeight - modalHeight) / 2;
-    if (keyboardOpen && isTyping && field) {
-        const held = keyboardBox?.width === layoutWidth && (keyboardBox.held || field !== keyboardBox.field);
-        if (held && keyboardBox) {
-            // 文字與 URL 鍵盤切換時保留原框，只有鍵盤實際遮住表單才縮短。
-            modalTop = Math.min(keyboardBox.top, modalTop);
-            modalHeight = Math.min(keyboardBox.height, modalHeight);
+    if (keyboardOpen && (isTyping || keyboardBox)) {
+        if (keyboardBox && keyboardBox.width === layoutWidth) {
+            // 切換輸入框時直接鎖定先前的 top 與 height，絕不隨切換重新跳動
+            modalTop = keyboardBox.top;
+            modalHeight = keyboardBox.height;
+        } else {
+            keyboardBox = { field: field || modal, width: layoutWidth, top: modalTop, height: modalHeight, held: true };
         }
-        keyboardBox = { field, width: layoutWidth, top: modalTop, height: modalHeight, held };
     } else if (!keyboardOpen) {
         keyboardBox = null;
     }

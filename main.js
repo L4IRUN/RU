@@ -6,8 +6,8 @@ import { state } from './state.js';
 import { APP_EVENTS, onAppEvent } from './events.js';
 import { isTransitionCategory, isUserBusy } from './domain.js';
 import * as UI from './ui.js';
-import { 
-    renderSidebar, 
+import {
+    renderSidebar,
     updateVisualEffectsSegment,
     updateAvatarAuthStatusUI,
     initClocks,
@@ -25,20 +25,20 @@ import {
     updateGoogleAccountUIState
 } from './modules/settings.js';
 import { StorageAPI, safeJSONParse, setStorageErrorHandler, requestPersistentStorage, initCrossTabSync } from './storage.js';
-import { 
+import {
     configureSyncProviders,
     uploadToDrive,
-    downloadFromDrive, 
-    startCloudPolling, 
-    isGoogleLinked, 
+    downloadFromDrive,
+    startCloudPolling,
+    isGoogleLinked,
     isTokenValid,
     ensureTokenSilently,
-    initGisTokenClient, 
-    updateSyncStatusIndicator, 
+    initGisTokenClient,
+    updateSyncStatusIndicator,
     initSyncLifecycle,
     recordObservedTimestamp,
     PENDING_SYNC_FLAG
-} from './sync.js'; 
+} from './sync.js';
 
 let isAppEventsBound = false;
 
@@ -94,7 +94,9 @@ function bindAppEvents() {
     });
 
     onAppEvent(APP_EVENTS.MODAL_CLOSE_SETTINGS, () => {
-        closeSettingsModal();
+        if (hasModal(state, 'settings')) {
+            closeSettingsModal();
+        }
     });
 }
 

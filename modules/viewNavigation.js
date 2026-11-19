@@ -57,7 +57,9 @@ export function selectCategory(category, closeSidebarOnMobile = true) {
 
     updateCollapsedIcons('bookmarks');
 
+    state.isViewSwitching = true;
     renderBookmarks();
+    state.isViewSwitching = false;
     updateFloatingCategoryTitle();
 
     const isEditorOpen = hasModal(state, 'editor') || hasModal(state, 'full-editor');
@@ -106,7 +108,9 @@ export function selectRemindersView(closeSidebarOnMobile = true) {
     updateCollapsedIcons('reminders');
 
     updateSelectionBarUI();
+    state.isViewSwitching = true;
     renderReminders();
+    state.isViewSwitching = false;
     updateFloatingCategoryTitle();
 
     const isEditorOpen = hasModal(state, 'editor') || hasModal(state, 'full-editor');
