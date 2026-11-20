@@ -1064,32 +1064,43 @@ export function updateCollapsedIcons(view) {
     if (btn) btn.classList.add('active');
 }
 
+export function updateSidebarReminderCounts() {
+    const now = Date.now();
+    const remindersArr = Object.values(state.reminders || {});
+    let inProgress = 0;
+    let completed = 0;
+    let overdue = 0;
+
+    remindersArr.forEach(r => {
+        if (!r) return;
+        if (r.isDone) {
+            completed++;
+        } else {
+            const targetTime = getReminderTargetTimestamp(r);
+            const isOverdue = targetTime > 0 && now > targetTime;
+            if (isOverdue) {
+                overdue++;
+            } else {
+                inProgress++;
+            }
+        }
+    });
+
+    const elInProgress = document.getElementById('stat-count-inprogress');
+    const elCompleted = document.getElementById('stat-count-completed');
+    const elOverdue = document.getElementById('stat-count-overdue');
+
+    if (elInProgress) elInProgress.textContent = String(inProgress);
+    if (elCompleted) elCompleted.textContent = String(completed);
+    if (elOverdue) elOverdue.textContent = String(overdue);
+}
+
 export function renderSidebar() {
-    const remindersContainer = document.querySelector('.sidebar-reminders-container');
-    if (remindersContainer) {
-        remindersContainer.innerHTML = '';
-        const reminderItem = document.createElement('div');
-        reminderItem.className = `year-item ${state.currentView === 'reminders' ? 'active' : ''}`;
-        reminderItem.id = 'nav-reminders-btn';
-        reminderItem.dataset.action = 'handleSidebarRemindersClick';
+    updateSidebarReminderCounts();
 
-        const reminderIconSpan = document.createElement('span');
-        reminderIconSpan.className = 'item-icon';
-        reminderIconSpan.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="7" y1="9" x2="7" y2="15"></line>
-                <line x1="12" y1="4" x2="12" y2="20"></line>
-                <line x1="17" y1="7" x2="17" y2="17"></line>
-            </svg>
-        `;
-        reminderItem.appendChild(reminderIconSpan);
-
-        const reminderText = document.createElement('span');
-        reminderText.className = 'item-text';
-        reminderText.innerText = '提醒';
-        reminderItem.appendChild(reminderText);
-
-        remindersContainer.appendChild(reminderItem);
+    const reminderBtn = document.getElementById('nav-reminders-btn');
+    if (reminderBtn) {
+        reminderBtn.classList.toggle('active', state.currentView === 'reminders');
     }
 
     const categoryList = document.getElementById('category-list');
@@ -2036,6 +2047,7 @@ export function renderReminders() {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const now = Date.now();
+    updateSidebarReminderCounts();
 
     // 重新定義三分類狀態：進行中 (now >= startTime 且未逾期)、未開始 (now < startTime 且未逾期)、已結束 (isDone 或已逾期)
     const inProgress = [];

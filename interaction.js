@@ -561,7 +561,10 @@ const CLICK_ACTIONS = {
     startInlineAddMainCategory: () => startInlineAddMainCategory(),
     openSortModal: (_e, el) => (el.dataset.param === 'autoLocate' ? openSortModal({ autoLocate: true }) : openSortModal()),
     handleSidebarProfileClick: (e) => handleSidebarProfileClick(e),
-    openSettingsModal: () => openSettingsModal(),
+    openSettingsModal: () => {
+        closeFloatingAvatarPopover();
+        openSettingsModal();
+    },
     toggleFloatingAvatarPopover: (e) => toggleFloatingAvatarPopover(e),
     handleFloatingManualSync: (e) => handleFloatingManualSync(e),
     handleFloatingSignOut: (e) => handleFloatingSignOut(e),

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" id="theme-color-meta" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -13,7 +13,10 @@
     <link rel="apple-touch-icon" href="icons/ru-desktop-192.png">
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='30' fill='%239A871E'/></svg>">
-    <link rel="stylesheet" href="style.css?v=82">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alien+Block&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=89">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
@@ -102,39 +105,57 @@
     </div>
 
     <aside id="sidebar">
-        <div class="logo-container">
-            <button class="icon-btn sidebar-toggle-btn" data-action="toggleSidebarDesktop" aria-label="切換側邊欄">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" fill="#9A871E"></circle>
-                </svg>
-            </button>
-            <div class="sidebar-ru-container">
-                <span class="ru-text">RU</span>
+        <!-- 上區塊：頂部 Logo 與提醒區塊 (佔約 30% 高度) -->
+        <div id="sidebar-top-card" class="sidebar-card sidebar-top-card glass-effect">
+            <div class="logo-container">
+                <div class="sidebar-brand-dot" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" fill="#9A871E"></circle>
+                    </svg>
+                </div>
+                <div class="sidebar-ru-container">
+                    <span class="ru-text">RU</span>
+                </div>
+            </div>
+
+            <div class="sidebar-reminders-section">
+                <div id="nav-reminders-btn" class="sidebar-reminder-card" data-action="handleSidebarRemindersClick" role="button" tabindex="0">
+                    <div class="sidebar-reminder-header">
+                        <span class="sidebar-reminder-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="7" y1="9" x2="7" y2="15"></line>
+                                <line x1="12" y1="4" x2="12" y2="20"></line>
+                                <line x1="17" y1="7" x2="17" y2="17"></line>
+                            </svg>
+                        </span>
+                        <span class="sidebar-reminder-title">提醒</span>
+                    </div>
+                    <div class="sidebar-reminder-divider"></div>
+                    <div class="sidebar-reminder-stats-group">
+                        <div class="reminder-stat-row">
+                            <span class="stat-dot-square dot-inprogress"></span>
+                            <span class="stat-label">進行中</span>
+                            <span class="stat-count" id="stat-count-inprogress">0</span>
+                        </div>
+                        <div class="reminder-stat-row">
+                            <span class="stat-dot-square dot-completed"></span>
+                            <span class="stat-label">已完成</span>
+                            <span class="stat-count" id="stat-count-completed">0</span>
+                        </div>
+                        <div class="reminder-stat-row">
+                            <span class="stat-dot-square dot-overdue"></span>
+                            <span class="stat-label">未完成</span>
+                            <span class="stat-count" id="stat-count-overdue">0</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="sidebar-collapsed-icons">
-            <button id="collapsed-reminders-btn" class="collapsed-icon-btn" data-action="selectRemindersView">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="7" y1="9" x2="7" y2="15"></line>
-                    <line x1="12" y1="4" x2="12" y2="20"></line>
-                    <line x1="17" y1="7" x2="17" y2="17"></line>
-                </svg>
-            </button>
-            <button id="collapsed-bookmarks-btn" class="collapsed-icon-btn" data-action="expandSidebarForBookmarks">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-            </button>
-        </div>
-
-        <div class="sidebar-reminders-container"></div>
-
-        <div class="sidebar-category-section">
+        <!-- 下區塊：分類區塊 (佔約 70% 高度) -->
+        <div id="sidebar-bottom-card" class="sidebar-card sidebar-bottom-card glass-effect">
             <div class="sidebar-category-header">
-                <div class="sidebar-section-title">資料儲存</div>
+                <div class="sidebar-section-title">分類</div>
                 <div class="sidebar-category-actions">
                     <button id="sidebar-add-category-btn" class="sidebar-add-category-btn"
                         data-action="startInlineAddMainCategory" aria-label="新增分類">
@@ -145,7 +166,7 @@
                         </svg>
                     </button>
                     <button id="sidebar-sort-btn" class="sidebar-sort-btn" data-action="openSortModal"
-                        aria-label="排序資料儲存">
+                        aria-label="排序分類">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="4" width="18" height="6" rx="1.5" ry="1.5"></rect>
@@ -155,45 +176,6 @@
                 </div>
             </div>
             <div id="category-list"></div>
-        </div>
-
-        <div class="sidebar-settings-section">
-            <div class="sidebar-profile-row">
-                <button type="button" id="sidebar-profile-trigger" class="sidebar-profile-trigger"
-                    data-action="handleSidebarProfileClick" aria-label="個人資料">
-                    <span class="sidebar-profile-avatar-wrapper">
-                        <span class="sidebar-profile-avatar">
-                            <img id="sidebar-avatar-img" alt="頭像" style="display: none;">
-                            <span id="sidebar-avatar-placeholder">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                            </span>
-                        </span>
-                        <span id="sidebar-collapsed-status-dot"
-                            class="avatar-status-dot avatar-corner-dot auth-status-disconnected"
-                            aria-hidden="true"></span>
-                    </span>
-                    <span class="sidebar-profile-name-row">
-                        <span id="sidebar-expanded-status-dot"
-                            class="avatar-status-dot avatar-name-dot auth-status-disconnected"
-                            aria-hidden="true"></span>
-                        <span id="sidebar-username-text" class="sidebar-profile-name">RU</span>
-                    </span>
-                </button>
-                <button type="button" id="main-settings-btn" class="sidebar-settings-gear-btn"
-                    data-action="openSettingsModal" aria-label="設定">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path
-                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                        </path>
-                    </svg>
-                </button>
-            </div>
         </div>
     </aside>
 
@@ -242,6 +224,17 @@
                             <div id="floating-popover-username" class="floating-avatar-menu-header">RU</div>
                         </div>
                         <div class="floating-avatar-menu-items">
+                            <button type="button" id="floating-settings-btn" class="floating-avatar-menu-item"
+                                data-action="openSettingsModal">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path
+                                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                    </path>
+                                </svg>
+                                <span>設定</span>
+                            </button>
                             <button type="button" id="floating-reconnect-btn" class="floating-avatar-menu-item"
                                 data-action="handleFloatingManualSync">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -841,61 +834,7 @@
         </div>
     </div>
 
-    <div id="sidebar-profile-popover" class="sidebar-profile-popover glass-effect" aria-hidden="true">
-        <div class="user-profile-card sidebar-profile-readonly-card">
-            <div class="profile-avatar-col">
-                <div class="profile-avatar-circle readonly">
-                    <img id="sidebar-popover-avatar-img" alt="頭像" style="display: none;">
-                    <span id="sidebar-popover-avatar-placeholder">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </span>
-                </div>
-            </div>
-            <div class="profile-name-col">
-                <span class="profile-name-label">使用者名稱</span>
-                <div id="sidebar-popover-username" class="profile-underline-display">RU</div>
-            </div>
-        </div>
-    </div>
 
-    <div id="sidebar-collapsed-menu" class="category-popover-menu sidebar-collapsed-menu glass-effect">
-        <div class="category-popover-item" data-action="triggerCollapsedMenuSettings">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path
-                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                </path>
-            </svg>
-            <span>設定</span>
-        </div>
-        <div class="category-popover-item" data-action="triggerCollapsedMenuSync">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M7.3 8.2a5.2 5.2 0 0 1 10.4 0"></path>
-                <path
-                    d="M10.3 15.8V8.2a2.2 2.2 0 0 1 4.4 0v3.3h2.1a4.2 4.2 0 0 1 4.2 4.2v2.6a3.7 3.7 0 0 1-3.7 3.7h-2.5">
-                </path>
-                <path d="M10.3 15.8l-1.5-1.3a2.6 2.6 0 0 0-3.7 3.7l4.1 3.8"></path>
-                <line x1="9.2" y1="22" x2="14.8" y2="22"></line>
-            </svg>
-            <span>手動同步</span>
-        </div>
-        <div id="sidebar-collapsed-logout-item" class="category-popover-item danger"
-            data-action="triggerCollapsedMenuLogout" style="display: none;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            <span>登出</span>
-        </div>
-    </div>
 
     <div id="text-toolbar" class="text-toolbar glass-effect">
         <button tabindex="-1" class="icon-btn animated-action-btn" data-action="handleClipboard" data-param="cut">
@@ -980,7 +919,7 @@
 
     <script src="vendor/dexie-4.4.6.min.js"
         integrity="sha384-3Lo+4VBEoe0BfmgnZYSfnLLPl0oJP2Vollzp9dr/049j77QxYLmjvhWidTB39osu"></script>
-    <script type="module" src="main.js?v=81"></script>
+    <script type="module" src="main.js?v=83"></script>
 </body>
 
 </html>

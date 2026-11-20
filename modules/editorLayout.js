@@ -81,7 +81,7 @@ export function positionEditorExternalBars() {
     );
 
     if (keyboardOpen && (isTyping || keyboardBox)) {
-        if (keyboardBox && keyboardBox.width === layoutWidth && Math.abs(lostHeight - keyboardBox.lostHeight) < 40) {
+        if (keyboardBox && keyboardBox.width === layoutWidth) {
             // 切換輸入框時直接鎖定先前的完整位置與大小，絕不隨切換重新跳動
             modalWidth = keyboardBox.widthPx;
             modalHeight = keyboardBox.height;

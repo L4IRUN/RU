@@ -346,21 +346,19 @@ function highlightChapterTick(activeIndex) {
 
 export function toggleSidebarDesktop() {
     hideCategoryPopoverMenu(true);
-    hideSidebarProfilePopover(true);
-    hideSidebarCollapsedMenu(true);
-    if (state._cachedInnerWidth > 768) {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-    } else {
+    if (state._cachedInnerWidth <= 768) {
         toggleSidebar(); 
     }
 }
 
 export function syncSidebarActiveState() {
     const isReminders = state.currentView === 'reminders';
+    const reminderBtn = document.getElementById('nav-reminders-btn');
+    if (reminderBtn) {
+        reminderBtn.classList.toggle('active', isReminders);
+    }
     document.querySelectorAll('.year-item').forEach(el => {
-        if (el.id === 'nav-reminders-btn') {
-            el.classList.toggle('active', isReminders);
-        } else if (el.dataset.category) {
+        if (el.dataset.category) {
             el.classList.toggle('active', !isReminders && el.dataset.category === state.currentCategory);
         }
     });

@@ -134,7 +134,10 @@ export function initEditorViewportInteractions() {
     window.addEventListener('scroll', preventWindowScroll, { passive: true });
     viewport?.addEventListener('scroll', () => {
         preventWindowScroll();
-        updateEditorViewport();
+        if (viewport) {
+            const isZoomed = Math.abs((viewport.scale || 1) - 1) > 0.05;
+            document.documentElement.style.setProperty('--vv-top', `${isZoomed ? Math.round(viewport.offsetTop) : 0}px`);
+        }
     }, { passive: true });
 
     const editor = document.getElementById('editor-modal');
@@ -142,21 +145,26 @@ export function initEditorViewportInteractions() {
         preventWindowScroll();
         const target = e.target;
         if (target && editor.contains(target) && target.matches('input, textarea, [contenteditable="true"]')) {
-            const box = editor.getBoundingClientRect();
-            const input = target.getBoundingClientRect();
-            const pad = 14;
-            if (input.bottom > box.bottom - pad) {
-                editor.scrollTop += Math.round(input.bottom - box.bottom + pad);
-            } else if (input.top < box.top + pad) {
-                editor.scrollTop -= Math.round(box.top - input.top + pad);
-            }
+            requestAnimationFrame(() => {
+                preventWindowScroll();
+                const box = editor.getBoundingClientRect();
+                const input = target.getBoundingClientRect();
+                const pad = 14;
+                if (input.bottom > box.bottom - pad) {
+                    editor.scrollTop += Math.round(input.bottom - box.bottom + pad);
+                } else if (input.top < box.top + pad) {
+                    editor.scrollTop -= Math.round(box.top - input.top + pad);
+                }
+            });
         }
-        updateEditorViewport();
     });
 
     const fullEditor = document.getElementById('full-editor-modal');
     fullEditor?.addEventListener('focusin', () => {
         preventWindowScroll();
+        requestAnimationFrame(() => {
+            preventWindowScroll();
+        });
     });
 
     if (viewport) updateEditorViewport();
