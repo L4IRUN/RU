@@ -8,7 +8,7 @@ import { isTransitionCategory, createEmptyEditorDraft, hasModal } from '../domai
 import {
     renderSidebar, getToastState, hideToast, updateBookmarkCategoryDisplayUI,
     updateReminderPreviewDisplay, updateBookmarkPreviewDisplay, getLocalDateString,
-    resetFabStateClean
+    resetFabStateClean, formatTimeWithDay
 } from '../ui.js';
 import { SYNC_CONFIG, getMonotonicTimestamp } from '../sync.js';
 import { StorageAPI } from '../storage.js';
@@ -240,6 +240,12 @@ export function switchCreateType(type) {
     if (bookmarkContainer) bookmarkContainer.style.display = 'none';
     if (reminderContainer) reminderContainer.style.display = 'none';
 
+    const timestampEl = document.getElementById('editor-modal-timestamp');
+    if (timestampEl && !isEditMode) {
+        timestampEl.textContent = '';
+        timestampEl.style.display = 'none';
+    }
+
     updateEditorTopBarUI(type, isEditMode);
 
     if (type === 'reminder') {
@@ -425,8 +431,25 @@ export function openBookmarkEditor(id = null, forcedType = null) {
         applyBookmarkFormType(editorType);
 
         deleteBtn.style.display = 'flex';
+
+        const timestampEl = document.getElementById('editor-modal-timestamp');
+        if (timestampEl) {
+            if (bm.timestamp) {
+                timestampEl.textContent = `上次編輯：${formatTimeWithDay(bm.timestamp)}`;
+                timestampEl.style.display = 'block';
+            } else {
+                timestampEl.textContent = '';
+                timestampEl.style.display = 'none';
+            }
+        }
     } else {
         titleEl.innerText = editorType === 'note' ? '新增內容' : '新增網址';
+
+        const timestampEl = document.getElementById('editor-modal-timestamp');
+        if (timestampEl) {
+            timestampEl.textContent = '';
+            timestampEl.style.display = 'none';
+        }
 
         // 若已在所在分類則直接顯示於輸入框；若在提醒分頁則重置為空
         const defaultCat = isFromBookmarkCategory
@@ -490,6 +513,17 @@ export function openReminderEditor(id = null) {
     if (id && state.reminders[id]) {
         titleEl.innerText = '編輯提醒';
         const r = state.reminders[id];
+
+        const timestampEl = document.getElementById('editor-modal-timestamp');
+        if (timestampEl) {
+            if (r.timestamp) {
+                timestampEl.textContent = `上次編輯：${formatTimeWithDay(r.timestamp)}`;
+                timestampEl.style.display = 'block';
+            } else {
+                timestampEl.textContent = '';
+                timestampEl.style.display = 'none';
+            }
+        }
 
         draft.reminderIsDone = !!r.isDone;
         updateEditorTopBarUI('reminder', true);
@@ -577,6 +611,12 @@ export function openReminderEditor(id = null) {
             reminderDoneBtn.classList.remove('checked', 'check-pop');
         }
 
+        const timestampEl = document.getElementById('editor-modal-timestamp');
+        if (timestampEl) {
+            timestampEl.textContent = '';
+            timestampEl.style.display = 'none';
+        }
+
         draft.reminderDate = todayStr;
         draft.reminderStartDate = todayStr;
         draft.reminderEndDate = todayStr;
@@ -624,6 +664,12 @@ export function closeAllEditors() {
 
     closeModal('editor');
     closeCalendar(false);
+
+    const timestampEl = document.getElementById('editor-modal-timestamp');
+    if (timestampEl) {
+        timestampEl.textContent = '';
+        timestampEl.style.display = 'none';
+    }
 
     const toolbar = document.getElementById('text-toolbar');
     if (toolbar) toolbar.classList.remove('active');

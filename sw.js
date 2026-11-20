@@ -17,7 +17,7 @@ const worker = /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (
 const scope = new URL(worker.registration.scope);
 const cachePrefix = `ru-static:${scope.pathname}:`;
 // 每次發布靜態檔案都要更新這個版號，同一天也要遞增。
-const cacheName = `${cachePrefix}20261119-8`;
+const cacheName = `${cachePrefix}20261120-7`;
 const index = new URL('index.html', scope);
 const assets = [
     'index.html',
@@ -29,9 +29,9 @@ const assets = [
     'icons/ru-512.png',
     'icons/ru-clear-192.png',
     'icons/ru-clear-512.png',
-    'style.css?v=76',
+    'style.css?v=82',
     'vendor/dexie-4.4.6.min.js',
-    'main.js?v=76',
+    'main.js?v=81',
     'domain.js',
     'events.js',
     'interaction.js',

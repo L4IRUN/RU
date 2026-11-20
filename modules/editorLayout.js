@@ -2,7 +2,20 @@
 
 let restingViewportHeight = 0;
 let restingViewportWidth = 0;
-/** @type {{ field: Element, width: number, top: number, height: number, held: boolean } | null} */
+/** @type {{
+ *   field: Element,
+ *   width: number,
+ *   lostHeight: number,
+ *   top: number,
+ *   height: number,
+ *   widthPx: number,
+ *   centerX: number,
+ *   centerY: number,
+ *   leftX: number,
+ *   topY: number,
+ *   bottomY: number,
+ *   held: boolean
+ * } | null} */
 let keyboardBox = null;
 
 export function positionEditorExternalBars() {
@@ -12,10 +25,11 @@ export function positionEditorExternalBars() {
     if (!modal) return;
 
     const vv = window.visualViewport;
+    const isZoomed = Boolean(vv && Math.abs((vv.scale || 1) - 1) > 0.05);
     const vpWidth = vv ? vv.width : window.innerWidth;
     const vpHeight = vv ? Math.floor(vv.height) : window.innerHeight;
-    const vpOffsetLeft = vv ? vv.offsetLeft : 0;
-    const vpOffsetTop = vv ? Math.round(vv.offsetTop) : 0;
+    const vpOffsetLeft = (vv && isZoomed) ? vv.offsetLeft : 0;
+    const vpOffsetTop = (vv && isZoomed) ? Math.round(vv.offsetTop) : 0;
 
     const layoutWidth = window.innerWidth;
     const isMobile = layoutWidth <= 768;
@@ -41,51 +55,78 @@ export function positionEditorExternalBars() {
     } else {
         document.body.style.removeProperty('--editor-rest-height');
     }
-    const modalWidth = Math.min(400, Math.round(vpWidth * 0.9));
+
+    const topBarHeight = isMobile ? 64 : 74;
+    const bottomBarHeight = isMobile ? 52 : 60;
+    const gap = 12;
+
+    let modalWidth = Math.min(400, Math.round(vpWidth * 0.9));
     // 隨鍵盤位移逐步釋放操作列空間，避免跨過顯示門檻時表單反向跳高。
     const releasedHeight = trackingKeyboard ? Math.min(144, Math.max(0, lostHeight - 48)) : 0;
     const reservedHeight = isMobile ? 168 - releasedHeight : 190;
     const minModalHeight = isMobile ? 80 : 220;
     let modalHeight = Math.max(minModalHeight, Math.min(536, vpHeight - reservedHeight));
     let modalTop = (vpHeight - modalHeight) / 2;
-    if (keyboardOpen && (isTyping || keyboardBox)) {
-        if (keyboardBox && keyboardBox.width === layoutWidth) {
-            // 切換輸入框時直接鎖定先前的 top 與 height，絕不隨切換重新跳動
-            modalTop = keyboardBox.top;
-            modalHeight = keyboardBox.height;
-        } else {
-            keyboardBox = { field: field || modal, width: layoutWidth, top: modalTop, height: modalHeight, held: true };
-        }
-    } else if (!keyboardOpen) {
-        keyboardBox = null;
-    }
-    const topBarHeight = isMobile ? 64 : 74;
-    const bottomBarHeight = isMobile ? 52 : 60;
-    const gap = 12;
 
-    const centerX = Math.round(vpOffsetLeft + vpWidth / 2);
-    const centerY = Math.round(vpOffsetTop + modalTop + modalHeight / 2);
-    const leftX = Math.round(centerX - modalWidth / 2);
-    const topY = Math.max(
+    let centerX = Math.round(vpOffsetLeft + vpWidth / 2);
+    let centerY = Math.round(vpOffsetTop + modalTop + modalHeight / 2);
+    let leftX = Math.round(centerX - modalWidth / 2);
+    let topY = Math.max(
         Math.round(vpOffsetTop + 12),
         Math.round(centerY - modalHeight / 2 - topBarHeight - gap)
     );
-    const bottomY = Math.min(
+    let bottomY = Math.min(
         Math.round(vpOffsetTop + vpHeight - bottomBarHeight - 12),
         Math.round(centerY + modalHeight / 2 + gap)
     );
 
-    const shrinksWhileTyping = keyboardOpen && isTyping && modalHeight < parseFloat(modal.style.height);
+    if (keyboardOpen && (isTyping || keyboardBox)) {
+        if (keyboardBox && keyboardBox.width === layoutWidth && Math.abs(lostHeight - keyboardBox.lostHeight) < 40) {
+            // 切換輸入框時直接鎖定先前的完整位置與大小，絕不隨切換重新跳動
+            modalWidth = keyboardBox.widthPx;
+            modalHeight = keyboardBox.height;
+            modalTop = keyboardBox.top;
+            centerX = keyboardBox.centerX;
+            centerY = keyboardBox.centerY;
+            leftX = keyboardBox.leftX;
+            topY = keyboardBox.topY;
+            bottomY = keyboardBox.bottomY;
+        } else {
+            keyboardBox = {
+                field: field || modal,
+                width: layoutWidth,
+                lostHeight,
+                top: modalTop,
+                height: modalHeight,
+                widthPx: modalWidth,
+                centerX,
+                centerY,
+                leftX,
+                topY,
+                bottomY,
+                held: true
+            };
+        }
+    } else if (!keyboardOpen) {
+        keyboardBox = null;
+    }
+
     modal.style.left = `${centerX}px`;
     modal.style.top = `${centerY}px`;
     modal.style.width = `${modalWidth}px`;
     modal.style.height = `${modalHeight}px`;
     modal.style.maxHeight = `${modalHeight}px`;
-    if (shrinksWhileTyping && field) {
+
+    // 視窗內輸入中或切換輸入框時，確保輸入框完全露出於視窗內，不讓瀏覽器外推視窗
+    if (isTyping && field && modal.contains(field)) {
         const box = modal.getBoundingClientRect();
         const input = field.getBoundingClientRect();
-        if (input.bottom > box.bottom - 4) modal.scrollTop += input.bottom - box.bottom + 4;
-        else if (input.top < box.top + 4) modal.scrollTop += input.top - box.top - 4;
+        const pad = 14;
+        if (input.bottom > box.bottom - pad) {
+            modal.scrollTop += Math.round(input.bottom - box.bottom + pad);
+        } else if (input.top < box.top + pad) {
+            modal.scrollTop -= Math.round(box.top - input.top + pad);
+        }
     }
 
     if (topBar) {

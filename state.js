@@ -8,7 +8,7 @@ import { createEmptyEditorDraft } from './domain.js';
  * @typedef {import('./types.js').AppState} AppState
  */
 
-export const APP_VERSION = '20261118';
+export const APP_VERSION = '20261120';
 
 /** @type {AppState} */
 export const state = {
@@ -21,17 +21,17 @@ export const state = {
     // 效能快取
     _cachedInnerWidth: window.innerWidth,
     _cachedInnerHeight: window.innerHeight,
-    
+
     // 當前視圖與狀態
     // 新增/編輯視窗目前的資料型別：'reminder'（提醒）｜'note'（內容，自訂紀錄）｜'bookmark'（網址書籤）
     currentUnifiedType: 'reminder',
     currentCategory: null,
     currentView: 'reminders',
-    
+
     // UI 互動狀態
     isFabTucked: false,
     fabIdleTimer: null,
-    
+
     // 核心資料庫 (記憶體快取)
     bookmarks: {},
     reminders: {},
@@ -53,17 +53,17 @@ export const state = {
     // 彈窗堆疊與編輯器草稿（單一真相來源）
     activeModals: [],
     editorDraft: createEmptyEditorDraft(),
-    
+
     // 編輯器狀態與防覆蓋隔離
     isEditing: false,
     editingBaselineUpdatedAt: 0,
     hasEditConflict: false,
     pendingSyncItems: null,
     hasPendingSyncRender: false,
-    
+
     // 刪除狀態
     deleteTargetType: null,
-    
+
     // 右鍵選單狀態
     contextTarget: { type: null, id: null },
 

@@ -115,27 +115,50 @@ export function initEditorViewportInteractions() {
     const viewport = window.visualViewport;
     const updateEditorViewport = () => {
         if (viewport) {
+            const isZoomed = Math.abs((viewport.scale || 1) - 1) > 0.05;
             const style = document.documentElement.style;
             style.setProperty('--vv-height', `${Math.floor(viewport.height)}px`);
-            style.setProperty('--vv-top', `${Math.round(viewport.offsetTop)}px`);
+            style.setProperty('--vv-top', `${isZoomed ? Math.round(viewport.offsetTop) : 0}px`);
         }
         if (hasModal(state, 'editor')) positionEditorExternalBars();
     };
-    window.addEventListener('resize', updateEditorViewport, { passive: true });
-    viewport?.addEventListener('resize', updateEditorViewport, { passive: true });
-    viewport?.addEventListener('scroll', () => {
-        if (hasModal(state, 'editor') && window.scrollY !== 0) {
+
+    const preventWindowScroll = () => {
+        if ((hasModal(state, 'editor') || hasModal(state, 'full-editor')) && (window.scrollY !== 0 || window.scrollX !== 0)) {
             window.scrollTo(0, 0);
         }
+    };
+
+    window.addEventListener('resize', updateEditorViewport, { passive: true });
+    viewport?.addEventListener('resize', updateEditorViewport, { passive: true });
+    window.addEventListener('scroll', preventWindowScroll, { passive: true });
+    viewport?.addEventListener('scroll', () => {
+        preventWindowScroll();
         updateEditorViewport();
     }, { passive: true });
+
     const editor = document.getElementById('editor-modal');
-    editor?.addEventListener('focusin', () => {
-        if (window.scrollY !== 0) {
-            window.scrollTo(0, 0);
+    editor?.addEventListener('focusin', (e) => {
+        preventWindowScroll();
+        const target = e.target;
+        if (target && editor.contains(target) && target.matches('input, textarea, [contenteditable="true"]')) {
+            const box = editor.getBoundingClientRect();
+            const input = target.getBoundingClientRect();
+            const pad = 14;
+            if (input.bottom > box.bottom - pad) {
+                editor.scrollTop += Math.round(input.bottom - box.bottom + pad);
+            } else if (input.top < box.top + pad) {
+                editor.scrollTop -= Math.round(box.top - input.top + pad);
+            }
         }
         updateEditorViewport();
     });
+
+    const fullEditor = document.getElementById('full-editor-modal');
+    fullEditor?.addEventListener('focusin', () => {
+        preventWindowScroll();
+    });
+
     if (viewport) updateEditorViewport();
 }
 

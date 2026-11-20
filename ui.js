@@ -903,13 +903,10 @@ export function updateBookmarkDOM(id) {
             descSpan.classList.add('is-empty');
         }
 
-        let timeEl = footer.querySelector('.note-timestamp');
-        if (!timeEl) {
-            timeEl = document.createElement('div');
-            timeEl.className = 'note-timestamp';
-            footer.appendChild(timeEl);
+        const timeEl = footer.querySelector('.note-timestamp');
+        if (timeEl) {
+            timeEl.remove();
         }
-        timeEl.innerText = `上次編輯：${formatTimeWithDay(b.timestamp)}`;
     }
 }
 
@@ -975,6 +972,7 @@ let currentEntranceAnimToken = 0;
 
 export function triggerViewEntranceAnimations() {
     if (state.isSelectionMode) return;
+    if (document.body.hasAttribute('data-no-glass')) return;
     const isModalOpen = Boolean(
         hasModal(state, 'editor') ||
         hasModal(state, 'full-editor') ||
@@ -1746,14 +1744,8 @@ export function renderBookmarks() {
                     descSpan.classList.add('is-empty');
                 }
 
-                let timeEl = footer.querySelector('.note-timestamp');
-                if (!timeEl) {
-                    timeEl = document.createElement('div');
-                    timeEl.className = 'note-timestamp';
-                    footer.appendChild(timeEl);
-                }
-                const targetTime = `上次編輯：${formatTimeWithDay(bm.timestamp)}`;
-                if (timeEl.innerText !== targetTime) timeEl.innerText = targetTime;
+                const timeEl = footer.querySelector('.note-timestamp');
+                if (timeEl) timeEl.remove();
 
                 observeCardEntrance(card, forceEntrance, bookmarkCardIdx++);
             } else {
@@ -1807,13 +1799,6 @@ export function renderBookmarks() {
                     descSpan.classList.add('is-empty');
                 }
                 footer.appendChild(descSpan);
-
-                if (bm.timestamp) {
-                    const timeEl = document.createElement('div');
-                    timeEl.className = 'note-timestamp';
-                    timeEl.innerText = `上次編輯：${formatTimeWithDay(bm.timestamp)}`;
-                    footer.appendChild(timeEl);
-                }
 
                 card.appendChild(footer);
 
@@ -2279,18 +2264,8 @@ export function renderReminders() {
                     endDateEl.textContent = targetEndText;
                 }
 
-                let timestamp = footer.querySelector('.note-timestamp') || card.querySelector(':scope > .note-timestamp');
-                if (!timestamp) {
-                    timestamp = document.createElement('div');
-                    timestamp.className = 'note-timestamp';
-                    footer.appendChild(timestamp);
-                } else if (timestamp.parentElement !== footer) {
-                    footer.appendChild(timestamp);
-                }
-                const targetTimeText = `上次編輯：${formatTimeWithDay(r.timestamp)}`;
-                if (timestamp.textContent !== targetTimeText) {
-                    timestamp.textContent = targetTimeText;
-                }
+                const timestamp = footer.querySelector('.note-timestamp') || card.querySelector(':scope > .note-timestamp');
+                if (timestamp) timestamp.remove();
 
                 const currentlyGlowing = card.classList.contains('reminder-glowing');
                 if (currentlyGlowing !== isGlowing) {
@@ -2339,11 +2314,6 @@ export function renderReminders() {
                 endDateSpan.className = 'reminder-end-date';
                 endDateSpan.textContent = `結束日期：${endDisplay}`;
                 footer.appendChild(endDateSpan);
-
-                const timestamp = document.createElement('div');
-                timestamp.className = 'note-timestamp';
-                timestamp.textContent = `上次編輯：${formatTimeWithDay(r.timestamp)}`;
-                footer.appendChild(timestamp);
 
                 card.appendChild(footer);
 
@@ -2503,10 +2473,11 @@ export function positionCategoryConfirmBtn() {
     if (!modal) return;
 
     const vv = window.visualViewport;
+    const isZoomed = Boolean(vv && Math.abs((vv.scale || 1) - 1) > 0.05);
     const vpWidth = vv ? vv.width : window.innerWidth;
     const vpHeight = vv ? vv.height : window.innerHeight;
-    const vpOffsetLeft = vv ? vv.offsetLeft : 0;
-    const vpOffsetTop = vv ? vv.offsetTop : 0;
+    const vpOffsetLeft = (vv && isZoomed) ? vv.offsetLeft : 0;
+    const vpOffsetTop = (vv && isZoomed) ? vv.offsetTop : 0;
 
     const isMobile = vpWidth <= 768;
     const modalWidth = Math.min(400, Math.round(vpWidth * 0.9));
@@ -2554,10 +2525,11 @@ export function positionSortExternalBars() {
     if (!modal) return;
 
     const vv = window.visualViewport;
+    const isZoomed = Boolean(vv && Math.abs((vv.scale || 1) - 1) > 0.05);
     const vpWidth = vv ? vv.width : window.innerWidth;
     const vpHeight = vv ? vv.height : window.innerHeight;
-    const vpOffsetLeft = vv ? vv.offsetLeft : 0;
-    const vpOffsetTop = vv ? vv.offsetTop : 0;
+    const vpOffsetLeft = (vv && isZoomed) ? vv.offsetLeft : 0;
+    const vpOffsetTop = (vv && isZoomed) ? vv.offsetTop : 0;
 
     const isMobile = vpWidth <= 768;
     const modalWidth = Math.min(400, Math.round(vpWidth * 0.9));

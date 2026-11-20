@@ -175,6 +175,7 @@ export function scrollToChapterTarget(targetDOM) {
 
     const triggerTargetAnimation = () => {
         if (!targetDOM) return;
+        if (document.body.hasAttribute('data-no-glass')) return;
         if (targetDOM.classList.contains('reminder-card')) {
             targetDOM.classList.remove('reminder-card-pop');
             void targetDOM.offsetWidth;
