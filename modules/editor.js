@@ -90,22 +90,19 @@ export function handleMainAction() {
         return;
     }
 
-    // 僅在手機版且按鈕處於提示膠囊模式或關閉中時進行判斷
-    const isMobile = state._cachedInnerWidth <= 768;
+    // 按鈕處於提示膠囊模式或關閉中時進行判斷（手機版與電腦版全面通用）
     const toastState = getToastState();
-    if (isMobile) {
-        if (toastState.isMobileToastDismissing || (!toastState.isMobileToastShowing && mainBtn && mainBtn.classList.contains('toast-mode'))) {
-            hideToast(true);
-        } else if (toastState.isMobileToastShowing || (mainBtn && mainBtn.classList.contains('toast-mode'))) {
-            if (typeof toastState.currentToastClickHandler === 'function') {
-                const clickHandler = toastState.currentToastClickHandler;
-                clickHandler();
-                hideToast();
-                return;
-            }
+    if (toastState.isMobileToastDismissing || (!toastState.isMobileToastShowing && mainBtn && mainBtn.classList.contains('toast-mode'))) {
+        hideToast(true);
+    } else if (toastState.isMobileToastShowing || (mainBtn && mainBtn.classList.contains('toast-mode'))) {
+        if (typeof toastState.currentToastClickHandler === 'function') {
+            const clickHandler = toastState.currentToastClickHandler;
+            clickHandler();
             hideToast();
             return;
         }
+        hideToast();
+        return;
     }
     
     if (state.currentView === 'bookmarks') openBookmarkEditor();

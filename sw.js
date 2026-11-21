@@ -17,7 +17,7 @@ const worker = /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (
 const scope = new URL(worker.registration.scope);
 const cachePrefix = `ru-static:${scope.pathname}:`;
 // 每次發布靜態檔案都要更新這個版號，同一天也要遞增。
-const cacheName = `${cachePrefix}20261120-14`;
+const cacheName = `${cachePrefix}20261121-02`;
 const index = new URL('index.html', scope);
 const assets = [
     'index.html',

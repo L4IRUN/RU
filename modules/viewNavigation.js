@@ -8,7 +8,7 @@ import { toggleSidebar, clearChapterScrollSpy, hideSidebarProfilePopover, hideSi
 
 import { exitSelectionMode } from './listInteractions.js';
 
-import { stopReminderCountdownTimer, updateCollapsedIcons, renderBookmarks, updateFloatingCategoryTitle, updateSelectionBarUI, renderReminders } from '../ui.js';
+import { stopReminderCountdownTimer, updateCollapsedIcons, renderBookmarks, updateFloatingCategoryTitle, updateSelectionBarUI, renderReminders, updateCategoryIndicator } from '../ui.js';
 
 import { hasModal, isTransitionCategory } from '../domain.js';
 
@@ -54,6 +54,7 @@ export function selectCategory(category, closeSidebarOnMobile = true) {
     document.querySelectorAll('.year-item[data-category]').forEach(el => {
         if (el.dataset.category === category) el.classList.add('active');
     });
+    updateCategoryIndicator(true);
 
     updateCollapsedIcons('bookmarks');
 
@@ -104,6 +105,7 @@ export function selectRemindersView(closeSidebarOnMobile = true) {
     document.querySelectorAll('.year-item').forEach(el => el.classList.remove('active'));
     const navRemindersBtn = document.getElementById('nav-reminders-btn');
     if (navRemindersBtn) navRemindersBtn.classList.add('active');
+    updateCategoryIndicator(false);
     
     updateCollapsedIcons('reminders');
 

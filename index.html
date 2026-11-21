@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Alien+Block&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=89">
+    <link rel="stylesheet" href="style.css?v=91">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
@@ -44,16 +44,6 @@
         })();
     </script>
     <div id="mobile-sidebar-overlay" data-action="toggleSidebar"></div>
-
-    <div id="cloud-toast">
-        <span id="cloud-toast-text"></span>
-        <div class="toast-icon-wrapper">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        </div>
-    </div>
 
     <button id="fab-main-btn" class="fab-main-btn" data-action="handleMainAction" aria-label="新增按鈕">
         <span id="fab-toast-text" class="fab-toast-text"></span>
@@ -109,8 +99,8 @@
         <div id="sidebar-top-card" class="sidebar-card sidebar-top-card glass-effect">
             <div class="logo-container">
                 <div class="sidebar-brand-dot" aria-hidden="true">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="10" fill="#9A871E"></circle>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="11" fill="#9A871E"></circle>
                     </svg>
                 </div>
                 <div class="sidebar-ru-container">
@@ -119,10 +109,12 @@
             </div>
 
             <div class="sidebar-reminders-section">
-                <div id="nav-reminders-btn" class="sidebar-reminder-card" data-action="handleSidebarRemindersClick" role="button" tabindex="0">
+                <div id="nav-reminders-btn" class="sidebar-reminder-card" data-action="handleSidebarRemindersClick"
+                    role="button" tabindex="0">
                     <div class="sidebar-reminder-header">
                         <span class="sidebar-reminder-icon">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="7" y1="9" x2="7" y2="15"></line>
                                 <line x1="12" y1="4" x2="12" y2="20"></line>
                                 <line x1="17" y1="7" x2="17" y2="17"></line>
@@ -133,17 +125,14 @@
                     <div class="sidebar-reminder-divider"></div>
                     <div class="sidebar-reminder-stats-group">
                         <div class="reminder-stat-row">
-                            <span class="stat-dot-square dot-inprogress"></span>
                             <span class="stat-label">進行中</span>
                             <span class="stat-count" id="stat-count-inprogress">0</span>
                         </div>
                         <div class="reminder-stat-row">
-                            <span class="stat-dot-square dot-completed"></span>
                             <span class="stat-label">已完成</span>
                             <span class="stat-count" id="stat-count-completed">0</span>
                         </div>
                         <div class="reminder-stat-row">
-                            <span class="stat-dot-square dot-overdue"></span>
                             <span class="stat-label">未完成</span>
                             <span class="stat-count" id="stat-count-overdue">0</span>
                         </div>
@@ -175,7 +164,11 @@
                     </button>
                 </div>
             </div>
-            <div id="category-list"></div>
+            <div id="category-list">
+                <div id="sidebar-category-indicator" class="sidebar-category-indicator" aria-hidden="true">
+                    <span class="category-indicator-line"></span>
+                </div>
+            </div>
         </div>
     </aside>
 

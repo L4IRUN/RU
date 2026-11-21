@@ -351,8 +351,8 @@ aside {
 }
 
 .sidebar-brand-dot {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -361,8 +361,8 @@ aside {
 }
 
 .sidebar-brand-dot svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     display: block;
 }
 
@@ -452,9 +452,9 @@ aside {
 .sidebar-reminder-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    height: 20px;
-    min-height: 20px;
+    gap: 10px;
+    height: 24px;
+    min-height: 24px;
     padding: 0;
     box-sizing: border-box;
 }
@@ -464,19 +464,19 @@ aside {
     align-items: center;
     justify-content: center;
     color: var(--primary);
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
 }
 
 .sidebar-reminder-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     display: block;
 }
 
 .sidebar-reminder-title {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--text);
     line-height: 1;
@@ -495,18 +495,32 @@ aside {
 }
 
 .sidebar-reminder-stats-group {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    padding-left: 12px;
+    padding-left: 30px;
     box-sizing: border-box;
+}
+
+.sidebar-reminder-stats-group::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--text-secondary);
+    opacity: 0.5;
+    box-shadow: none;
 }
 
 .reminder-stat-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0;
     font-size: 13.5px;
     font-weight: 600;
     color: var(--text-secondary);
@@ -514,15 +528,7 @@ aside {
 }
 
 .stat-dot-square {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    min-width: 7px;
-    min-height: 7px;
-    border-radius: 2px;
-    background-color: var(--primary);
-    box-shadow: 0 0 6px rgba(154, 135, 30, 0.9);
-    flex-shrink: 0;
+    display: none !important;
 }
 
 .stat-dot-square.dot-inprogress {
@@ -639,6 +645,7 @@ aside {
 }
 
 @media (hover: hover) {
+
     .sidebar-add-category-btn:hover:not(:active),
     .sidebar-sort-btn:hover:not(:active) {
         transform: none !important;
@@ -668,6 +675,56 @@ aside {
     padding: 0 10px;
     flex-grow: 1;
     position: relative;
+}
+
+#category-list .item-icon.category-dot {
+    display: none !important;
+}
+
+#category-list .year-item {
+    position: relative;
+    z-index: 2;
+    background: transparent !important;
+}
+
+#category-list .year-item .item-text {
+    margin-left: 14px;
+}
+
+.sidebar-category-indicator {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    width: calc(100% - 20px);
+    height: 46px;
+    border-radius: 10px;
+    background: var(--menu-selection-bg);
+    box-shadow: none;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    will-change: top, height, opacity;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    box-sizing: border-box;
+}
+
+.category-indicator-line {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3.5px;
+    height: 55%;
+    min-height: 24px;
+    max-height: 54px;
+    border-radius: 999px;
+    background: var(--primary);
+    box-shadow: 0 0 8px rgba(154, 135, 30, 0.7);
+    transition: height 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+aside.collapsed .sidebar-category-indicator {
+    display: none !important;
 }
 
 /* 側邊欄選項項目：統一鎖定 46px 高度 */
@@ -942,7 +999,7 @@ body:not(.is-dragging-item) .year-item.context-menu-mode .category-more-btn {
 }
 
 .year-item.active {
-    background: var(--menu-selection-bg) !important;
+    background: transparent !important;
     color: var(--primary) !important;
     opacity: 1 !important;
     box-shadow: none;
@@ -4113,8 +4170,8 @@ body.avatar-delete-confirm #confirm-modal {
 
     .floating-avatar-group {
         position: fixed !important;
-        top: 20px !important;
-        right: 52px !important;
+        top: 31px !important;
+        right: 44px !important;
         width: 36px !important;
         height: 36px !important;
         z-index: 1005 !important;
@@ -4238,7 +4295,7 @@ body.avatar-delete-confirm #confirm-modal {
     display: flex;
     align-items: center;
     gap: 8px;
-    min-height: 36px;
+    min-height: 40px;
     padding: 0 52px 0 12px;
     box-sizing: border-box;
 }
@@ -4246,15 +4303,16 @@ body.avatar-delete-confirm #confirm-modal {
 .floating-avatar-menu-header {
     flex: 1;
     min-width: 0;
-    font-size: 16px;
+    font-family: 'Alien Block', system-ui, -apple-system, sans-serif;
+    font-size: 20px;
     font-weight: 700;
     color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: left;
-    line-height: 1.3;
-    letter-spacing: 0.3px;
+    line-height: 1.25;
+    letter-spacing: 0.5px;
 }
 
 .floating-avatar-menu-items {
@@ -5109,61 +5167,15 @@ textarea:focus {
    15. 浮動按鈕與通知 (FAB & Cloud Toast)
    ========================================== */
 /* 電腦版原版通知膠囊 */
+/* ==========================================
+   17. 提示通知膠囊與浮動操作按鈕 (Toasts & FAB)
+   ========================================== */
+/* 原版頂部通知膠囊已全面移除並隱藏，由底部新增按鈕結合之提示膠囊統一接管 */
 #cloud-toast {
-    position: fixed;
-    top: -100px;
-    right: 40px;
-    width: 52px;
-    height: 52px;
-    background: var(--primary);
-    border-radius: 26px;
-    z-index: 1005;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    box-shadow: 0 6px 16px rgba(154, 135, 30, 0.4);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-        width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    overflow: hidden;
+    display: none !important;
 }
 
-#cloud-toast.drop {
-    transform: translateY(120px);
-}
-
-.toast-icon-wrapper {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 52px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FAF6EE;
-}
-
-#cloud-toast-text {
-    color: #FAF6EE;
-    font-weight: 600;
-    font-size: 15px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    line-height: 1;
-    padding: 0 18px;
-    box-sizing: border-box;
-    width: 100%;
-    overflow: hidden;
-}
-
-/* 右下角浮動新增按鈕 */
+/* 浮動新增按鈕（兼具提示通知膠囊功能，電腦版與手機版全面統一） */
 .fab-main-btn {
     width: 64px;
     height: 64px;
@@ -5172,8 +5184,8 @@ textarea:focus {
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(154, 135, 30, 0.5);
-    transition: width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
-        border-radius 0.32s ease,
+    transition: width 0.24s cubic-bezier(0.25, 1, 0.5, 1),
+        border-radius 0.24s ease,
         transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
         box-shadow 0.3s ease,
         opacity 0.3s ease;
@@ -5221,7 +5233,7 @@ textarea:focus {
     transform-origin: center center;
 }
 
-/* 手機版按鈕內置通知文字容器 */
+/* 按鈕內置通知文字容器 */
 .fab-toast-text {
     position: absolute;
     top: 0;
@@ -5241,18 +5253,18 @@ textarea:focus {
     text-overflow: ellipsis;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 加號等比例整體放大再縮小消失動效（純等比縮放，杜絕單向拉長） */
+/* 提示窗彈出：加號等比例彈簧放大再縮小消失動效 */
 @keyframes fabIconZoomOut {
     0% {
         transform: translate(-50%, -50%) scale(1);
         opacity: 1;
     }
 
-    45% {
-        transform: translate(-50%, -50%) scale(1.35);
+    35% {
+        transform: translate(-50%, -50%) scale(1.32);
         opacity: 1;
     }
 
@@ -5262,7 +5274,7 @@ textarea:focus {
     }
 }
 
-/* 加號等比例整體放大再縮回原大小動效（純等比縮放，杜絕單向拉長） */
+/* 提示窗收起：加號等比例彈簧放大再縮回原大小動效 */
 @keyframes fabIconZoomIn {
     0% {
         transform: translate(-50%, -50%) scale(0);
@@ -5270,7 +5282,7 @@ textarea:focus {
     }
 
     60% {
-        transform: translate(-50%, -50%) scale(1.35);
+        transform: translate(-50%, -50%) scale(1.32);
         opacity: 1;
     }
 
@@ -5281,14 +5293,53 @@ textarea:focus {
 }
 
 .fab-main-btn.icon-zoom-out .fab-icon-wrapper {
-    animation: fabIconZoomOut 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: fabIconZoomOut 0.20s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .fab-main-btn.icon-zoom-in .fab-icon-wrapper {
-    animation: fabIconZoomIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: fabIconZoomIn 0.30s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/* 手機版展開為膠囊狀態 */
+/* 提示窗彈出時的形變變扁擠壓動畫（彈出受衝擊變扁、快速回彈成原樣，與收起擠壓相呼應） */
+@keyframes fabSpringMorphExpand {
+    0% {
+        transform: scale(1, 1) translateZ(0);
+    }
+
+    30% {
+        /* 彈出衝出受阻變扁：水平拉伸延伸、垂直受壓變扁（變扁形變） */
+        transform: scale(1.08, 0.90) translateZ(0);
+    }
+
+    58% {
+        /* 快速回彈：垂直拉伸回彈、水平微縮 */
+        transform: scale(0.97, 1.05) translateZ(0);
+    }
+
+    78% {
+        /* 次級微幅震盪平復 */
+        transform: scale(1.01, 0.985) translateZ(0);
+    }
+
+    92% {
+        transform: scale(0.998, 1.004) translateZ(0);
+    }
+
+    100% {
+        /* 恢復原本比例 */
+        transform: scale(1, 1) translateZ(0);
+    }
+}
+
+/* 展開為提示通知膠囊狀態 */
+.fab-main-btn.toast-mode {
+    transform-origin: right center !important;
+    transition: width 0.38s cubic-bezier(0.34, 1.42, 0.64, 1),
+        border-radius 0.28s ease,
+        box-shadow 0.3s ease;
+    animation: fabSpringMorphExpand 0.44s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+}
+
 .fab-main-btn.toast-mode .fab-icon-wrapper {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0);
@@ -5299,57 +5350,44 @@ textarea:focus {
     pointer-events: auto;
 }
 
-@keyframes fabPopBounce {
+/* 提示窗收起時的彈簧形變擠壓動畫（受兩側內收擠壓、柔和反彈、最後恢復正圓比例） */
+@keyframes fabSpringMorphCollapse {
     0% {
-        transform: scale(1) translateZ(0);
+        transform: scale(1, 1) translateZ(0);
     }
 
-    45% {
-        transform: scale(1.15) translateZ(0);
+    25% {
+        /* 兩側內收撞擊，水平受壓凹陷、垂直適度拉長（柔和自然的擠壓形變） */
+        transform: scale(0.90, 1.10) translateZ(0);
+    }
+
+    50% {
+        /* 彈性柔和回彈：適度回彈，去除過強的變形感 */
+        transform: scale(1.05, 0.96) translateZ(0);
     }
 
     75% {
-        transform: scale(0.96) translateZ(0);
+        /* 次級微幅震盪 */
+        transform: scale(0.985, 1.012) translateZ(0);
+    }
+
+    90% {
+        transform: scale(1.005, 0.998) translateZ(0);
     }
 
     100% {
-        transform: scale(1) translateZ(0);
+        /* 徹底恢復原本正圓比例 */
+        transform: scale(1, 1) translateZ(0);
     }
+}
+
+.fab-main-btn.fab-morph-squeeze {
+    animation: fabSpringMorphCollapse 0.44s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
 }
 
 .fab-main-btn:active {
     transform: scale(0.92) translateZ(0) !important;
     box-shadow: 0 2px 8px rgba(154, 135, 30, 0.5) !important;
-}
-
-/* 電腦版規則（> 768px）：鎖定按鈕為標準尺寸圓形，完全隱藏按鈕內文字 */
-@media (min-width: 769px) {
-    .fab-main-btn {
-        width: 80px !important;
-        height: 80px !important;
-        border-radius: 40px !important;
-    }
-
-    .fab-icon-wrapper {
-        width: 35px;
-        height: 35px;
-    }
-
-    .fab-main-btn svg {
-        width: 35px;
-        height: 35px;
-    }
-
-    .fab-toast-text {
-        display: none !important;
-    }
-}
-
-/* 手機版規則（≤ 768px）：隱藏原版頂部通知膠囊 */
-@media (max-width: 768px) {
-    #cloud-toast {
-        display: none !important;
-    }
 }
 
 .settings-action-btn {
@@ -6136,7 +6174,7 @@ textarea,
         box-shadow: none !important;
     }
 
-    .fab-main-btn:hover {
+    .fab-main-btn:hover:not(.toast-mode):not(.fab-morph-squeeze) {
         transform: scale(1.15) translateZ(0) !important;
     }
 
@@ -7138,7 +7176,7 @@ textarea,
         display: flex;
         align-items: center;
         gap: 8px;
-        min-height: 36px;
+        min-height: 40px;
         padding: 0 52px 0 12px;
         box-sizing: border-box;
     }
@@ -7146,15 +7184,16 @@ textarea,
     .floating-avatar-menu-header {
         flex: 1;
         min-width: 0;
-        font-size: 16px;
+        font-family: 'Alien Block', system-ui, -apple-system, sans-serif;
+        font-size: 20px;
         font-weight: 700;
         color: var(--text);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         text-align: left;
-        line-height: 1.3;
-        letter-spacing: 0.3px;
+        line-height: 1.25;
+        letter-spacing: 0.5px;
     }
 
     .floating-avatar-menu-items {
@@ -7362,7 +7401,6 @@ textarea,
     }
 
     .fab-main-btn.toast-mode {
-        transform: translateX(0) scale(1) translateZ(0) !important;
         opacity: 1 !important;
         box-shadow: 0 6px 20px rgba(154, 135, 30, 0.55) !important;
     }
@@ -7658,15 +7696,16 @@ textarea,
 .profile-name-col {
     flex: 1;
     min-width: 0;
-    height: 64px;
+    min-height: 68px;
+    height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .profile-name-label {
-    font-size: 15.5px;
+    font-size: 16.5px;
     font-weight: 700;
     color: var(--text);
     letter-spacing: 0.4px;
@@ -7681,10 +7720,11 @@ textarea,
     border: none !important;
     border-bottom: 2px solid var(--glass-border) !important;
     border-radius: 0 !important;
-    padding: 4px 2px;
-    font-family: inherit;
-    font-size: 14px;
+    padding: 6px 2px;
+    font-family: 'Alien Block', system-ui, -apple-system, sans-serif;
+    font-size: 20px;
     font-weight: 600;
+    letter-spacing: 0.5px;
     color: var(--text);
     outline: none !important;
     box-shadow: none !important;
@@ -7695,7 +7735,10 @@ textarea,
 .profile-underline-input::placeholder {
     color: var(--text-secondary);
     opacity: 0.6;
+    font-family: 'Alien Block', system-ui, -apple-system, sans-serif;
+    font-size: 19px;
     font-weight: 400;
+    letter-spacing: 0.5px;
 }
 
 .profile-underline-input:focus {
@@ -7712,10 +7755,11 @@ textarea,
     border: none;
     border-bottom: 2px solid var(--glass-border);
     border-radius: 0;
-    padding: 4px 2px;
-    font-family: inherit;
-    font-size: 15.5px;
+    padding: 6px 2px;
+    font-family: 'Alien Block', system-ui, -apple-system, sans-serif;
+    font-size: 20px;
     font-weight: 700;
+    letter-spacing: 0.5px;
     color: var(--text);
     white-space: nowrap;
     overflow: hidden;

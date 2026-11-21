@@ -508,201 +508,97 @@ export function updateSelectionBarUI() {
     }
 }
 
-// 電腦版原版 Toast 動態時序常數
-const TOAST_DROP_MS = 400;       // 對應 #cloud-toast 的 transform 下拉過渡
-const TOAST_EXPAND_MS = 300;     // 對應 #cloud-toast 的 width 展開過渡
-const TOAST_TEXT_FADE_MS = 200;  // 對應 #cloud-toast-text 的 opacity 淡入淡出
-const TOAST_HOLD_MS = 2000;      // 停留顯示時長
+// 按鈕提示膠囊動態時序常數 (彈簧與形變動畫)
+const FAB_TOAST_ICON_ZOOM_OUT_MS = 200; // 加號放大再縮小隱藏耗時
+const FAB_TOAST_EXPAND_MS = 380;        // 膠囊寬度彈簧展開耗時
+const FAB_TOAST_FADE_OUT_MS = 140;      // 文字淡出耗時
+const FAB_TOAST_COLLAPSE_MS = 240;      // 膠囊寬度收回正圓耗時
+const FAB_TOAST_MORPH_MS = 440;         // 彈簧收起形變擠壓 (squash & stretch) 與恢復比例耗時
+const FAB_TOAST_ICON_ZOOM_IN_MS = 300;  // 加號回彈復位耗時
+const TOAST_HOLD_MS = 2000;             // 停留顯示時長
 
-// 手機版按鈕膠囊動態時序常數
-const MOBILE_ICON_ZOOM_OUT_MS = 240; // 加號放大再縮小隱藏耗時
-const MOBILE_EXPAND_MS = 320;        // 膠囊寬度展開耗時
-const MOBILE_FADE_MS = 180;          // 文字淡出耗時
-const MOBILE_ICON_ZOOM_IN_MS = 280;  // 加號放大再縮回原大小耗時
+let fabToastTimers = [];
+let isFabToastShowing = false;
+let isFabToastDismissing = false;
+let currentFabClickHandler = null;
 
-let desktopToastTimers = [];
-let mobileToastTimers = [];
-let isDesktopToastShowing = false;
-let isMobileToastShowing = false;
-let isMobileToastDismissing = false;
-let currentDesktopClickHandler = null;
-let currentMobileClickHandler = null;
-
-function clearDesktopTimers() {
-    desktopToastTimers.forEach(clearTimeout);
-    desktopToastTimers = [];
-}
-
-function clearMobileTimers() {
-    mobileToastTimers.forEach(clearTimeout);
-    mobileToastTimers = [];
+function clearFabTimers() {
+    fabToastTimers.forEach(clearTimeout);
+    fabToastTimers = [];
 }
 
 export function getToastState() {
     return {
-        isToastShowing: isDesktopToastShowing || isMobileToastShowing || isMobileToastDismissing,
-        isMobileToastShowing,
-        isMobileToastDismissing,
-        currentToastClickHandler: currentMobileClickHandler || currentDesktopClickHandler
+        isToastShowing: isFabToastShowing || isFabToastDismissing,
+        isMobileToastShowing: isFabToastShowing,
+        isMobileToastDismissing: isFabToastDismissing,
+        currentToastClickHandler: currentFabClickHandler
     };
 }
 
 /**
- * 顯示通知膠囊（依螢幕寬度自動分流：電腦版採用原版下拉膠囊，手機版採用按鈕變形）
+ * 顯示通知膠囊（電腦版與手機版全面統一：與右下角新增按鈕結合）
  */
 export function showCloudToast(message, options = {}) {
-    const isDesktop = state._cachedInnerWidth > 768;
     const persistent = typeof options === 'object' ? !!options.persistent : false;
     const onClick = typeof options === 'object' && typeof options.onClick === 'function' ? options.onClick : null;
 
-    if (isDesktop) {
-        showDesktopOriginalToast(message, persistent, onClick);
-    } else {
-        showMobileFabToast(message, persistent, onClick);
-    }
+    showFabToast(message, persistent, onClick);
 }
 
 /**
- * 電腦版：完全還原原版右上角圓形下落、展開寬度、文字浮現之經典膠囊
+ * 新增按鈕結合提示通知膠囊：
+ * 加號等比彈簧放大縮小隱藏 -> 膠囊彈簧展開顯示通知 -> 消失後平滑收回 -> 觸發彈簧形變擠壓 (morph) 並恢復正圓 -> 加號彈性復位
  */
-function showDesktopOriginalToast(message, persistent, onClick) {
-    const toast = document.getElementById('cloud-toast');
-    const textSpan = document.getElementById('cloud-toast-text');
-    if (!toast || !textSpan) return;
-
-    const iconWrapper = toast.querySelector('.toast-icon-wrapper');
-    if (iconWrapper) iconWrapper.style.display = 'none';
-
-    clearDesktopTimers();
-
-    if (currentDesktopClickHandler) {
-        toast.removeEventListener('click', currentDesktopClickHandler);
-        currentDesktopClickHandler = null;
-    }
-    toast.style.cursor = '';
-
-    if (onClick) {
-        toast.style.cursor = 'pointer';
-        currentDesktopClickHandler = (e) => {
-            e.stopPropagation();
-            onClick(e);
-        };
-        toast.addEventListener('click', currentDesktopClickHandler);
-    }
-
-    textSpan.style.opacity = '0';
-
-    const expandAndReveal = () => {
-        textSpan.innerText = message;
-        const computedStyle = window.getComputedStyle(textSpan);
-        const fontStyle = computedStyle.font || `${computedStyle.fontWeight} ${computedStyle.fontSize} ${computedStyle.fontFamily}`;
-        const textWidth = getTextWidth(message, fontStyle);
-        const totalWidth = Math.max(Math.ceil(textWidth) + 48, 52);
-
-        toast.style.width = `${totalWidth}px`;
-        toast.classList.add('expand');
-
-        desktopToastTimers.push(setTimeout(() => {
-            textSpan.style.opacity = '1';
-            if (!persistent) {
-                desktopToastTimers.push(setTimeout(hideDesktopToast, TOAST_HOLD_MS));
-            }
-        }, TOAST_EXPAND_MS));
-    };
-
-    if (isDesktopToastShowing) {
-        toast.classList.remove('expand');
-        toast.style.width = '52px';
-        desktopToastTimers.push(setTimeout(expandAndReveal, TOAST_TEXT_FADE_MS));
-    } else {
-        isDesktopToastShowing = true;
-        toast.style.width = '52px';
-        toast.classList.add('drop');
-        desktopToastTimers.push(setTimeout(expandAndReveal, TOAST_DROP_MS));
-    }
-}
-
-/**
- * 電腦版：收合並滑出頂部
- */
-function hideDesktopToast() {
-    const toast = document.getElementById('cloud-toast');
-    const textSpan = document.getElementById('cloud-toast-text');
-    if (!toast || !textSpan) return;
-
-    clearDesktopTimers();
-
-    if (currentDesktopClickHandler) {
-        toast.removeEventListener('click', currentDesktopClickHandler);
-        currentDesktopClickHandler = null;
-    }
-    toast.style.cursor = '';
-
-    textSpan.style.opacity = '0';
-
-    desktopToastTimers.push(setTimeout(() => {
-        toast.classList.remove('expand');
-        toast.style.width = '52px';
-
-        desktopToastTimers.push(setTimeout(() => {
-            toast.classList.remove('drop');
-
-            desktopToastTimers.push(setTimeout(() => {
-                toast.style.width = '';
-                isDesktopToastShowing = false;
-            }, TOAST_DROP_MS));
-        }, TOAST_EXPAND_MS));
-    }, TOAST_TEXT_FADE_MS));
-}
-
-/**
- * 手機版：加號等比放大再縮小隱藏 -> 按鈕展開顯示通知 -> 消失後縮回圓形 -> 加號等比放大再縮回原大小
- */
-function showMobileFabToast(message, persistent, onClick) {
+function showFabToast(message, persistent, onClick) {
     const fabBtn = document.getElementById('fab-main-btn') || document.querySelector('.fab-main-btn');
     const textEl = document.getElementById('fab-toast-text') || (fabBtn ? fabBtn.querySelector('.fab-toast-text') : null);
     if (!fabBtn || !textEl) return;
 
-    clearMobileTimers();
+    clearFabTimers();
 
-    // 強制重置收合狀態機旗標，徹底杜絕快速打斷或清理時計時器遺留的鎖定
-    isMobileToastDismissing = false;
+    isFabToastDismissing = false;
+    fabBtn.classList.remove('fab-morph-squeeze');
 
-    currentMobileClickHandler = onClick;
+    currentFabClickHandler = onClick;
     fabBtn.style.cursor = onClick ? 'pointer' : '';
 
     const computedStyle = window.getComputedStyle(textEl);
     const fontStyle = computedStyle.font || `${computedStyle.fontWeight} ${computedStyle.fontSize} ${computedStyle.fontFamily}`;
     const textWidth = getTextWidth(message, fontStyle);
-    const maxAvailableWidth = Math.max(160, state._cachedInnerWidth - 40);
-    const targetWidth = Math.min(maxAvailableWidth, Math.max(Math.ceil(textWidth) + 44, 64));
+    const screenWidth = state._cachedInnerWidth || window.innerWidth;
+    const maxAvailableWidth = Math.max(160, screenWidth - 60);
+    const targetWidth = Math.min(maxAvailableWidth, Math.max(Math.ceil(textWidth) + 48, 64));
 
     // 展開按鈕並淡入文字
     const expandAndReveal = () => {
-        isMobileToastDismissing = false;
+        isFabToastDismissing = false;
         textEl.textContent = message;
-        fabBtn.classList.remove('icon-zoom-out', 'icon-zoom-in');
+        fabBtn.classList.remove('icon-zoom-out', 'icon-zoom-in', 'fab-morph-squeeze');
         fabBtn.classList.add('toast-mode');
         fabBtn.style.width = `${targetWidth}px`;
 
-        mobileToastTimers.push(setTimeout(() => {
+        fabToastTimers.push(setTimeout(() => {
             textEl.style.opacity = '1';
+        }, 100));
+
+        fabToastTimers.push(setTimeout(() => {
             if (!persistent) {
-                mobileToastTimers.push(setTimeout(hideMobileFabToast, TOAST_HOLD_MS));
+                fabToastTimers.push(setTimeout(() => hideFabToast(false), TOAST_HOLD_MS));
             }
-        }, MOBILE_EXPAND_MS));
+        }, FAB_TOAST_EXPAND_MS));
     };
 
-    if (isMobileToastShowing) {
-        isMobileToastDismissing = false;
+    if (isFabToastShowing) {
+        isFabToastDismissing = false;
         textEl.style.opacity = '0';
-        mobileToastTimers.push(setTimeout(() => {
+        fabToastTimers.push(setTimeout(() => {
             expandAndReveal();
-        }, MOBILE_FADE_MS));
+        }, FAB_TOAST_FADE_OUT_MS));
         return;
     }
 
-    isMobileToastShowing = true;
+    isFabToastShowing = true;
 
     // 若按鈕正處於貼邊收納狀態，先彈回
     clearTimeout(state.fabIdleTimer);
@@ -712,74 +608,80 @@ function showMobileFabToast(message, persistent, onClick) {
         fabBtn.classList.remove('tucked');
     }
 
-    // 階段 1：加號在原尺寸圓形中整體等比放大再縮小（按鈕保持正圓形，杜絕拉長變形）
-    fabBtn.classList.remove('icon-zoom-in');
+    // 階段 1：加號在原尺寸圓形中彈性等比放大再縮小隱藏
+    fabBtn.classList.remove('icon-zoom-in', 'fab-morph-squeeze');
     fabBtn.classList.add('icon-zoom-out');
 
-    mobileToastTimers.push(setTimeout(() => {
+    fabToastTimers.push(setTimeout(() => {
         expandAndReveal();
-    }, MOBILE_ICON_ZOOM_OUT_MS));
+    }, FAB_TOAST_ICON_ZOOM_OUT_MS));
 }
 
-function hideMobileFabToast(fastDismiss = false) {
+function hideFabToast(fastDismiss = false) {
     const fabBtn = document.getElementById('fab-main-btn') || document.querySelector('.fab-main-btn');
     const textEl = document.getElementById('fab-toast-text') || (fabBtn ? fabBtn.querySelector('.fab-toast-text') : null);
-    if (!fabBtn || !textEl || (!isMobileToastShowing && !isMobileToastDismissing)) {
-        isMobileToastShowing = false;
-        isMobileToastDismissing = false;
-        currentMobileClickHandler = null;
+    if (!fabBtn || !textEl || (!isFabToastShowing && !isFabToastDismissing)) {
+        isFabToastShowing = false;
+        isFabToastDismissing = false;
+        currentFabClickHandler = null;
         return;
     }
 
-    clearMobileTimers();
+    clearFabTimers();
     fabBtn.style.cursor = '';
 
     if (fastDismiss) {
         fabBtn.style.width = '';
-        fabBtn.classList.remove('toast-mode', 'icon-zoom-out', 'icon-zoom-in');
+        fabBtn.classList.remove('toast-mode', 'icon-zoom-out', 'icon-zoom-in', 'fab-morph-squeeze');
         textEl.style.opacity = '0';
         textEl.textContent = '';
-        isMobileToastShowing = false;
-        isMobileToastDismissing = false;
-        currentMobileClickHandler = null;
+        isFabToastShowing = false;
+        isFabToastDismissing = false;
+        currentFabClickHandler = null;
         emitAppEvent(APP_EVENTS.FAB_IDLE_RESET);
         return;
     }
 
-    isMobileToastShowing = false;
-    isMobileToastDismissing = true;
+    isFabToastShowing = false;
+    isFabToastDismissing = true;
 
-    // 階段 1：文字先淡出
+    // 階段 1：文字快速淡出
     textEl.style.opacity = '0';
 
-    mobileToastTimers.push(setTimeout(() => {
-        // 階段 2：膠囊寬度平滑收回為 64px 圓形
+    fabToastTimers.push(setTimeout(() => {
+        // 階段 2：膠囊寬度平滑收回為 64px 正圓
         fabBtn.style.width = '';
 
-        mobileToastTimers.push(setTimeout(() => {
+        fabToastTimers.push(setTimeout(() => {
+            // 階段 3：膠囊抵達正圓的瞬間，啟動彈簧形變擠壓動畫 (morph squash & stretch)
             fabBtn.classList.remove('toast-mode');
             textEl.textContent = '';
+            fabBtn.classList.remove('fab-morph-squeeze');
+            void fabBtn.offsetWidth; // 強制重繪
+            fabBtn.classList.add('fab-morph-squeeze');
 
-            // 階段 3：在按鈕已完全復位為正圓形後，加號才進行整體等比放大並回彈復位
-            fabBtn.classList.remove('icon-zoom-out');
-            fabBtn.classList.add('icon-zoom-in');
+            // 階段 4：在形變擠壓回彈反向拉開時，加號等比彈性浮現復位
+            fabToastTimers.push(setTimeout(() => {
+                fabBtn.classList.remove('icon-zoom-out');
+                fabBtn.classList.add('icon-zoom-in');
+            }, 100));
 
-            mobileToastTimers.push(setTimeout(() => {
-                fabBtn.classList.remove('icon-zoom-in');
-                isMobileToastDismissing = false;
-                currentMobileClickHandler = null;
+            // 階段 5：形變與彈簧動畫徹底結束，恢復原本正圓比例
+            fabToastTimers.push(setTimeout(() => {
+                fabBtn.classList.remove('fab-morph-squeeze', 'icon-zoom-in');
+                isFabToastDismissing = false;
+                currentFabClickHandler = null;
                 emitAppEvent(APP_EVENTS.FAB_IDLE_RESET);
-            }, MOBILE_ICON_ZOOM_IN_MS));
-        }, MOBILE_EXPAND_MS));
-    }, MOBILE_FADE_MS));
+            }, FAB_TOAST_MORPH_MS));
+        }, FAB_TOAST_COLLAPSE_MS));
+    }, FAB_TOAST_FADE_OUT_MS));
 }
 
 /**
  * 統一收合入口
  */
 export function hideToast(fastDismiss = false) {
-    hideDesktopToast();
-    hideMobileFabToast(fastDismiss);
+    hideFabToast(fastDismiss);
 }
 
 /**
@@ -791,8 +693,9 @@ export function resetFabStateClean(mainBtn) {
     state.isFabTucked = false;
     hideToast(true);
     if (mainBtn) {
-        mainBtn.classList.remove('tucked', 'toast-mode', 'icon-zoom-out', 'icon-zoom-in');
+        mainBtn.classList.remove('tucked', 'toast-mode', 'icon-zoom-out', 'icon-zoom-in', 'fab-morph-squeeze');
         mainBtn.style.width = '';
+        mainBtn.style.transform = '';
         const iconWrapper = mainBtn.querySelector('.fab-icon-wrapper');
         if (iconWrapper instanceof HTMLElement) {
             iconWrapper.style.opacity = '';
@@ -1104,7 +1007,11 @@ export function renderSidebar() {
     }
 
     const categoryList = document.getElementById('category-list');
+    const existingIndicator = document.getElementById('sidebar-category-indicator');
     if (categoryList) categoryList.innerHTML = '';
+    if (categoryList && existingIndicator) {
+        categoryList.appendChild(existingIndicator);
+    }
 
     const groupedBookmarks = {};
     Object.keys(state.bookmarks).forEach(id => {
@@ -1200,7 +1107,127 @@ export function renderSidebar() {
     }
 
     updateCollapsedIcons(state.currentView);
+    updateCategoryIndicator(false);
 }
+
+let categoryIndicatorAnim = null;
+let lastIndicatorTop = null;
+let lastIndicatorHeight = 46;
+
+export function updateCategoryIndicator(animate = true) {
+    const categoryList = document.getElementById('category-list');
+    if (!categoryList) return;
+
+    let indicator = document.getElementById('sidebar-category-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'sidebar-category-indicator';
+        indicator.className = 'sidebar-category-indicator';
+        indicator.setAttribute('aria-hidden', 'true');
+        indicator.innerHTML = '<span class="category-indicator-line"></span>';
+        categoryList.appendChild(indicator);
+    } else if (!indicator.querySelector('.category-indicator-line')) {
+        indicator.innerHTML = '<span class="category-indicator-line"></span>';
+    }
+
+    if (state.currentView !== 'bookmarks') {
+        if (categoryIndicatorAnim) {
+            categoryIndicatorAnim.cancel();
+            categoryIndicatorAnim = null;
+        }
+        indicator.style.opacity = '0';
+        indicator.style.transform = 'scale(0.96)';
+        lastIndicatorTop = null;
+        return;
+    }
+
+    const activeItem = categoryList.querySelector('.year-item.active');
+    if (!activeItem) {
+        if (categoryIndicatorAnim) {
+            categoryIndicatorAnim.cancel();
+            categoryIndicatorAnim = null;
+        }
+        indicator.style.opacity = '0';
+        indicator.style.transform = 'scale(0.96)';
+        lastIndicatorTop = null;
+        return;
+    }
+
+    const H0 = activeItem.offsetHeight || 46;
+    const targetTop = activeItem.offsetTop;
+
+    if (!animate || lastIndicatorTop === null) {
+        if (categoryIndicatorAnim) {
+            categoryIndicatorAnim.cancel();
+            categoryIndicatorAnim = null;
+        }
+        indicator.style.top = `${targetTop}px`;
+        indicator.style.height = `${H0}px`;
+        indicator.style.opacity = '1';
+        indicator.style.transform = 'none';
+        lastIndicatorTop = targetTop;
+        lastIndicatorHeight = H0;
+        return;
+    }
+
+    const distance = targetTop - lastIndicatorTop;
+    if (Math.abs(distance) < 1) {
+        indicator.style.top = `${targetTop}px`;
+        indicator.style.height = `${H0}px`;
+        indicator.style.opacity = '1';
+        indicator.style.transform = 'none';
+        return;
+    }
+
+    // Stretch-squish jelly animation for the selection box (選取框與內部垂直滑動分頁底線):
+    // Moving Down: leading edge (bottom) extends forward rapidly, stretching the box; trailing edge catches up.
+    // Moving Up: leading edge (top) extends upward rapidly, stretching the box; trailing edge catches up.
+    const stretch = Math.min(Math.abs(distance) * 0.72, 85);
+    const yFrom = lastIndicatorTop;
+    const yTo = targetTop;
+
+    let keyframes;
+    if (distance > 0) {
+        keyframes = [
+            { top: `${yFrom}px`, height: `${H0}px`, opacity: 1, transform: 'scale(1)' },
+            { top: `${yFrom + distance * 0.15}px`, height: `${H0 + stretch}px`, opacity: 1, transform: 'scale(1)', offset: 0.38 },
+            { top: `${yTo - 3}px`, height: `${H0 + stretch * 0.16}px`, opacity: 1, transform: 'scale(1)', offset: 0.72 },
+            { top: `${yTo}px`, height: `${H0}px`, opacity: 1, transform: 'scale(1)', offset: 1.0 }
+        ];
+    } else {
+        keyframes = [
+            { top: `${yFrom}px`, height: `${H0}px`, opacity: 1, transform: 'scale(1)' },
+            { top: `${yFrom - stretch + distance * 0.15}px`, height: `${H0 + stretch}px`, opacity: 1, transform: 'scale(1)', offset: 0.38 },
+            { top: `${yTo + 2}px`, height: `${H0 + stretch * 0.16}px`, opacity: 1, transform: 'scale(1)', offset: 0.72 },
+            { top: `${yTo}px`, height: `${H0}px`, opacity: 1, transform: 'scale(1)', offset: 1.0 }
+        ];
+    }
+
+    if (categoryIndicatorAnim) {
+        categoryIndicatorAnim.cancel();
+    }
+
+    indicator.style.top = `${targetTop}px`;
+    indicator.style.height = `${H0}px`;
+    indicator.style.opacity = '1';
+    indicator.style.transform = 'none';
+
+    categoryIndicatorAnim = indicator.animate(keyframes, {
+        duration: 300,
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
+    });
+
+    categoryIndicatorAnim.onfinish = () => {
+        categoryIndicatorAnim = null;
+    };
+
+    lastIndicatorTop = targetTop;
+    lastIndicatorHeight = H0;
+}
+
+window.addEventListener('resize', () => {
+    updateCategoryIndicator(false);
+}, { passive: true });
 
 export function createEmptyStateDOM() {
     const wrapper = document.createElement('div');
