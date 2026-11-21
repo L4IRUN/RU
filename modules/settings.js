@@ -6,6 +6,7 @@
 import { state } from '../state.js';
 import { closeModalState, hasModal } from '../domain.js';
 import { closeModal, openModal } from './modalManager.js';
+import { closeFloatingAvatarPopover } from './navigation.js';
 import { renderBookmarks, renderReminders, renderSidebar, renderUserProfileUI, showCloudToast, updateAvatarAuthStatusUI, updateVisualEffectsSegment } from '../ui.js';
 import { downloadFromDrive, getMonotonicTimestamp, isGoogleLinked, isTokenValid, markLocalDataDirty, requestGoogleAuth, signOutGoogle, uploadToDrive } from '../sync.js';
 import { StorageAPI, notifyCrossTabChange, stripDangerousHtml } from '../storage.js';
@@ -514,6 +515,7 @@ export function returnFromCloudAlert() {
 }
 
 export async function handleGoogleAuthClick() {
+    closeFloatingAvatarPopover();
     await requestGoogleAuth();
     updateGoogleAccountUIState();
     renderSidebar();
@@ -525,6 +527,7 @@ export async function handleGoogleAuthClick() {
 }
 
 export async function handleGoogleSignOutClick() {
+    closeFloatingAvatarPopover();
     await signOutGoogle();
     updateGoogleAccountUIState();
     renderSidebar();
@@ -536,10 +539,11 @@ export async function handleGoogleSignOutClick() {
 }
 
 export function openSyncSettingsFromAlert() {
+    closeModalState(state, 'cloud-alert');
     const alertModal = document.getElementById('cloud-alert-modal');
-    alertModal.classList.remove('active');
+    if (alertModal) alertModal.classList.remove('active');
     setTimeout(() => {
-        alertModal.style.display = 'none';
+        if (alertModal && !hasModal(state, 'cloud-alert')) alertModal.style.display = 'none';
         openSettingsModal();
     }, 250);
 }

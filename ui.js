@@ -2733,13 +2733,23 @@ export function updateCategoryPathHeader() {
         categoryPathClearTimers
     );
 
+    const draft = state.editorDraft;
+    let editingCardTitle = '';
+    if (draft && draft.editingBookmarkId) {
+        const bm = state.bookmarks ? state.bookmarks[draft.editingBookmarkId] : null;
+        editingCardTitle = (draft.bookmarkTitle && draft.bookmarkTitle.trim())
+            || (bm && bm.title && bm.title.trim())
+            || (bm && bm.url && bm.url.trim())
+            || '未命名項目';
+    }
+
     setSortPathSegmentState(
         cardSeg,
         cardVal,
-        null,
-        '',
+        'card',
+        editingCardTitle,
         step === 3,
-        false,
+        Boolean(editingCardTitle && step < 3 && selectedCat && selectedSub),
         categoryPathClearTimers
     );
 }
@@ -2966,12 +2976,23 @@ export function renderCategoryModalColumns(options = {}) {
             subCats.add('未分類');
         }
 
+        if (state.isMoveSelectionActive && state.moveTargetType === 'subcategory') {
+            const movingSubCats = Array.from(state.selectedSubCategories || []).filter(s => s && s !== '未分類');
+            movingSubCats.forEach(s => subCats.add(s));
+        }
+
         const subOrdersMap = (state.tempCategoryModalSubCategoryOrders && Object.keys(state.tempCategoryModalSubCategoryOrders).length > 0)
             ? state.tempCategoryModalSubCategoryOrders
             : safeJSONParse(localStorage.getItem('my_subcategory_order'), {});
         const currentSubOrder = Array.isArray(subOrdersMap[currentCat]) ? subOrdersMap[currentCat] : [];
 
         const sortedSubCats = Array.from(subCats).sort((a, b) => {
+            if (state.isMoveSelectionActive && state.moveTargetType === 'subcategory') {
+                const aIsMove = Boolean(state.selectedSubCategories && state.selectedSubCategories.has(a));
+                const bIsMove = Boolean(state.selectedSubCategories && state.selectedSubCategories.has(b));
+                if (aIsMove && !bIsMove) return -1;
+                if (!aIsMove && bIsMove) return 1;
+            }
             const idxA = currentSubOrder.indexOf(a);
             const idxB = currentSubOrder.indexOf(b);
             if (idxA !== -1 && idxB !== -1) return idxA - idxB;
@@ -3044,6 +3065,13 @@ export function renderCategoryModalColumns(options = {}) {
             rightList.appendChild(emptyRight);
         } else {
             sortedSubCats.forEach(sub => {
+                const isMovingSub = Boolean(
+                    state.isMoveSelectionActive &&
+                    state.moveTargetType === 'subcategory' &&
+                    state.selectedSubCategories &&
+                    state.selectedSubCategories.has(sub)
+                );
+
                 const item = document.createElement('div');
                 item.className = 'category-modal-item';
                 item.dataset.categoryType = 'subcategory';
@@ -3051,7 +3079,7 @@ export function renderCategoryModalColumns(options = {}) {
                 item.dataset.subcategory = sub;
                 item.dataset.action = 'handleSelectModalSubCategory';
                 item.dataset.param = sub;
-                if (sub === state.tempModalSubCategory && step >= 2) {
+                if (isMovingSub || (sub === state.tempModalSubCategory && step >= 2)) {
                     item.classList.add('active');
                 }
 
@@ -3065,6 +3093,13 @@ export function renderCategoryModalColumns(options = {}) {
 
                 item.appendChild(iconSpan);
                 item.appendChild(textSpan);
+
+                if (isMovingSub) {
+                    const moveBadge = document.createElement('span');
+                    moveBadge.className = 'category-draft-label category-move-label';
+                    moveBadge.textContent = '搬移';
+                    item.appendChild(moveBadge);
+                }
 
                 rightList.appendChild(item);
             });
@@ -3081,7 +3116,7 @@ export function renderCategoryModalColumns(options = {}) {
             (state.currentUnifiedType === 'bookmark' || state.currentUnifiedType === 'note');
         const cardOrder = state.tempCategoryModalCardOrders[cardKey] ??
             getBookmarkIdsInSubCategory(state.bookmarks, currentCat, currentSub);
-        const currentCardIds = cardOrder.filter(id => id === null ? showsDraft : Boolean(state.bookmarks[id]));
+        let currentCardIds = cardOrder.filter(id => id === null ? showsDraft : Boolean(state.bookmarks[id]));
         if (showsDraft && !currentCardIds.includes(null)) {
             const insertion = draft.bookmarkInsertion;
             const subCategory = currentSub === '未分類' ? '' : currentSub;
@@ -3089,6 +3124,20 @@ export function renderCategoryModalColumns(options = {}) {
                 ? getBookmarkInsertionIndex(currentCardIds.filter(id => id !== null), insertion)
                 : 0;
             currentCardIds.splice(position, 0, null);
+        }
+
+        if (state.isMoveSelectionActive && state.moveTargetType === 'card') {
+            const movingCardIds = Array.from(state.selectedBookmarkIds || []).filter(id => Boolean(state.bookmarks[id]));
+            if (movingCardIds.length > 0) {
+                if (!state.tempCategoryModalCardOrders[cardKey]) {
+                    currentCardIds = [
+                        ...movingCardIds,
+                        ...currentCardIds.filter(id => !movingCardIds.includes(id))
+                    ];
+                    if (!state.tempCategoryModalCardOrders) state.tempCategoryModalCardOrders = {};
+                    state.tempCategoryModalCardOrders[cardKey] = currentCardIds;
+                }
+            }
         }
 
         if (currentCardIds.length === 0) {
@@ -3121,12 +3170,28 @@ export function renderCategoryModalColumns(options = {}) {
                 const bm = state.bookmarks[id];
                 if (!bm) return;
 
+                const isMovingCard = Boolean(
+                    state.isMoveSelectionActive &&
+                    state.moveTargetType === 'card' &&
+                    state.selectedBookmarkIds &&
+                    state.selectedBookmarkIds.has(id)
+                );
+                const isEditingCard = Boolean(
+                    !state.isMoveSelectionActive &&
+                    draft &&
+                    draft.editingBookmarkId &&
+                    draft.editingBookmarkId === id
+                );
+
                 const item = document.createElement('div');
                 item.className = 'category-modal-item';
                 item.dataset.categoryType = 'card';
                 item.dataset.id = id;
                 item.dataset.category = currentCat;
                 item.dataset.subcategory = currentSub;
+                if (isMovingCard || isEditingCard) {
+                    item.classList.add('active');
+                }
 
                 const textSpan = document.createElement('span');
                 textSpan.className = 'category-modal-item-text';
@@ -3134,6 +3199,13 @@ export function renderCategoryModalColumns(options = {}) {
 
                 item.appendChild(iconSpan);
                 item.appendChild(textSpan);
+
+                if (isMovingCard) {
+                    const moveBadge = document.createElement('span');
+                    moveBadge.className = 'category-draft-label category-move-label';
+                    moveBadge.textContent = '搬移';
+                    item.appendChild(moveBadge);
+                }
 
                 cardList.appendChild(item);
             });

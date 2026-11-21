@@ -1052,7 +1052,9 @@ function initOutsideInteractions() {
             hideSidebarCollapsedMenu();
         }
         if (!e.target.closest('#floating-avatar-group')) {
-            closeFloatingAvatarPopover();
+            if (Date.now() - (state.floatingAvatarOpenedAt || 0) > 400) {
+                closeFloatingAvatarPopover();
+            }
         }
     });
 

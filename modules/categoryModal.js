@@ -425,6 +425,8 @@ export function initCategoryModalDrag() {
     let autoScrollRAF = null;
     let activeList = null;
     let dragType = '';
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
 
     const animateItemsFlip = (visibleItems, firstTops) => {
         if (document.body.hasAttribute('data-no-glass')) return;
@@ -542,14 +544,22 @@ export function initCategoryModalDrag() {
         );
         lastPointerY = clientY;
 
+        const rect = item.getBoundingClientRect();
+        dragOffsetX = clientX - rect.left;
+        dragOffsetY = clientY - rect.top;
+
         placeholder = document.createElement('div');
         placeholder.className = 'category-modal-item placeholder';
+        placeholder.style.height = `${rect.height}px`;
+        placeholder.style.minHeight = `${rect.height}px`;
         item.before(placeholder);
 
         item.classList.add('is-drag-origin');
 
         dragGhost = document.createElement('div');
         dragGhost.className = 'sort-drag-ghost';
+        dragGhost.style.width = `${rect.width}px`;
+        dragGhost.style.height = `${rect.height}px`;
         const dotIcon = document.createElement('span');
         dotIcon.className = 'item-icon category-dot';
         dotIcon.innerHTML = '<span class="category-dot-circle"></span>';
@@ -558,8 +568,16 @@ export function initCategoryModalDrag() {
         ghostText.textContent = item.querySelector('.category-modal-item-text')?.innerText || '';
         dragGhost.appendChild(dotIcon);
         dragGhost.appendChild(ghostText);
-        dragGhost.style.left = `${clientX}px`;
-        dragGhost.style.top = `${clientY}px`;
+
+        if (item.querySelector('.category-move-label')) {
+            const moveTag = document.createElement('span');
+            moveTag.className = 'category-draft-label category-move-label';
+            moveTag.textContent = '搬移';
+            dragGhost.appendChild(moveTag);
+        }
+
+        dragGhost.style.left = `${clientX - dragOffsetX}px`;
+        dragGhost.style.top = `${clientY - dragOffsetY}px`;
 
         window.getSelection()?.removeAllRanges();
         document.body.appendChild(dragGhost);
@@ -601,8 +619,8 @@ export function initCategoryModalDrag() {
 
         if (isDragging && dragGhost) {
             if (e.cancelable) e.preventDefault();
-            dragGhost.style.left = `${clientX}px`;
-            dragGhost.style.top = `${clientY}px`;
+            dragGhost.style.left = `${clientX - dragOffsetX}px`;
+            dragGhost.style.top = `${clientY - dragOffsetY}px`;
             checkCategorySwap(clientY);
         }
     };

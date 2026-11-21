@@ -3301,7 +3301,7 @@ body.avatar-delete-confirm #confirm-modal {
     align-items: center;
     gap: 12px;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 16.5px;
     font-weight: 600;
     color: var(--text);
     background: var(--input-bg);
@@ -3321,6 +3321,19 @@ body.avatar-delete-confirm #confirm-modal {
 .category-draft-label {
     flex: none;
     font-size: 12px;
+}
+
+.category-move-label {
+    flex: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #FAF6EE !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    letter-spacing: 0.5px;
 }
 
 .category-modal-item:active {
@@ -3385,6 +3398,7 @@ body.avatar-delete-confirm #confirm-modal {
 .category-modal-item-text {
     flex: 1;
     min-width: 0;
+    font-size: 16.5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -3427,7 +3441,7 @@ body.avatar-delete-confirm #confirm-modal {
     border: none;
     background: transparent;
     color: var(--text);
-    font-size: 15px;
+    font-size: 16.5px;
     font-weight: 600;
     outline: none;
     padding: 0;
@@ -3723,7 +3737,7 @@ body.avatar-delete-confirm #confirm-modal {
     align-items: center;
     gap: 12px;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 16.5px;
     font-weight: 600;
     color: var(--text);
     background: var(--input-bg);
@@ -3753,16 +3767,20 @@ body.avatar-delete-confirm #confirm-modal {
 .sort-modal-item.placeholder,
 .category-modal-item.placeholder {
     z-index: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: 70px !important;
     min-height: 70px !important;
     margin: 0 !important;
     padding: 12px 16px !important;
     border-radius: 12px !important;
-    background: transparent !important;
-    border: 2.5px solid rgba(154, 135, 30, 0.85) !important;
-    box-sizing: border-box;
+    background: var(--input-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    opacity: 0.45 !important;
+    box-sizing: border-box !important;
     box-shadow: none !important;
     pointer-events: none !important;
+    flex-shrink: 0 !important;
 }
 
 .sort-modal-item .item-icon.category-dot {
@@ -3820,6 +3838,7 @@ body.avatar-delete-confirm #confirm-modal {
 .sort-modal-item-text {
     flex: 1;
     min-width: 0;
+    font-size: 16.5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -3833,20 +3852,18 @@ body.avatar-delete-confirm #confirm-modal {
     pointer-events: none;
     box-sizing: border-box;
     height: 70px;
-    max-width: min(300px, calc(90vw - 64px));
     padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
     border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    background: #ffffff;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28), var(--glass-inner-highlight);
-    transform: translate(-50%, -50%) scale(1.02);
-    transform-origin: center center;
+    font-size: 16.5px !important;
+    font-weight: 600 !important;
+    color: #FAF6EE !important;
+    background: var(--primary) !important;
+    border: 1px solid var(--primary) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), var(--glass-inner-highlight) !important;
+    transform: none !important;
     white-space: nowrap;
     user-select: none;
     -webkit-user-select: none;
@@ -3854,10 +3871,10 @@ body.avatar-delete-confirm #confirm-modal {
 }
 
 [data-theme="dark"] .sort-drag-ghost {
-    background: #202020;
-    color: #FAF6EE;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), var(--glass-inner-highlight);
+    background: var(--primary) !important;
+    color: #FAF6EE !important;
+    border: 1px solid var(--primary) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), var(--glass-inner-highlight) !important;
 }
 
 .sort-drag-ghost .item-icon.category-dot {
@@ -3876,13 +3893,18 @@ body.avatar-delete-confirm #confirm-modal {
     min-width: 4px;
     min-height: 4px;
     border-radius: 50%;
-    background-color: var(--primary) !important;
+    background-color: #FAF6EE !important;
     opacity: 1 !important;
-    box-shadow: 0 0 6px var(--primary) !important;
+    box-shadow: none !important;
 }
 
 .sort-drag-ghost .sort-modal-item-text {
+    flex: 1;
+    min-width: 0;
     margin-left: 0;
+    font-size: 16.5px !important;
+    font-weight: 600 !important;
+    color: #FAF6EE !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -6770,8 +6792,7 @@ textarea,
     }
 
     .sort-drag-ghost {
-        transform: translate(-50%, -56px) scale(1.06) !important;
-        transform-origin: center bottom !important;
+        transform: none !important;
     }
 
     #bookmark-form-container:not(.mode-note) {

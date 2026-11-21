@@ -309,7 +309,9 @@ export function toggleCalendar() {
         draft.tempSelectedReminderDate = sDate;
         draft.calendarCrossMonthAnchorDate = '';
 
-        const parts = sDate.split('-');
+        const isExistingCard = Boolean(draft.editingReminderId || draft.editingBookmarkId);
+        const targetDateStr = (isExistingCard && eDate) ? eDate : sDate;
+        const parts = targetDateStr.split('-');
         if (parts.length === 3) {
             draft.calDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
         }

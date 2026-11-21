@@ -343,6 +343,8 @@ export function initSortModalDrag() {
     let autoScrollRAF = null;
     let activeList = null;
     let sortType = '';
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
 
     const animateItemsFlip = (visibleItems, firstTops) => {
         if (document.body.hasAttribute('data-no-glass')) return;
@@ -456,14 +458,22 @@ export function initSortModalDrag() {
         activeList = item.closest('.sort-column-list');
         lastPointerY = clientY;
 
+        const rect = item.getBoundingClientRect();
+        dragOffsetX = clientX - rect.left;
+        dragOffsetY = clientY - rect.top;
+
         placeholder = document.createElement('div');
         placeholder.className = 'sort-modal-item placeholder';
+        placeholder.style.height = `${rect.height}px`;
+        placeholder.style.minHeight = `${rect.height}px`;
         item.before(placeholder);
 
         item.classList.add('is-drag-origin');
 
         dragGhost = document.createElement('div');
         dragGhost.className = 'sort-drag-ghost';
+        dragGhost.style.width = `${rect.width}px`;
+        dragGhost.style.height = `${rect.height}px`;
         dragGhost.innerHTML = `
             <span class="item-icon category-dot">
                 <span class="category-dot-circle"></span>
@@ -473,8 +483,8 @@ export function initSortModalDrag() {
         label.className = 'sort-modal-item-text';
         label.textContent = item.querySelector('.sort-modal-item-text')?.innerText || '';
         dragGhost.appendChild(label);
-        dragGhost.style.left = `${clientX}px`;
-        dragGhost.style.top = `${clientY}px`;
+        dragGhost.style.left = `${clientX - dragOffsetX}px`;
+        dragGhost.style.top = `${clientY - dragOffsetY}px`;
 
         window.getSelection()?.removeAllRanges();
         document.body.appendChild(dragGhost);
@@ -516,8 +526,8 @@ export function initSortModalDrag() {
 
         if (isDragging && dragGhost) {
             if (e.cancelable) e.preventDefault();
-            dragGhost.style.left = `${clientX}px`;
-            dragGhost.style.top = `${clientY}px`;
+            dragGhost.style.left = `${clientX - dragOffsetX}px`;
+            dragGhost.style.top = `${clientY - dragOffsetY}px`;
             checkSortSwap(clientY);
         }
     };

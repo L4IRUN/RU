@@ -236,7 +236,6 @@ export async function confirmCategorySubCategorySelection() {
 
             const subOrdersMap = safeJSONParse(localStorage.getItem('my_subcategory_order'), {});
             const subTimestampsMap = safeJSONParse(localStorage.getItem('my_subcategory_order_timestamps'), {});
-            const targetSubOrder = Array.isArray(subOrdersMap[targetCategory]) ? subOrdersMap[targetCategory] : [];
             const sourceSubOrder = Array.isArray(subOrdersMap[state.currentCategory]) ? subOrdersMap[state.currentCategory] : [];
 
             const updatedBookmarks = { ...pendingCardOrderUpdates };
@@ -255,11 +254,11 @@ export async function confirmCategorySubCategorySelection() {
                 await StorageAPI.saveItems('bookmarks', updatedBookmarks);
             }
 
-            subCatsToMove.forEach(sub => {
-                if (sub !== '未分類' && !targetSubOrder.includes(sub)) {
-                    targetSubOrder.push(sub);
-                }
-            });
+            const movingSubCats = Array.from(state.selectedSubCategories || []).filter(s => s && s !== '未分類');
+            const targetSubOrder = (state.tempCategoryModalSubCategoryOrders && state.tempCategoryModalSubCategoryOrders[targetCategory])
+                ? state.tempCategoryModalSubCategoryOrders[targetCategory]
+                : [...movingSubCats, ...(Array.isArray(subOrdersMap[targetCategory]) ? subOrdersMap[targetCategory].filter(s => !movingSubCats.includes(s)) : [])];
+
             subOrdersMap[targetCategory] = targetSubOrder;
             subOrdersMap[state.currentCategory] = sourceSubOrder.filter(s => !subCatsToMove.includes(s));
             subTimestampsMap[targetCategory] = now;
@@ -312,27 +311,59 @@ export async function confirmCategorySubCategorySelection() {
                 return;
             }
 
-            const existingOrders = Object.values(state.bookmarks || {})
-                .filter(bm => {
-                    if (!bm || cardIdsToMove.includes(bm.id)) return false;
-                    const bmCat = (bm.category && bm.category.trim() !== '') ? bm.category.trim() : '未分類';
-                    const bmSub = (bm.subCategory && bm.subCategory.trim() !== '') ? bm.subCategory.trim() : '';
-                    return bmCat === finalCat && bmSub === finalSubCat;
-                })
-                .map(bm => typeof bm.order === 'number' ? bm.order : 0);
-            let nextOrder = existingOrders.length > 0 ? Math.max(...existingOrders) + 1 : 0;
+            const cardKey = `${finalCat}:::${state.tempModalSubCategory || ''}`;
+            const orderedCardIds = state.tempCategoryModalCardOrders ? state.tempCategoryModalCardOrders[cardKey] : null;
 
             const updatedBookmarks = { ...pendingCardOrderUpdates };
-            cardIdsToMove.forEach(id => {
-                const bm = state.bookmarks[id];
-                if (bm) {
-                    bm.category = finalCat;
-                    bm.subCategory = finalSubCat;
-                    bm.order = nextOrder++;
-                    bm.updatedAt = now;
-                    updatedBookmarks[id] = bm;
-                }
-            });
+
+            if (Array.isArray(orderedCardIds) && orderedCardIds.length > 0) {
+                orderedCardIds.forEach((id, index) => {
+                    const bm = state.bookmarks[id];
+                    if (!bm) return;
+                    let changed = false;
+                    if (cardIdsToMove.includes(id)) {
+                        bm.category = finalCat;
+                        bm.subCategory = finalSubCat;
+                        changed = true;
+                    }
+                    if (bm.order !== index) {
+                        bm.order = index;
+                        changed = true;
+                    }
+                    if (changed) {
+                        bm.updatedAt = now;
+                        updatedBookmarks[id] = bm;
+                    }
+                });
+            } else {
+                const existingInTarget = Object.values(state.bookmarks || {})
+                    .filter(bm => {
+                        if (!bm || cardIdsToMove.includes(bm.id)) return false;
+                        const bmCat = (bm.category && bm.category.trim() !== '') ? bm.category.trim() : '未分類';
+                        const bmSub = (bm.subCategory && bm.subCategory.trim() !== '') ? bm.subCategory.trim() : '';
+                        return bmCat === finalCat && bmSub === finalSubCat;
+                    })
+                    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+                const allInTarget = [...cardIdsToMove.map(id => state.bookmarks[id]), ...existingInTarget];
+                allInTarget.forEach((bm, index) => {
+                    if (!bm) return;
+                    let changed = false;
+                    if (cardIdsToMove.includes(bm.id)) {
+                        bm.category = finalCat;
+                        bm.subCategory = finalSubCat;
+                        changed = true;
+                    }
+                    if (bm.order !== index) {
+                        bm.order = index;
+                        changed = true;
+                    }
+                    if (changed) {
+                        bm.updatedAt = now;
+                        updatedBookmarks[bm.id] = bm;
+                    }
+                });
+            }
 
             if (Object.keys(updatedBookmarks).length > 0) {
                 await StorageAPI.saveItems('bookmarks', updatedBookmarks);

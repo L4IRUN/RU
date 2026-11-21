@@ -8,7 +8,7 @@ import { createEmptyEditorDraft } from './domain.js';
  * @typedef {import('./types.js').AppState} AppState
  */
 
-export const APP_VERSION = '20261120';
+export const APP_VERSION = '20261121';
 
 /** @type {AppState} */
 export const state = {
