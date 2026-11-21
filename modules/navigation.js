@@ -581,7 +581,6 @@ export function toggleFloatingAvatarPopover(e) {
     state.floatingAvatarOpenedAt = Date.now();
 
     popover.classList.add('active');
-    if (avatarBtn) avatarBtn.classList.add('is-enlarged');
     if (avatarGroup) avatarGroup.classList.add('is-open');
 }
 

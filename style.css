@@ -4236,7 +4236,7 @@ body.avatar-delete-confirm #confirm-modal {
     transform: scale(1) translateZ(0);
     transform-origin: center center;
     will-change: transform;
-    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 #floating-avatar-status-dot {
@@ -4248,13 +4248,9 @@ body.avatar-delete-confirm #confirm-modal {
     transform: scale(0.4);
 }
 
-#floating-avatar-btn:active:not(.is-enlarged) {
+#floating-avatar-btn:active {
     transform: scale(0.92) translateZ(0) !important;
-}
-
-#floating-avatar-btn.is-enlarged {
-    transform: scale(1.12) translateZ(0) !important;
-    box-shadow: none !important;
+    transition: transform 0.04s ease-out !important;
 }
 
 #floating-avatar-img {
@@ -7116,7 +7112,7 @@ textarea,
         transform: scale(1) translateZ(0);
         transform-origin: center center;
         will-change: transform;
-        transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     #floating-avatar-status-dot {
@@ -7128,13 +7124,9 @@ textarea,
         transform: scale(0.4);
     }
 
-    #floating-avatar-btn:active:not(.is-enlarged) {
+    #floating-avatar-btn:active {
         transform: scale(0.92) translateZ(0) !important;
-    }
-
-    #floating-avatar-btn.is-enlarged {
-        transform: scale(1.12) translateZ(0) !important;
-        box-shadow: none !important;
+        transition: transform 0.04s ease-out !important;
     }
 
     #floating-avatar-img {

@@ -575,7 +575,7 @@ export function sanitizeDatasetPayload(data) {
         cleanUsername = stripDangerousHtml(rawProfile.username)
             .replace(/<[^>]*>/g, '')
             .trim()
-            .slice(0, 50);
+            .slice(0, 9);
     }
 
     const sanitizeProfileTimestamp = (val) => {

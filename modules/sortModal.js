@@ -459,21 +459,28 @@ export function initSortModalDrag() {
         lastPointerY = clientY;
 
         const rect = item.getBoundingClientRect();
-        dragOffsetX = clientX - rect.left;
-        dragOffsetY = clientY - rect.top;
+        const itemWidth = item.offsetWidth || rect.width;
+        const itemHeight = item.offsetHeight || rect.height;
+        const itemCenterX = rect.left + (rect.width / 2);
+        const itemCenterY = rect.top + (rect.height / 2);
+        const unscaledLeft = itemCenterX - (itemWidth / 2);
+        const unscaledTop = itemCenterY - (itemHeight / 2);
+
+        dragOffsetX = clientX - unscaledLeft;
+        dragOffsetY = clientY - unscaledTop;
 
         placeholder = document.createElement('div');
         placeholder.className = 'sort-modal-item placeholder';
-        placeholder.style.height = `${rect.height}px`;
-        placeholder.style.minHeight = `${rect.height}px`;
+        placeholder.style.height = `${itemHeight}px`;
+        placeholder.style.minHeight = `${itemHeight}px`;
         item.before(placeholder);
 
         item.classList.add('is-drag-origin');
 
         dragGhost = document.createElement('div');
         dragGhost.className = 'sort-drag-ghost';
-        dragGhost.style.width = `${rect.width}px`;
-        dragGhost.style.height = `${rect.height}px`;
+        dragGhost.style.width = `${itemWidth}px`;
+        dragGhost.style.height = `${itemHeight}px`;
         dragGhost.innerHTML = `
             <span class="item-icon category-dot">
                 <span class="category-dot-circle"></span>

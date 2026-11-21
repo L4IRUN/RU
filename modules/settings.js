@@ -225,7 +225,7 @@ async function commitProfileUsername(rawValue) {
     const cleanUsername = stripDangerousHtml(String(rawValue ?? ''))
         .replace(/<[^>]*>/g, '')
         .trim()
-        .slice(0, 50);
+        .slice(0, 9);
 
     if (!state.userProfile || typeof state.userProfile !== 'object') {
         state.userProfile = { avatarData: '', avatarUpdatedAt: 0, username: '', usernameUpdatedAt: 0 };
@@ -249,6 +249,9 @@ export function initProfileUsernameInput() {
     input.dataset.usernameBound = 'true';
 
     input.addEventListener('input', () => {
+        if (input.value.length > 9) {
+            input.value = input.value.slice(0, 9);
+        }
         clearTimeout(usernameSaveDebounceTimer);
         usernameSaveDebounceTimer = setTimeout(() => {
             commitProfileUsername(input.value);

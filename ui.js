@@ -371,7 +371,7 @@ export function updateAvatarAuthStatusUI(explicitStatus = null) {
 export function renderUserProfileUI() {
     const profile = state.userProfile || {};
     const avatarData = typeof profile.avatarData === 'string' ? profile.avatarData.trim() : '';
-    const rawUsername = typeof profile.username === 'string' ? profile.username.trim() : '';
+    const rawUsername = typeof profile.username === 'string' ? profile.username.trim().slice(0, 9) : '';
     const displayUsername = rawUsername || 'RU';
     const hasAvatar = Boolean(avatarData);
 
@@ -971,18 +971,22 @@ export function updateSidebarReminderCounts() {
     const now = Date.now();
     const remindersArr = Object.values(state.reminders || {});
     let inProgress = 0;
-    let completed = 0;
+    let notStarted = 0;
     let overdue = 0;
 
     remindersArr.forEach(r => {
         if (!r) return;
         if (r.isDone) {
-            completed++;
+            return;
+        }
+        const targetTime = getReminderTargetTimestamp(r);
+        const isOverdue = targetTime > 0 && now > targetTime;
+        if (isOverdue) {
+            overdue++;
         } else {
-            const targetTime = getReminderTargetTimestamp(r);
-            const isOverdue = targetTime > 0 && now > targetTime;
-            if (isOverdue) {
-                overdue++;
+            const startTimestamp = getReminderStartTimestamp(r);
+            if (now < startTimestamp) {
+                notStarted++;
             } else {
                 inProgress++;
             }
@@ -990,11 +994,11 @@ export function updateSidebarReminderCounts() {
     });
 
     const elInProgress = document.getElementById('stat-count-inprogress');
-    const elCompleted = document.getElementById('stat-count-completed');
+    const elNotStarted = document.getElementById('stat-count-notstarted') || document.getElementById('stat-count-completed');
     const elOverdue = document.getElementById('stat-count-overdue');
 
     if (elInProgress) elInProgress.textContent = String(inProgress);
-    if (elCompleted) elCompleted.textContent = String(completed);
+    if (elNotStarted) elNotStarted.textContent = String(notStarted);
     if (elOverdue) elOverdue.textContent = String(overdue);
 }
 
